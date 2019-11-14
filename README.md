@@ -1,41 +1,159 @@
-# Cape
-As an initial contribution we have developed a novel system called Cape (Counterbalancing with Aggregation Patterns for Explanations) for explaining outliers in aggregation queries through counterbalancing. That is, explanations are outliers in the opposite direction of the outlier of interest.
-**Cape** (**C**ounterbalancing with **A**ggregation **P**atterns for **E**xplanations) is a system that explains outliers (surprisingly low or high) aggregation function results for group-by queries in SQL. The user provides the system with a query and a surprising outcome for this query. Cape then uses patterns discovered over the input data of the query in an offline pattern mining step to explain the outlier by finding an *related* outlier in the opposite direction that **counterbalances** the outlier of interest.
+# SIGMOD Reproducibility for Paper
 
-# Installation
 
-## Prerequisites
+## A) Source code info
 
-Cape requires python 3 and uses python's `tkinter` for its graphical UI. For example, on ubuntu you can install the prerequisites with:
+The **Cape** system is written in `Python` and uses [PostgreSQL](https://www.postgresql.org/) as a backend for storage. Cape is made available on [pypi](https://pypi.org/). The **Cape** package installs a library as well as a commandline tool `capexplain`. This tool can be used to mine patterns, create explanations, and to start a GUI for interactively running queries, specifying questions, and browsing patterns and explanation
+
+- Repository: https://github.com/IITDBGroup/cape
+- Programming Language: Python
+- Additional Programming Language info: we are requiring Python3. Tested versions are Python 3.6 and Python 3.8
+- Compiler Info:
+- Required libraries/packages: `tkinter` which requires a system package to be installed (see below)
+
+
+## B)  Datasets info
+
+We used two real world datasets in the experiments.
+Repository: [url]
+Data generators: [url]
+
+## C) Hardware Info
+[Here you should include any details and comments about the used hardware in order to be able to accommodate the reproducibility effort. Any information about non-standard hardware should also be included. You should also include at least the following info:]
+
+- C1) Processor (architecture, type, and number of processors/sockets)
+- C2) Caches (number of levels, and size of each level)
+- C3) Memory (size and speed)
+- C4) Secondary Storage (type: SSD/HDD/other, size, performance: random read/sequnetial read/random write/sequnetial write)
+
+
+## D) Installation and Setup
+
+### Install Cape
+
+Please follow these instructions to install the system and datasets for reproducibility. Please see below for an standard installation with pip.
+
+#### Prerequisites ####
+
+Cape requires python 3 and uses python's [tkinter](https://docs.python.org/3/library/tkinter.html) for its graphical UI. For example, on ubuntu you can install the prerequisites with:
 
 ~~~shell
 sudo apt-get install python3 python3-pip python3-tk
 ~~~
 
-## Install with pip
+#### Clone git repository
 
-Make sure you have pip installed (see previous step).
-
-~~~shell
-pip3 install capexplain
-~~~
-
-## Install from github
-
-Alternatively, you can directly install from source. For that you need python3 and the setuptools package. You probably would want to use a [virtual environment](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) for that. If you have `python3` and `pip` installed you can install/update the `setuptools` package by running:
-
-~~~shell
-~~~
-
-To install Cape, clone the github repository and use `setup.py` to install.
+Please clone the Cape git repository and check out the `sigmod-reproducibility` branch. This branch contains Cape as well as scripts for running experiments and plotting results.
 
 ~~~shell
 git clone git@github.com:IITDBGroup/cape.git capexplain
 cd capexplain
+~~~
+
+#### Build and Install Cape
+
+As mentioned before, Cape is written in Python. We recommend creating a python3 [virtual environment](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/). There are several ways to do that. Here we illustrate one. First enter the directory in which you cloned the capexplain git repository.
+
+~~~shell
+cd capexplain
+~~~
+
+Create the virtual environment.
+
+~~~shell
+python3 -m venv env
+~~~
+
+Activate the environment:
+
+~~~shell
+source ./env/bin/activate
+~~~
+
+Update `setuptools`:
+
+~~~shell
+python3 -m pip update setuptools
+~~~
+
+Install Cape:
+
+~~~shell
 python3 setup.py install
 ~~~
 
-# Usage
+##### Test the installation
+
+You can run
+
+~~~shell
+capexplain help
+~~~
+
+This should produce an output like this:
+
+~~~shell
+$capexplain help
+capexplain COMMAND [OPTIONS]:
+	explain unusually high or low aggregation query results.
+
+AVAILABLE COMMANDS:
+
+mine                          - Mining patterns that hold for a relation (necessary preprocessing step for generating explanations.
+explain                       - Generate explanations for an aggregation result (patterns should have been mined upfront using mine).
+stats                         - Extracting statistics from database collected during previous mining executions.
+help                          - Show general or command specific help.
+gui                           - Open the Cape graphical explanation explorer.
+~~~
+
+##### Use Docker (Alternative)
+
+For convenience we also provide a docker image:
+
+- TODO
+
+### Install Postgres + load database ###
+
+We provide a docker image with a Postgres database that contains the datasets used in the experiments. If you do not have docker, please install it:
+
+- on mac: [https://docs.docker.com/docker-for-mac/install/](https://docs.docker.com/docker-for-mac/install/)
+
+here: First pull the image from dockerhub:
+
+~~~shell
+docker pull iitdbgroup/2019-sigmod-reproducibility-cape-postgres
+~~~
+
+To start a container and forward its port to your local machine run the command shown below. Postgres will be available at port `5440`. Using these settings the container will be deleted once it is stopped.
+
+~~~shell
+docker run -d -p 5432:5440 --rm --name capepostgres iitdbgroup/2019-sigmod-reproducibility-cape-postgres
+~~~
+
+To test the postgres container run:
+
+~~~shell
+docker exec -ti mypostgres psql -U postgres postgres
+psql (10.0)
+Type "help" for help.
+
+postgres=#
+~~~
+
+This will connect to the Postgres instance using Postgre's commandline client `psql`. You can quit the client using `\q`.
+
+### Run Experiments
+
+- TODO
+
+### Suggestions and Instructions for Alternative Experiments
+
+For convenience, we provide the single script that runs all experiments. Creating explanations for outliers in cape consists of two steps. There is an offline mining phase that detects patterns in a dataset and an online explanation generation phase that uses the patterns to create an explanation for a user questions. To run different parameter settings, you can use the commandline client to run these phases (`capexplain COMMAND -help` lists all options that are available for a particular commeand, e.g., `mine`). Furthermore, we provide a GUI for exploring explanations. Feel free to use it for generating explanations for additional queries / user questions not covered in the experiments.
+
+- TODO
+
+# Appendix
+## Cape Usage ##
 
 Cape provides a single binary `capexplain` that support multiple subcommands. The general form is:
 
@@ -45,11 +163,11 @@ capexplain COMMAND [OPTIONS]
 
 Options are specific to each subcommand. Use `capexplain help` to see a list of supported commands and `capexplain help COMMAND` get more detailed help for a subcommand.
 
-## Overview
+### Overview ###
 
 Cape currently only supports PostgreSQL as a backend database (version 9 or higher). To use Cape to explain an aggregation outlier, you first have to let cape find patterns for the table over which you are aggregating. This an offline step that only has to be executed only once for each table (unless you want to re-run pattern mining with different parameter settings). Afterwards, you can either use the commandline or Cape's UI to request explanations for an outlier in an aggregation query result.
 
-## Mining Patterns
+### Mining Patterns ###
 
 Use `capexplain mine [OPTIONS]` to mine patterns. Cape will store the discovered patterns in the database. The "mined" patterns will be stored in a created schema called `pattern`, and the pattern tables generated after running `mine` command are `pattern.{target_table}_global` and `pattern.{target_table}_local`. At the minimum you have to tell Cape how to connect to the database you want to use and which table it should generate patterns for. Run `capexplain help mine` to get a list of all supported options for the mine command. The options needed to specify the target table and database connection are:
 
@@ -68,7 +186,7 @@ For instance, if you run a postgres server locally (default) with user `postgres
 capexplain mine -p test -d mydb -t employees
 ~~~
 
-### Mining algorithm parameters
+#### Mining algorithm parameters ####
 
 Cape's mining algorithm takes the following arguments:
 
@@ -86,7 +204,7 @@ Cape's mining algorithm takes the following arguments:
 
 ~~~
 
-### Running our "crime" data example
+#### Running our "crime" data example ####
 
 We included a subset of the "Chicago Crime" dataset (https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/)
 in our repository for user to play with. To import this dataset in your postgres databse, under `/testdb` directory, run the following command template:
@@ -96,7 +214,7 @@ psql -h <host> -U <user name> -d <local database name where you want to store ou
 ~~~
 then run the `capexplain` commands accordingly to explore this example.
 
-## Explaining Outliers
+### Explaining Outliers ###
 
 To explain an aggregation outlier use `capexplain explain [OPTIONS]`.
 
@@ -123,7 +241,7 @@ value1,value2,value3...., high/low
 please refer to `input.txt` to look at an example.
 
 
-## Starting the Explanation Explorer GUI
+### Starting the Explanation Explorer GUI ###
 
 Cape comes with a graphical UI for running queries, selecting outliers of interest, and exploring patterns that are relevant for an outlier and browsing explanations generated by the system. You need to specify the Postgres server to connect to. The explorer can only generate explanations for queries over tables for which patterns have mined beforehand using `capexplain mine`.
 Here is our demo video : (https://www.youtube.com/watch?v=gWqhIUrcwz8)
@@ -149,6 +267,6 @@ For instance, if you run a postgres server locally (default) with user `postgres
 capexplain gui -p test -d mydb
 ~~~
 
-# Links
+## Links ##
 
 Cape is developed by researchers at Illinois Institute of Technology and Duke University. For more information and publications see the Cape project page [http://www.cs.iit.edu/~dbgroup/projects/cape.html](http://www.cs.iit.edu/~dbgroup/projects/cape.html).
