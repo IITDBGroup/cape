@@ -39,7 +39,7 @@ class ExplConfig(DictLike):
     DEFAULT_AGGREGATE_COLUMN = '*'
     DEFAULT_EPSILON = 0.25
     DEFAULT_LAMBDA = 0.5
-    TOP_K = 30
+    TOP_K = 20
     PARAMETER_DEV_WEIGHT = 1.0
     # global MATERIALIZED_CNT
     MATERIALIZED_CNT = 0
@@ -322,8 +322,8 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
     if len(gp2_list) == 0:
         return []
     for gp2 in gp2_list:
-        if str(gp2[0]).find('primary_type') == -1 or str(gp2[0]).find('community_area') == -1 or str(gp2[1]).find('year') == -1:
-            continue
+        # if str(gp2[0]).find('primary_type') == -1 or str(gp2[0]).find('community_area') == -1 or str(gp2[1]).find('year') == -1:
+        #     continue
 
         if dir == 1:
             dev_ub = abs(gp2[7])
