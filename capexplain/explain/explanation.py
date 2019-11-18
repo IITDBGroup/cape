@@ -497,16 +497,18 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                 if compare_tuple(t_t, t) == 0:
                     s = score_of_explanation(t_t, t, cat_sim, num_dis_norm, dir, t_t[agg_col], local_patterns[i],
                                              local_patterns[i])
-                    if str(t_t) not in marked:
-                        marked[str(t_t)] = True
-                        topK_heap.Push(Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
+                    expl_temp = Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
                                                    # list(map(lambda y: y[1], sorted(t_t.items(), key=lambda x: x[0]))),
                                                    dict(t_t),
-                                                   ExplConfig.TOP_K, local_patterns[i], None))
+                                                   ExplConfig.TOP_K, local_patterns[i], None)
+                    expl_temp_str = expl_temp.ordered_tuple_string()
+                    # if str(t_t) not in marked:
+                    #     marked[str(t_t)] = True
+                    if expl_temp_str not in marked:
+                        marked[expl_temp_str] = True
+                        topK_heap.Push(expl_temp)
 
-                    top_k_lists[i][-1].append(Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
-                                                          dict(t_t),
-                                                          ExplConfig.TOP_K, local_patterns[i], None))
+                    top_k_lists[i][-1].append(expl_temp)
                     if s[-1] < dist_lb:
                         dist_lb = s[-1]
                         # use raw distance (without penalty on missing attributes) as the lower bound
