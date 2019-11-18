@@ -289,7 +289,7 @@ def compare_tuple(t1, t2):
     flag1 = True
     for a in t1:
         # if (a != 'lambda' and a.find('_') == -1):
-        if (a != 'lambda' and a != 'count'):
+        if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
             if a not in t2:
                 flag1 = False
             elif t1[a] != t2[a]:
@@ -297,7 +297,7 @@ def compare_tuple(t1, t2):
     flag2 = True
     for a in t2:
         # if (a != 'lambda' and a.find('_') == -1):
-        if (a != 'lambda' and a != 'count'):
+        if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
             if a not in t1:
                 flag2 = False
             elif t1[a] != t2[a]:
