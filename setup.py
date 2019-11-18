@@ -25,7 +25,7 @@ setup(
         'colorful>=0.4.1',
         'geopy',
         'idna>=2.7',
-        'matplotlib==3.0.2',
+        'matplotlib==3.0.0',
         'numpy>=1.14.5',
         'pandas==0.23.4',
         'patsy>=0.5.0',

@@ -536,8 +536,11 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                                             dir, uq['query_result'],
                                             norm_lb, dist_lb, topK_heap)
             for tk in top_k_lists[i][-1]:
-                if str(tk.tuple_value) not in marked:
-                    marked[str(tk.tuple_value)] = True
+                # if str(tk.tuple_value) not in marked:
+                #    marked[str(tk.tuple_value)] = True
+                tk_str = tk.ordered_tuple_string()
+                if tk_str not in marked:
+                    marked[tk_str] = True
                     topK_heap.Push(tk)
 
         score_computing_end = time.time()
