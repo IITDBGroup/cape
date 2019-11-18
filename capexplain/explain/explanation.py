@@ -507,8 +507,8 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                     if expl_temp_str not in marked:
                         marked[expl_temp_str] = True
                         topK_heap.Push(expl_temp)
-
-                    top_k_lists[i][-1].append(expl_temp)
+                        top_k_lists[i][-1].append(expl_temp)
+                        print(t_t, t, compare_tuple(t_t, t))
                     if s[-1] < dist_lb:
                         dist_lb = s[-1]
                         # use raw distance (without penalty on missing attributes) as the lower bound
