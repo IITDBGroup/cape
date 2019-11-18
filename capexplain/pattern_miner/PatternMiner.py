@@ -111,7 +111,7 @@ class MinerConfig(DictLike):
     def run_experiment(self, fd_on = False): #fd_on overrides self.fd_check
         if not path.exists(self.csv): # create and make header
             f = open(self.csv, 'a+')
-            f.write('query,regression,rest,total,algo,')
+            f.write('query,regression,mining,total,algo,')
             if (self.experiment == 'fd'):
                 f.write('size,')
             f.write(self.experiment+'\n')
