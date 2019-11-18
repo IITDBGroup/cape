@@ -224,6 +224,8 @@ EXPLAIN_OPTIONS = COMMON_OPTIONS + DB_OPTIONS + [
               hasarg=True, cfgFieldName='query_result_table'),
     ConfigOpt(longopt='ufile', desc='file storing user question',
               hasarg=True, cfgFieldName='user_question_file'),
+    ConfigOpt(longopt='csmfile', desc='file storing predefined similarity matrix of categorical values',
+              hasarg=True, cfgFieldName='similarity_matrix_file'),
     ConfigOpt(longopt='ofile', shortopt='o', desc='file to write output to',
               hasarg=True, cfgFieldName='outfile'),
     ConfigOpt(longopt='aggcolumn', shortopt='a', desc='column that was input to the aggregation function',
