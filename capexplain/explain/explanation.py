@@ -539,7 +539,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                 # if str(tk.tuple_value) not in marked:
                 #    marked[str(tk.tuple_value)] = True
                 tk_str = tk.ordered_tuple_string()
-                if not in marked:
+                if tk_str not in marked:
                     marked[tk_str] = True
                     topK_heap.Push(tk)
 
