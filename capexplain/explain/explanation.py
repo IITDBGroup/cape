@@ -39,7 +39,7 @@ class ExplConfig(DictLike):
     DEFAULT_AGGREGATE_COLUMN = '*'
     DEFAULT_EPSILON = 0.25
     DEFAULT_LAMBDA = 0.5
-    TOP_K = 10
+    TOP_K = 30
     PARAMETER_DEV_WEIGHT = 1.0
     # global MATERIALIZED_CNT
     MATERIALIZED_CNT = 0
@@ -504,9 +504,9 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                     expl_temp_str = expl_temp.ordered_tuple_string()
                     # if str(t_t) not in marked:
                     #     marked[str(t_t)] = True
-                    if expl_temp_str not in marked:
-                        marked[expl_temp_str] = True
-                        topK_heap.Push(expl_temp)
+                    # if expl_temp_str not in marked:
+                    #     marked[expl_temp_str] = True
+                    topK_heap.Push(expl_temp)
 
                     top_k_lists[i][-1].append(expl_temp)
                     if s[-1] < dist_lb:
@@ -541,9 +541,9 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                 # if str(tk.tuple_value) not in marked:
                 #    marked[str(tk.tuple_value)] = True
                 tk_str = tk.ordered_tuple_string()
-                if tk_str not in marked:
-                    marked[tk_str] = True
-                    topK_heap.Push(tk)
+                # if tk_str not in marked:
+                #     marked[tk_str] = True
+                topK_heap.Push(tk)
 
         score_computing_end = time.time()
         score_computing_time_cur_uq = score_computing_end - score_computing_start
