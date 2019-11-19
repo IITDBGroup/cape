@@ -34,13 +34,13 @@ class ExplConfig(DictLike):
     # DEFAULT_PATTERN_TABLE = 'dev.crime_exp'
     DEFAULT_QUESTION_PATH = './input/user_question.csv'
 
-    EXAMPLE_NETWORK_EMBEDDING_PATH = './input/NETWORK_EMBEDDING'
-    EXAMPLE_SIMILARITY_MATRIX_PATH = './input/SIMILARITY_DEFINITION'
+    DEFAULT_NETWORK_EMBEDDING_PATH = './input/NETWORK_EMBEDDING'
+    DEFAULT_SIMILARITY_MATRIX_PATH = './input/SIMILARITY_DEFINITION'
     DEFAULT_AGGREGATE_COLUMN = '*'
-    DEFAULT_EPSILON = 0.25
-    DEFAULT_LAMBDA = 0.5
-    TOP_K = 10
-    PARAMETER_DEV_WEIGHT = 1.0
+    DEFAULT_THETA = 0.1
+    DEFAULT_LAMBDA = 0.1
+    DEFAULT_TOP_K = 10
+
     # global MATERIALIZED_CNT
     MATERIALIZED_CNT = 0
     # global MATERIALIZED_DICT
@@ -54,15 +54,23 @@ class ExplConfig(DictLike):
                  query_result_table=DEFAULT_RESULT_TABLE,
                  pattern_table=DEFAULT_PATTERN_TABLE,
                  user_question_file=DEFAULT_QUESTION_PATH,
+                 similarity_matrix_file=None,
                  outputfile='',
                  aggregate_column=DEFAULT_AGGREGATE_COLUMN,
+                 pattern_theta=DEFAULT_THETA,
+                 pattern_lambda=DEFAULT_LAMBDA,
+                 expl_topk=DEFAULT_TOP_K,
                  regression_package='statsmodels'
                  ):
         self.pattern_table = pattern_table
         self.query_result_table = query_result_table
         self.user_question_file = user_question_file
+        self.similarity_matrix_file = similarity_matrix_file
         self.outputfile = outputfile
         self.aggregate_column = aggregate_column
+        self.pattern_theta = pattern_theta
+        self.pattern_lambda = pattern_lambda
+        self.expl_topk = expl_topk
         self.regression_package = regression_package
         self.global_patterns = None
         self.schema = None
@@ -289,7 +297,7 @@ def compare_tuple(t1, t2):
     flag1 = True
     for a in t1:
         # if (a != 'lambda' and a.find('_') == -1):
-        if (a != 'lambda' and a != 'count'):
+        if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
             if a not in t2:
                 flag1 = False
             elif t1[a] != t2[a]:
@@ -297,7 +305,7 @@ def compare_tuple(t1, t2):
     flag2 = True
     for a in t2:
         # if (a != 'lambda' and a.find('_') == -1):
-        if (a != 'lambda' and a != 'count'):
+        if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
             if a not in t1:
                 flag2 = False
             elif t1[a] != t2[a]:
@@ -314,7 +322,7 @@ def compare_tuple(t1, t2):
 def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_coarser, t_coarser, t_prime,
               target_tuple,
               conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm,
-              dir, query_result, norm_lb, dist_lb, tkheap):
+              dir, query_result, norm_lb, dist_lb, tkheap, expl_topk):
     reslist = []
     agg_col = local_pattern[3]
 
@@ -322,15 +330,15 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
     if len(gp2_list) == 0:
         return []
     for gp2 in gp2_list:
-        if str(gp2[0]).find('primary_type') == -1 or str(gp2[0]).find('community_area') == -1 or str(gp2[1]).find('year') == -1:
-            continue
+        # if str(gp2[0]).find('primary_type') == -1 or str(gp2[0]).find('community_area') == -1 or str(gp2[1]).find('year') == -1:
+        #     continue
 
         if dir == 1:
             dev_ub = abs(gp2[7])
         else:
             dev_ub = abs(gp2[6])
         k_score = tkheap.MinValue()
-        if tkheap.HeapSize() == ExplConfig.TOP_K and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
+        if tkheap.HeapSize() == expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
             # prune
             continue
 
@@ -359,7 +367,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
                 dev_ub = abs(lp3[8])
             k_score = tkheap.MinValue()
 
-            if tkheap.HeapSize() == ExplConfig.TOP_K and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
+            if tkheap.HeapSize() == expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
                 # prune
                 continue
             f_key = str(lp3[1]).replace('\'', '')[1:-1]
@@ -379,7 +387,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
                     cmp_res = compare_tuple(row, target_tuple)
                     if cmp_res == 0:  # row is not subset of target_tuple, target_tuple is not subset of row
                         reslist.append(
-                            Explanation(1, s[0], s[1], s[2], s[3], dir, dict(row), ExplConfig.TOP_K, local_pattern,
+                            Explanation(1, s[0], s[1], s[2], s[3], dir, dict(row), expl_topk, local_pattern,
                                         lp3))
 
             # for f_key in tuples_same_F_dict:
@@ -412,7 +420,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
 
 
 def find_explanation_regression_based(user_question_list, global_patterns, global_patterns_dict,
-                                      cat_sim, num_dis_norm, agg_col, conn, cur, pat_table_name, res_table_name):
+                                      cat_sim, num_dis_norm, agg_col, conn, cur, pat_table_name, res_table_name, expl_topk=10):
     """Find explanations for user questions
 
     Args:
@@ -437,7 +445,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
 
     for j, uq in enumerate(user_question_list):
         dir = uq['dir']
-        topK_heap = TopkHeap(ExplConfig.TOP_K)
+        topK_heap = TopkHeap(expl_topk)
         marked = {}
 
         t = dict(uq['target_tuple'])
@@ -497,16 +505,18 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                 if compare_tuple(t_t, t) == 0:
                     s = score_of_explanation(t_t, t, cat_sim, num_dis_norm, dir, t_t[agg_col], local_patterns[i],
                                              local_patterns[i])
-                    if str(t_t) not in marked:
-                        marked[str(t_t)] = True
-                        topK_heap.Push(Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
+                    expl_temp = Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
                                                    # list(map(lambda y: y[1], sorted(t_t.items(), key=lambda x: x[0]))),
                                                    dict(t_t),
-                                                   ExplConfig.TOP_K, local_patterns[i], None))
-
-                    top_k_lists[i][-1].append(Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
-                                                          dict(t_t),
-                                                          ExplConfig.TOP_K, local_patterns[i], None))
+                                                   expl_topk, local_patterns[i], None)
+                    expl_temp_str = expl_temp.ordered_tuple_string()
+                    # if str(t_t) not in marked:
+                    #     marked[str(t_t)] = True
+                    if expl_temp_str not in marked:
+                        marked[expl_temp_str] = True
+                        topK_heap.Push(expl_temp)
+                        top_k_lists[i][-1].append(expl_temp)
+                        print(t_t, t, compare_tuple(t_t, t))
                     if s[-1] < dist_lb:
                         dist_lb = s[-1]
                         # use raw distance (without penalty on missing attributes) as the lower bound
@@ -527,17 +537,20 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
 
             k_score = topK_heap.MinValue()
             # prune
-            if topK_heap.HeapSize() == ExplConfig.TOP_K and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
+            if topK_heap.HeapSize() == expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
                 continue
             top_k_lists[i][-1] += DrillDown(global_patterns_dict, local_patterns[i],
                                             F_set, T_set.difference(F_set.union(V_set)), V_set, t_coarser_copy,
                                             t_coarser_copy, t, t,
                                             conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm,
                                             dir, uq['query_result'],
-                                            norm_lb, dist_lb, topK_heap)
+                                            norm_lb, dist_lb, topK_heap, expl_topk)
             for tk in top_k_lists[i][-1]:
-                if str(tk.tuple_value) not in marked:
-                    marked[str(tk.tuple_value)] = True
+                # if str(tk.tuple_value) not in marked:
+                #    marked[str(tk.tuple_value)] = True
+                tk_str = tk.ordered_tuple_string()
+                if tk_str not in marked:
+                    marked[tk_str] = True
                     topK_heap.Push(tk)
 
         score_computing_end = time.time()
@@ -611,6 +624,8 @@ class ExplanationGenerator:
                 self.config.query_result_table = user_input_config['query_result_table']
             if 'user_question_file' in user_input_config:
                 self.config.user_question_file = user_input_config['user_question_file']
+            if 'similarity_matrix_file' in user_input_config:
+                self.config.similarity_matrix_file = user_input_config['similarity_matrix_file']
             if 'outputfile' in user_input_config:
                 self.config.outputfile = user_input_config['outputfile']
             if 'aggregate_column' in user_input_config:
@@ -618,32 +633,34 @@ class ExplanationGenerator:
 
     def initialize(self):
         ecf = self.config
-        query_result_table = ecf.query_result_table
-        pattern_table = ecf.pattern_table
-        cur = ecf.cur
         logger.debug(ecf)
-        logger.debug("pattern_table is")
-        logger.debug(pattern_table)
+        # logger.debug("pattern_table is")
+        # logger.debug(pattern_table)
 
-        logger.debug("query_result_table is")
-        logger.debug(query_result_table)
+        # logger.debug("query_result_table is")
+        # logger.debug(query_result_table)
 
         # print(opts)
         start = time.clock()
         logger.info("start explaining ...")
-        self.global_patterns, self.schema, self.global_patterns_dict = load_patterns(cur, pattern_table,
-                                                                                     query_result_table)
+        self.global_patterns, self.schema, self.global_patterns_dict = load_patterns(
+            ecf.cur, ecf.pattern_table, ecf.query_result_table,
+            ecf.pattern_theta, ecf.pattern_lambda)
         logger.debug("loaded patterns from database")
 
-        if query_result_table.find('crime') == -1:
-            self.category_similarity = CategorySimilarityNaive(cur=cur, table_name=query_result_table)
+
+        if ecf.similarity_matrix_file is None:
+            if ecf.query_result_table.find('crime') == -1:
+                self.category_similarity = CategorySimilarityNaive(cur=ecf.cur, table_name=ecf.query_result_table)
+            else:
+                self.category_similarity = CategorySimilarityNaive(cur=ecf.cur, table_name=ecf.query_result_table,
+                                                                   embedding_table_list=[
+                                                                       ('community_area', 'community_area_loc')])
         else:
-            self.category_similarity = CategorySimilarityNaive(cur=cur, table_name=query_result_table,
-                                                               embedding_table_list=[
-                                                                   ('community_area', 'community_area_loc')])
+            self.category_similarity = CategorySimilarityMatrix(inf=ecf.similarity_matrix_file)
         # category_similarity = CategoryNetworkEmbedding(EXAMPLE_NETWORK_EMBEDDING_PATH, data['df'])
         # num_dis_norm = normalize_numerical_distance(data['df'])
-        self.num_dis_norm = normalize_numerical_distance(cur=cur, table_name=query_result_table)
+        self.num_dis_norm = normalize_numerical_distance(cur=ecf.cur, table_name=ecf.query_result_table)
         end = time.clock()
         print('Loading time: ' + str(end - start) + 'seconds')
         logger.debug(ExplConfig.MATERIALIZED_DICT)
@@ -719,7 +736,7 @@ class ExplanationGenerator:
         explanations_list, local_patterns_list, score_computing_time_list = find_explanation_regression_based(
             Q, self.global_patterns, self.global_patterns_dict, self.category_similarity, self.num_dis_norm,
             aggregate_column, conn, cur,
-            pattern_table, query_result_table
+            pattern_table, query_result_table, ecf.expl_topk
         )
 
         end = time.clock()
