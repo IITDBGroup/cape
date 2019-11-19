@@ -1,2 +1,2 @@
-community_area,local_description,year,count,direction
-28,CHA PARKING LOT,2016,1,low
+primary_type,community_area,year,count,direction
+BATTERY,26,2011,16,low
