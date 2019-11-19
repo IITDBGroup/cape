@@ -1,0 +1,2 @@
+primary_type,community_area,year,count,direction
+BATTERY,26,2011,16,low
