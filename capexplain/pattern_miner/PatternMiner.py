@@ -74,8 +74,8 @@ class MinerConfig(DictLike):
         self.experiment = experiment
         self.rep = rep
         self.csv = csv
-        self.num = num.split(',') if num else []
-        self.summable = summable.split(',') if summable else []
+        self.num = num
+        self.summable = summable
         log.debug("created miner configuration:\n%s", self.__dict__)
 
     def validateConfiguration(self):
@@ -99,11 +99,6 @@ class MinerConfig(DictLike):
             if not self.csv:
                 log.error("missing experiment output file")
                 raise Exception('you must provide an output file for experiment')
-        if self.summable:
-            for attr in self.summable:
-                if attr not in self.num:
-                    log.error("summable is not numeric")
-                    raise Exception("summable must be a subset of numeric")
         log.debug(
             "validation of miner configuration successful:\n%s", self.__dict__)
         return True
@@ -237,8 +232,8 @@ class PatternFinder:
         log.debug("possible grouping attributes: %s", self.grouping_attr)
 
         if self.config.num:
-            self.num = self.config.num
-            self.summable = self.config.summable
+            self.num = self.config.num.split(',')
+            self.summable = self.config.summable.split(',')
             log.debug("input given numerical attributes %s and summable attributes %s",
                     self.num, self.summable)
             return

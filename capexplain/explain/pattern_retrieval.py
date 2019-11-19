@@ -65,7 +65,7 @@ def find_patterns_refinement(global_patterns_dict, F_prime_set, V_set, agg_col, 
 def find_patterns_relevant(global_patterns_dict, t, conn, cur, query_table_name, pattern_table_name, cat_sim):
     res_list = []
     t_set = set(t.keys())
-    # logger.debug(global_patterns_dict[0].keys())
+    logger.debug(global_patterns_dict[1].keys())
     for v_key in global_patterns_dict[0]:
         V_set = set(v_key[1:-1].replace("'", '').split(', '))
         if not V_set.issubset(t_set):
@@ -102,10 +102,14 @@ def load_patterns(cur, pat_table_name, query_table_name):
     patterns = []
     pattern_dict = [{}, {}]
     for pat in res:
-        # if 'date' in pat[0] or 'date' in pat[1]:
-        #     continue
-        # if 'id' in pat[0] or 'id' in pat[1]:
-        #     continue
+        if 'date' in pat[0] or 'date' in pat[1]:
+            continue
+        if 'id' in pat[0] or 'id' in pat[1]:
+            continue
+        if 'year' in pat[0]:
+            continue
+        if 'name' in pat[1] or 'venue' in pat[1]:
+            continue
         # if 'primary_type' in pat[1] or 'description' in pat[1] or 'location_description' in pat[1] or 'community_area' in pat[1] or 'beat' in pat[1]:
         #     continue
 

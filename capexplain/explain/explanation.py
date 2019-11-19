@@ -40,6 +40,7 @@ class ExplConfig(DictLike):
     DEFAULT_EPSILON = 0.1
     DEFAULT_LAMBDA = 0.1
     DEFAULT_TOP_K = 10
+
     # global MATERIALIZED_CNT
     MATERIALIZED_CNT = 0
     # global MATERIALIZED_DICT
@@ -296,7 +297,7 @@ def compare_tuple(t1, t2):
     flag1 = True
     for a in t1:
         # if (a != 'lambda' and a.find('_') == -1):
-        if (a != 'lambda' and a != 'count'):
+        if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
             if a not in t2:
                 flag1 = False
             elif t1[a] != t2[a]:
@@ -304,7 +305,7 @@ def compare_tuple(t1, t2):
     flag2 = True
     for a in t2:
         # if (a != 'lambda' and a.find('_') == -1):
-        if (a != 'lambda' and a != 'count'):
+        if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
             if a not in t1:
                 flag2 = False
             elif t1[a] != t2[a]:
@@ -329,8 +330,8 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
     if len(gp2_list) == 0:
         return []
     for gp2 in gp2_list:
-        if str(gp2[0]).find('primary_type') == -1 or str(gp2[0]).find('community_area') == -1 or str(gp2[1]).find('year') == -1:
-            continue
+        # if str(gp2[0]).find('primary_type') == -1 or str(gp2[0]).find('community_area') == -1 or str(gp2[1]).find('year') == -1:
+        #     continue
 
         if dir == 1:
             dev_ub = abs(gp2[7])
@@ -504,16 +505,18 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                 if compare_tuple(t_t, t) == 0:
                     s = score_of_explanation(t_t, t, cat_sim, num_dis_norm, dir, t_t[agg_col], local_patterns[i],
                                              local_patterns[i])
-                    if str(t_t) not in marked:
-                        marked[str(t_t)] = True
-                        topK_heap.Push(Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
+                    expl_temp = Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
                                                    # list(map(lambda y: y[1], sorted(t_t.items(), key=lambda x: x[0]))),
                                                    dict(t_t),
-                                                   ExplConfig.expl_topk, local_patterns[i], None))
-
-                    top_k_lists[i][-1].append(Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
-                                                          dict(t_t),
-                                                          ExplConfig.expl_topk, local_patterns[i], None))
+                                                   ExplConfig.TOP_K, local_patterns[i], None)
+                    expl_temp_str = expl_temp.ordered_tuple_string()
+                    # if str(t_t) not in marked:
+                    #     marked[str(t_t)] = True
+                    if expl_temp_str not in marked:
+                        marked[expl_temp_str] = True
+                        topK_heap.Push(expl_temp)
+                        top_k_lists[i][-1].append(expl_temp)
+                        print(t_t, t, compare_tuple(t_t, t))
                     if s[-1] < dist_lb:
                         dist_lb = s[-1]
                         # use raw distance (without penalty on missing attributes) as the lower bound
@@ -543,8 +546,11 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                                             dir, uq['query_result'],
                                             norm_lb, dist_lb, topK_heap)
             for tk in top_k_lists[i][-1]:
-                if str(tk.tuple_value) not in marked:
-                    marked[str(tk.tuple_value)] = True
+                # if str(tk.tuple_value) not in marked:
+                #    marked[str(tk.tuple_value)] = True
+                tk_str = tk.ordered_tuple_string()
+                if tk_str not in marked:
+                    marked[tk_str] = True
                     topK_heap.Push(tk)
 
         score_computing_end = time.time()
