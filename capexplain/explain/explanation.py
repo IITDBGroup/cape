@@ -322,7 +322,7 @@ def compare_tuple(t1, t2):
 def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_coarser, t_coarser, t_prime,
               target_tuple,
               conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm,
-              dir, query_result, norm_lb, dist_lb, tkheap):
+              dir, query_result, norm_lb, dist_lb, tkheap, expl_topk):
     reslist = []
     agg_col = local_pattern[3]
 
@@ -544,7 +544,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                                             t_coarser_copy, t, t,
                                             conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm,
                                             dir, uq['query_result'],
-                                            norm_lb, dist_lb, topK_heap)
+                                            norm_lb, dist_lb, topK_heap, expl_topk)
             for tk in top_k_lists[i][-1]:
                 # if str(tk.tuple_value) not in marked:
                 #    marked[str(tk.tuple_value)] = True
