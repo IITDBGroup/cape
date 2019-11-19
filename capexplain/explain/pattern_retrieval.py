@@ -90,7 +90,7 @@ def find_patterns_relevant(global_patterns_dict, t, conn, cur, query_table_name,
     return g_pat_list
 
 
-def load_patterns(cur, pat_table_name, query_table_name):
+def load_patterns(cur, pat_table_name, query_table_name, theta_thres=0.1, lambda_thres=0.1):
     '''
         load pre-defined constraints(currently only fixed attributes and variable attributes)
     '''

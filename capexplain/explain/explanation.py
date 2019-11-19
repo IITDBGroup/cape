@@ -37,7 +37,7 @@ class ExplConfig(DictLike):
     DEFAULT_NETWORK_EMBEDDING_PATH = './input/NETWORK_EMBEDDING'
     DEFAULT_SIMILARITY_MATRIX_PATH = './input/SIMILARITY_DEFINITION'
     DEFAULT_AGGREGATE_COLUMN = '*'
-    DEFAULT_EPSILON = 0.1
+    DEFAULT_THETA = 0.1
     DEFAULT_LAMBDA = 0.1
     DEFAULT_TOP_K = 10
 
@@ -57,9 +57,9 @@ class ExplConfig(DictLike):
                  similarity_matrix_file=None,
                  outputfile='',
                  aggregate_column=DEFAULT_AGGREGATE_COLUMN,
-                 pattern_epsilon=DEFAULT_EPSILON,
+                 pattern_theta=DEFAULT_THETA,
                  pattern_lambda=DEFAULT_LAMBDA,
-                 expl_topk=TOP_K,
+                 expl_topk=DEFAULT_TOP_K,
                  regression_package='statsmodels'
                  ):
         self.pattern_table = pattern_table
@@ -68,7 +68,7 @@ class ExplConfig(DictLike):
         self.similarity_matrix_file = similarity_matrix_file
         self.outputfile = outputfile
         self.aggregate_column = aggregate_column
-        self.pattern_epsilon = pattern_epsilon
+        self.pattern_theta = pattern_theta
         self.pattern_lambda = pattern_lambda
         self.expl_topk = expl_topk
         self.regression_package = regression_package
@@ -634,18 +634,18 @@ class ExplanationGenerator:
     def initialize(self):
         ecf = self.config
         logger.debug(ecf)
-        logger.debug("pattern_table is")
-        logger.debug(pattern_table)
+        # logger.debug("pattern_table is")
+        # logger.debug(pattern_table)
 
-        logger.debug("query_result_table is")
-        logger.debug(query_result_table)
+        # logger.debug("query_result_table is")
+        # logger.debug(query_result_table)
 
         # print(opts)
         start = time.clock()
         logger.info("start explaining ...")
         self.global_patterns, self.schema, self.global_patterns_dict = load_patterns(
             ecf.cur, ecf.pattern_table, ecf.query_result_table,
-            ecf.pattern_epsilon, ecf.pattern_lambda)
+            ecf.pattern_theta, ecf.pattern_lambda)
         logger.debug("loaded patterns from database")
 
 
