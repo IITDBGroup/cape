@@ -338,7 +338,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
         else:
             dev_ub = abs(gp2[6])
         k_score = tkheap.MinValue()
-        if tkheap.HeapSize() == ExplConfig.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
+        if tkheap.HeapSize() == expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
             # prune
             continue
 
@@ -367,7 +367,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
                 dev_ub = abs(lp3[8])
             k_score = tkheap.MinValue()
 
-            if tkheap.HeapSize() == ExplConfig.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
+            if tkheap.HeapSize() == expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
                 # prune
                 continue
             f_key = str(lp3[1]).replace('\'', '')[1:-1]
@@ -387,7 +387,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
                     cmp_res = compare_tuple(row, target_tuple)
                     if cmp_res == 0:  # row is not subset of target_tuple, target_tuple is not subset of row
                         reslist.append(
-                            Explanation(1, s[0], s[1], s[2], s[3], dir, dict(row), ExplConfig.expl_topk, local_pattern,
+                            Explanation(1, s[0], s[1], s[2], s[3], dir, dict(row), expl_topk, local_pattern,
                                         lp3))
 
             # for f_key in tuples_same_F_dict:
@@ -420,7 +420,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
 
 
 def find_explanation_regression_based(user_question_list, global_patterns, global_patterns_dict,
-                                      cat_sim, num_dis_norm, agg_col, conn, cur, pat_table_name, res_table_name):
+                                      cat_sim, num_dis_norm, agg_col, conn, cur, pat_table_name, res_table_name, expl_topk=10):
     """Find explanations for user questions
 
     Args:
@@ -445,7 +445,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
 
     for j, uq in enumerate(user_question_list):
         dir = uq['dir']
-        topK_heap = TopkHeap(ExplConfig.expl_topk)
+        topK_heap = TopkHeap(expl_topk)
         marked = {}
 
         t = dict(uq['target_tuple'])
@@ -537,7 +537,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
 
             k_score = topK_heap.MinValue()
             # prune
-            if topK_heap.HeapSize() == ExplConfig.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
+            if topK_heap.HeapSize() == expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
                 continue
             top_k_lists[i][-1] += DrillDown(global_patterns_dict, local_patterns[i],
                                             F_set, T_set.difference(F_set.union(V_set)), V_set, t_coarser_copy,
@@ -650,7 +650,7 @@ class ExplanationGenerator:
 
 
         if ecf.similarity_matrix_file is None:
-            if query_result_table.find('crime') == -1:
+            if ecf.query_result_table.find('crime') == -1:
                 self.category_similarity = CategorySimilarityNaive(cur=ecf.cur, table_name=ecf.query_result_table)
             else:
                 self.category_similarity = CategorySimilarityNaive(cur=ecf.cur, table_name=ecf.query_result_table,
@@ -736,7 +736,7 @@ class ExplanationGenerator:
         explanations_list, local_patterns_list, score_computing_time_list = find_explanation_regression_based(
             Q, self.global_patterns, self.global_patterns_dict, self.category_similarity, self.num_dis_norm,
             aggregate_column, conn, cur,
-            pattern_table, query_result_table
+            pattern_table, query_result_table, ecf.expl_topk
         )
 
         end = time.clock()
