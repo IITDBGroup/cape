@@ -357,8 +357,8 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
             continue
         lp2 = lp2_list[0]
 
-        if len(lp2[0]) == 2 and len(lp2[2]) == 1:
-            logger.debug(lp2)
+        # if len(lp2[0]) == 2 and len(lp2[2]) == 1:
+        #     logger.debug(lp2)
         f_value = get_F_value(local_pattern[0], t_prime)
 
         tuples_same_F, agg_range, tuples_same_F_dict = get_tuples_by_F_V(local_pattern, lp2, f_value,
