@@ -767,7 +767,6 @@ class ExplanationGenerator:
         query_result_table = ecf.query_result_table
         pattern_table = ecf.pattern_table
         user_question_file = ecf.user_question_file
-        outfile = ''
         aggregate_column = ecf.aggregate_column
         conn = ecf.conn
         cur = ecf.cur
@@ -819,9 +818,18 @@ class ExplanationGenerator:
         print('Total querying time: ' + str(end - start) + 'seconds')
         logger.debug("finding explanations ... DONE")
 
+        for g_key in ecf.MATERIALIZED_DICT:
+            for fv_key in ecf.MATERIALIZED_DICT[g_key]:
+                dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(ecf.MATERIALIZED_DICT[g_key][fv_key]))
+                ecf.cur.execute(dv_query)
+                ecf.conn.commit()
+        ecf.MATERIALIZED_DICT = dict()
+        ecf.MATERIALIZED_CNT = 0
+
+
         ofile = sys.stdout
-        if outfile != '':
-            ofile = open(outfile, 'w')
+        if ecf.outfile != '':
+            ofile = open(ecf.outfile, 'w')
 
         for i, top_k_list in enumerate(explanations_list):
             ofile.write('User question {} in direction {}: {}\n'.format(
@@ -834,13 +842,16 @@ class ExplanationGenerator:
                 ofile.write(e.to_string())
                 ofile.write('------------------------\n')
 
-        # for g_key in ecf.MATERIALIZED_DICT:
-        #     for fv_key in ecf.MATERIALIZED_DICT[g_key]:
-        #         dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(ecf.MATERIALIZED_DICT[g_key][fv_key]))
-        #         cur.execute(dv_query)
-        #         conn.commit()
-        # ecf.MATERIALIZED_DICT = dict()
-        # ecf.MATERIALIZED_CNT = 0
+        if ecf.exp_id is not None and ecf.runtime_outfile != '':
+            att_size_list = []
+            sct_list = []
+            runtime_outfile = open(ecf.runtime_outfile, 'w')
+            for sct in score_computing_time_list:
+               att_size_list.append(len(list(sct[0].keys())) - 2)
+               sct_list.append(sct[1])
+               runtime_outfile.write(str(att_size_list[-1]) + ',' + str(sct_list[-1]) + '\n')
+            runtime_outfile.close()
+            
 
 
 def main(argv=[]):
