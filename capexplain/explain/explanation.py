@@ -349,7 +349,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
             continue
 
         lp2_list = get_local_patterns(gp2[0], None, gp2[1], gp2[2], gp2[3], t_prime, ecf.conn, ecf.cur, 
-            (ecf.pattern_table + '_local') + ('_' + str(ecf.exp_id)) if ecf.exp_id is not None else '')
+            (ecf.pattern_table + '_local') + (('_' + str(ecf.exp_id)) if ecf.exp_id is not None else ''))
         if len(lp2_list) == 0:
             continue
         lp2 = lp2_list[0]
@@ -363,7 +363,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
                                                                          ecf.conn, ecf.cur, ecf.query_result_table, cat_sim)
 
         lp3_list = get_local_patterns(lp2[0], f_value, lp2[2], lp2[3], lp2[4], t_prime, ecf.conn, ecf.cur, 
-            (ecf.pattern_table + '_local') + ('_' + str(ecf.exp_id)) if ecf.exp_id is not None else '')
+            (ecf.pattern_table + '_local') + (('_' + str(ecf.exp_id)) if ecf.exp_id is not None else ''))
 
         for lp3 in lp3_list:
 
