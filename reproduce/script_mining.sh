@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#parameters
+
+lsup=15
+gsup=15
+
 #first create/empty all the csv files
 echo "">experiments/crime_fd_on_off.csv
 echo "">experiments/crime_num_att.csv
@@ -12,13 +17,18 @@ rm experiments/crime_bar.csv
 algorithms='cube share_grp optimized'
 
 echo 'Running experiments for Figure 3 (a)'
-for algo in 'naive' $algorithms
+for algo in $algorithms
 do
     for num in {4..11}
     do
         echo "mining crime_exp_${num} with $algo"
-        #capexplain mine -u antiprov -d antiprov -p antiprov -P 5436 -t crime_exp_$num --algorithm $algo --numeric year --show-progress False --experiment 'num_attribute' --csv 'experiments/crime_num_att.csv'
+        capexplain mine -u antiprov -d antiprov -p antiprov -P 5436 -t crime_exp_$num --algorithm $algo --local-support $lsup --global-support $gsup --show-progress False --experiment 'num_attribute' --csv 'experiments/crime_num_att.csv'
     done
+done
+for num in {4..7}
+do
+    echo "mining crime_exp_${num} with naive"
+    #capexplain mine -u antiprov -d antiprov -p antiprov -P 5436 -t crime_exp_$num --algorithm naive --numeric year --show-progress False --experiment 'num_attribute' --csv 'experiments/crime_num_att.csv'
 done
 
 echo 'Running experiments for Figure 3 (b)'
@@ -44,7 +54,7 @@ do
 done
 
 echo 'Figure 4 uses the same experiment data as Figure 3 (a)'
-#cp crime_num_att.csv crime_bar.csv
+cp crime_num_att.csv crime_bar.csv
 
 echo 'Running experiments for Figure 5'
 for algo in $algorithms
