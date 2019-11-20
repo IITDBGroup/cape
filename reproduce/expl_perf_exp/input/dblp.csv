@@ -1,0 +1,22 @@
+year,pubcount,name,venue,sum_pubcount,direction,lambda
+2012,*,Alex Bateman,nar,4,high,0.2
+2006,*,Divyakant Agrawal,vldb,4,high,0.2
+2012,*,Divyakant Agrawal,vldb,4,high,0.2
+2011,*,Loo Hay Lee,wsc,3,high,0.2
+2012,*,Loo Hay Lee,wsc,3,high,0.2
+2002,*,Shaogang Gong,bmvc,1,low,0.2
+2006,*,Shaogang Gong,bmvc,6,high,0.2
+2009,*,Shu-Ching Chen,iri,6,high,0.2
+2000,*,Rob A. Rutenbar,dac,4,high,0.2
+2012,*,Wu-chun Feng,ipps,4,high,0.2
+2005,*,B+¬la Bollob+ís,rsa,4,high,0.2
+2000,*,Jyh-Horng Wen,wpc,2,high,0.2
+2010,*,Jyh-Horng Wen,wpc,2,high,0.2
+2011,*,+üngel Rodr+¡guez-V+ízquez,iscas,1,low,0.2
+2005,*,Xiaoou Tang,mm,1,low,0.2
+2006,*,Xiaoou Tang,mm,5,high,0.2
+2011,*,Edward H. Shortliffe,jamia,7,high,0.2
+2003,*,Paulo S. R. Diniz,iscas,5,high,0.2
+2003,*,Joe Saur,sigsoft,4,high,0.2
+2005,*,Joe Saur,sigsoft,4,high,0.2
+2011,*,Maria Ant+¦nia Mart+¡,pdln,4,high,0.2
