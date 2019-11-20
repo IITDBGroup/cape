@@ -360,7 +360,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
 
         tuples_same_F, agg_range, tuples_same_F_dict = get_tuples_by_F_V(local_pattern, lp2, f_value,
                                                                          None,
-                                                                         ecf.conn, ecf.cur, ecf.res_table_name, cat_sim)
+                                                                         ecf.conn, ecf.cur, ecf.query_result_table, cat_sim)
 
         lp3_list = get_local_patterns(lp2[0], f_value, lp2[2], lp2[3], lp2[4], t_prime, ecf.conn, ecf.cur, 
             (ecf.pattern_table + '_local') + ('_' + str(ecf.exp_id)) if ecf.exp_id is not None else '')
@@ -503,7 +503,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                                                               get_F_value(local_patterns[i][0], t),
                                                               # [get_V_value(local_patterns[i][2], t), [[-3, 3]]],
                                                               None,
-                                                              ecf.conn, ecf.cur, ecf.res_table_name, cat_sim)
+                                                              ecf.conn, ecf.cur, ecf.query_result_table, cat_sim)
 
             dist_lb = 1e10
             dev_ub = 0
