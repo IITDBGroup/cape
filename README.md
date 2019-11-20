@@ -7,24 +7,46 @@ The **Cape** system is written in `Python` and uses [PostgreSQL](https://www.pos
 
 - Repository: https://github.com/IITDBGroup/cape
 - Programming Language: Python
-- Additional Programming Language info: we are requiring Python3. Tested versions are Python 3.6 and Python 3.8
-- Compiler Info:
+- Additional Programming Language info: we are requiring Python3. Tested versions are Python 3.6 and Python 3.8.
 - Required libraries/packages: `tkinter` which requires a system package to be installed (see below)
 
 
 ## B)  Datasets info
 
-We used two real world datasets in the experiments.
-Repository: [url]
-Data generators: [url]
+We used two real world datasets in the experiments:
+- Publication dataset extracted from DBLP: [https://dblp.uni-trier.de/](https://dblp.uni-trier.de/)
+- Crime dataset from the Chicago open data portal: [https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2)
+
+In the experiments we utilized several subsets of these datasets. We provide a docker image with Postgres containing all of these datasets. Please install docker TODO on your machine and run the command below to fetch the image.
+
+~~~sh
+docker pull iitdbgroup/cape-experimentsTODO
+~~~
+
+You can create a container from this image using
+
+~~~sh
+docker run --name cape-postgres -d -p 5433:5432 iitdbgroup/cape-experiments
+~~~
+
+To test the container you can connect to the database and test it using:
+
+~~~sh
+docker exec -ti cape-postgres psql TODO
+~~~
 
 ## C) Hardware Info
-[Here you should include any details and comments about the used hardware in order to be able to accommodate the reproducibility effort. Any information about non-standard hardware should also be included. You should also include at least the following info:]
 
-- C1) Processor (architecture, type, and number of processors/sockets)
-- C2) Caches (number of levels, and size of each level)
-- C3) Memory (size and speed)
-- C4) Secondary Storage (type: SSD/HDD/other, size, performance: random read/sequnetial read/random write/sequnetial write)
+All runtime experiments were executed on a server with the following specs:
+
+| Element          | Description                                                                   |
+|------------------|-------------------------------------------------------------------------------|
+| CPU              | 2 x AMD Opteron(tm) Processor 4238, 3.3Ghz                                    |
+| Caches (per CPU) | L1 (288KiB), L2 (6 MiB), L3 (6MiB)                                            |
+| Memory           | 128GB (DDR3 1333MHz)                                                          |
+| RAID Controller  | LSI Logic / Symbios Logic MegaRAID SAS 2108 [Liberator] (rev 05), 512MB cache |
+| RAID Config      | 4 x 1TB, configured as RAID 5                                                 |
+| Disks            | 4 x 1TB 7.2K RPM Near-Line SAS 6Gbps (DELL CONSTELLATION ES.3)                |
 
 
 ## D) Installation and Setup
@@ -127,7 +149,7 @@ docker pull iitdbgroup/2019-sigmod-reproducibility-cape-postgres
 To start a container and forward its port to your local machine run the command shown below. Postgres will be available at port `5440`. Using these settings the container will be deleted once it is stopped.
 
 ~~~shell
-docker run -d -p 5432:5440 --rm --name capepostgres iitdbgroup/2019-sigmod-reproducibility-cape-postgres
+docker run -d -p 5432:5440 --name capepostgres iitdbgroup/2019-sigmod-reproducibility-cape-postgres
 ~~~
 
 To test the postgres container run:
@@ -144,13 +166,39 @@ This will connect to the Postgres instance using Postgre's commandline client `p
 
 ### Run Experiments
 
-- TODO
+In our experiments we evaluated three things:
+
+- performance of the offline pattern mining algorithm
+- performance of the online explanation generation algorithm
+- quality of the generated explanations
+
+#### Pattern mining
+
+- TODO finding the right parameters
+- TODO generating the subset tables
+
+#### Explanation generation
+
+- TODO materialize the subset pattern tables
+- TODO setup the script
+
+#### Explanation Quality
+
+- TODO materialize the subset pattern tables
+
 
 ### Suggestions and Instructions for Alternative Experiments
 
 For convenience, we provide the single script that runs all experiments. Creating explanations for outliers in cape consists of two steps. There is an offline mining phase that detects patterns in a dataset and an online explanation generation phase that uses the patterns to create an explanation for a user questions. To run different parameter settings, you can use the commandline client to run these phases (`capexplain COMMAND -help` lists all options that are available for a particular commeand, e.g., `mine`). Furthermore, we provide a GUI for exploring explanations. Feel free to use it for generating explanations for additional queries / user questions not covered in the experiments.
 
-- TODO
+
+#### Pattern mining
+
+- TODO explain how to run the algorithm with different parameters, giving some suggestions
+
+#### Explanation generation and Explanation Quality
+
+- TODO how to subsample the tables (create script), how to generate explanations, how to use the GUI
 
 # Appendix
 ## Cape Usage ##

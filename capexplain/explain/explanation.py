@@ -34,13 +34,13 @@ class ExplConfig(DictLike):
     # DEFAULT_PATTERN_TABLE = 'dev.crime_exp'
     DEFAULT_QUESTION_PATH = './input/user_question.csv'
 
-    EXAMPLE_NETWORK_EMBEDDING_PATH = './input/NETWORK_EMBEDDING'
-    EXAMPLE_SIMILARITY_MATRIX_PATH = './input/SIMILARITY_DEFINITION'
+    DEFAULT_NETWORK_EMBEDDING_PATH = './input/NETWORK_EMBEDDING'
+    DEFAULT_SIMILARITY_MATRIX_PATH = './input/SIMILARITY_DEFINITION'
     DEFAULT_AGGREGATE_COLUMN = '*'
-    DEFAULT_EPSILON = 0.25
-    DEFAULT_LAMBDA = 0.5
-    TOP_K = 10
-    PARAMETER_DEV_WEIGHT = 1.0
+    DEFAULT_THETA = 0.1
+    DEFAULT_LAMBDA = 0.1
+    DEFAULT_TOP_K = 10
+
     # global MATERIALIZED_CNT
     MATERIALIZED_CNT = 0
     # global MATERIALIZED_DICT
@@ -54,15 +54,29 @@ class ExplConfig(DictLike):
                  query_result_table=DEFAULT_RESULT_TABLE,
                  pattern_table=DEFAULT_PATTERN_TABLE,
                  user_question_file=DEFAULT_QUESTION_PATH,
-                 outputfile='',
+                 similarity_matrix_file=None,
+                 outfile='',
+                 runtime_outfile=None,
                  aggregate_column=DEFAULT_AGGREGATE_COLUMN,
-                 regression_package='statsmodels'
+                 pattern_theta=DEFAULT_THETA,
+                 pattern_lambda=DEFAULT_LAMBDA,
+                 expl_topk=DEFAULT_TOP_K,
+                 regression_package='statsmodels',
+                 exp_id=None,
+                 pruning=False
                  ):
         self.pattern_table = pattern_table
         self.query_result_table = query_result_table
         self.user_question_file = user_question_file
-        self.outputfile = outputfile
+        self.similarity_matrix_file = similarity_matrix_file
+        self.outfile = outfile
         self.aggregate_column = aggregate_column
+        self.pattern_theta = pattern_theta
+        self.pattern_lambda = pattern_lambda
+        self.expl_topk = int(expl_topk)
+        self.exp_id = exp_id
+        self.runtime_outfile = runtime_outfile
+        self.pruning = pruning
         self.regression_package = regression_package
         self.global_patterns = None
         self.schema = None
@@ -268,8 +282,11 @@ def score_of_explanation(t1, t2, cat_sim, num_dis_norm, dir, denominator=1, lp1=
         for col in t2:
             if col not in t1:
                 diff += 1
-
-        w = 5
+        if diff > 0 and 'venue' not in t2 and 'name' not in t2:
+            diff += 1 
+        w = 1
+        if 'name' in t2 and 'name' not in t1:
+            w = 10000
         t_dis = math.sqrt(t_dis_raw * t_dis_raw + w * diff * diff)
 
         t1v = dict(zip(lp1[2], map(lambda x: x, get_V_value(lp1[2], t1))))
@@ -289,7 +306,7 @@ def compare_tuple(t1, t2):
     flag1 = True
     for a in t1:
         # if (a != 'lambda' and a.find('_') == -1):
-        if (a != 'lambda' and a != 'count'):
+        if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
             if a not in t2:
                 flag1 = False
             elif t1[a] != t2[a]:
@@ -297,7 +314,7 @@ def compare_tuple(t1, t2):
     flag2 = True
     for a in t2:
         # if (a != 'lambda' and a.find('_') == -1):
-        if (a != 'lambda' and a != 'count'):
+        if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
             if a not in t1:
                 flag2 = False
             elif t1[a] != t2[a]:
@@ -313,7 +330,7 @@ def compare_tuple(t1, t2):
 
 def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_coarser, t_coarser, t_prime,
               target_tuple,
-              conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm,
+              ecf, cat_sim, num_dis_norm,
               dir, query_result, norm_lb, dist_lb, tkheap):
     reslist = []
     agg_col = local_pattern[3]
@@ -322,34 +339,34 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
     if len(gp2_list) == 0:
         return []
     for gp2 in gp2_list:
-        if str(gp2[0]).find('primary_type') == -1 or str(gp2[0]).find('community_area') == -1 or str(gp2[1]).find('year') == -1:
-            continue
+        # if str(gp2[0]).find('primary_type') == -1 or str(gp2[0]).find('community_area') == -1 or str(gp2[1]).find('year') == -1:
+        #     continue
 
         if dir == 1:
             dev_ub = abs(gp2[7])
         else:
             dev_ub = abs(gp2[6])
         k_score = tkheap.MinValue()
-        if tkheap.HeapSize() == ExplConfig.TOP_K and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
+        if ecf.pruning and tkheap.HeapSize() == ecf.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
             # prune
             continue
 
-        lp2_list = get_local_patterns(gp2[0], None, gp2[1], gp2[2], gp2[3], t_prime, conn, cur, pat_table_name,
-                                      res_table_name)
+        lp2_list = get_local_patterns(gp2[0], None, gp2[1], gp2[2], gp2[3], t_prime, ecf.conn, ecf.cur, 
+            (ecf.pattern_table + '_local') + (('_' + str(ecf.exp_id)) if ecf.exp_id is not None else ''))
         if len(lp2_list) == 0:
             continue
         lp2 = lp2_list[0]
 
-        if len(lp2[0]) == 2 and len(lp2[2]) == 1:
-            logger.debug(lp2)
+        # if len(lp2[0]) == 2 and len(lp2[2]) == 1:
+        #     logger.debug(lp2)
         f_value = get_F_value(local_pattern[0], t_prime)
 
         tuples_same_F, agg_range, tuples_same_F_dict = get_tuples_by_F_V(local_pattern, lp2, f_value,
                                                                          None,
-                                                                         conn, cur, res_table_name, cat_sim)
+                                                                         ecf.conn, ecf.cur, ecf.query_result_table, cat_sim)
 
-        lp3_list = get_local_patterns(lp2[0], f_value, lp2[2], lp2[3], lp2[4], t_prime, conn, cur, pat_table_name,
-                                      res_table_name)
+        lp3_list = get_local_patterns(lp2[0], f_value, lp2[2], lp2[3], lp2[4], t_prime, ecf.conn, ecf.cur, 
+            (ecf.pattern_table + '_local') + (('_' + str(ecf.exp_id)) if ecf.exp_id is not None else ''))
 
         for lp3 in lp3_list:
 
@@ -359,7 +376,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
                 dev_ub = abs(lp3[8])
             k_score = tkheap.MinValue()
 
-            if tkheap.HeapSize() == ExplConfig.TOP_K and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
+            if ecf.pruning and tkheap.HeapSize() == ecf.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
                 # prune
                 continue
             f_key = str(lp3[1]).replace('\'', '')[1:-1]
@@ -379,7 +396,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
                     cmp_res = compare_tuple(row, target_tuple)
                     if cmp_res == 0:  # row is not subset of target_tuple, target_tuple is not subset of row
                         reslist.append(
-                            Explanation(1, s[0], s[1], s[2], s[3], dir, dict(row), ExplConfig.TOP_K, local_pattern,
+                            Explanation(1, s[0], s[1], s[2], s[3], dir, dict(row), ecf.expl_topk, local_pattern,
                                         lp3))
 
             # for f_key in tuples_same_F_dict:
@@ -412,7 +429,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
 
 
 def find_explanation_regression_based(user_question_list, global_patterns, global_patterns_dict,
-                                      cat_sim, num_dis_norm, agg_col, conn, cur, pat_table_name, res_table_name):
+                                      cat_sim, num_dis_norm, agg_col, ecf):
     """Find explanations for user questions
 
     Args:
@@ -437,13 +454,13 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
 
     for j, uq in enumerate(user_question_list):
         dir = uq['dir']
-        topK_heap = TopkHeap(ExplConfig.TOP_K)
+        topK_heap = TopkHeap(ecf.expl_topk)
         marked = {}
 
         t = dict(uq['target_tuple'])
 
         uq['global_patterns'] = find_patterns_relevant(
-            global_patterns_dict, uq['target_tuple'], conn, cur, res_table_name, pat_table_name, cat_sim)
+            global_patterns_dict, uq['target_tuple'], ecf.conn, ecf.cur, ecf.query_result_table, cat_sim)
 
         top_k_lists = [[] for i in range(len(uq['global_patterns']))]
         local_patterns = []
@@ -469,14 +486,14 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                                 agg='{}' AND model='{}'
                             ORDER BY theta;
                         '''.format(
-                pat_table_name + '_local',
+                (ecf.pattern_table + '_local') + (('_' + str(ecf.exp_id)) if ecf.exp_id is not None else ''),
                 str(uq['global_patterns'][i][0]).replace("\'", '').replace('[', '').replace(']', ''),
                 str(tF)[1:-1].replace("\'", ''),
                 str(uq['global_patterns'][i][1]).replace("\'", '').replace('[', '').replace(']', ''),
                 uq['global_patterns'][i][2], uq['global_patterns'][i][3]
             )
-            cur.execute(local_pattern_query_fixed)
-            res_fixed = cur.fetchall()
+            ecf.cur.execute(local_pattern_query_fixed)
+            res_fixed = ecf.cur.fetchall()
 
             if len(res_fixed) == 0:
                 continue
@@ -489,7 +506,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                                                               get_F_value(local_patterns[i][0], t),
                                                               # [get_V_value(local_patterns[i][2], t), [[-3, 3]]],
                                                               None,
-                                                              conn, cur, res_table_name, cat_sim)
+                                                              ecf.conn, ecf.cur, ecf.query_result_table, cat_sim)
 
             dist_lb = 1e10
             dev_ub = 0
@@ -497,16 +514,18 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                 if compare_tuple(t_t, t) == 0:
                     s = score_of_explanation(t_t, t, cat_sim, num_dis_norm, dir, t_t[agg_col], local_patterns[i],
                                              local_patterns[i])
-                    if str(t_t) not in marked:
-                        marked[str(t_t)] = True
-                        topK_heap.Push(Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
+                    expl_temp = Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
                                                    # list(map(lambda y: y[1], sorted(t_t.items(), key=lambda x: x[0]))),
                                                    dict(t_t),
-                                                   ExplConfig.TOP_K, local_patterns[i], None))
-
-                    top_k_lists[i][-1].append(Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
-                                                          dict(t_t),
-                                                          ExplConfig.TOP_K, local_patterns[i], None))
+                                                   ecf.expl_topk, local_patterns[i], None)
+                    expl_temp_str = expl_temp.ordered_tuple_string()
+                    # if str(t_t) not in marked:
+                    #     marked[str(t_t)] = True
+                    if expl_temp_str not in marked:
+                        marked[expl_temp_str] = True
+                        topK_heap.Push(expl_temp)
+                        top_k_lists[i][-1].append(expl_temp)
+                        # print(t_t, t, compare_tuple(t_t, t))
                     if s[-1] < dist_lb:
                         dist_lb = s[-1]
                         # use raw distance (without penalty on missing attributes) as the lower bound
@@ -527,12 +546,12 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
 
             k_score = topK_heap.MinValue()
             # prune
-            if topK_heap.HeapSize() == ExplConfig.TOP_K and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
+            if ecf.pruning and topK_heap.HeapSize() == ecf.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
                 continue
             top_k_lists[i][-1] += DrillDown(global_patterns_dict, local_patterns[i],
                                             F_set, T_set.difference(F_set.union(V_set)), V_set, t_coarser_copy,
                                             t_coarser_copy, t, t,
-                                            conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm,
+                                            ecf, cat_sim, num_dis_norm,
                                             dir, uq['query_result'],
                                             norm_lb, dist_lb, topK_heap)
             for tk in top_k_lists[i][-1]:
@@ -550,7 +569,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
         score_computing_time_list.append([t, score_computing_time_cur_uq])
 
     print('Local pattern loading time: ' + str(local_pattern_loading_time) + 'seconds')
-    print('Score computing time: ' + str(score_computing_time) + 'seconds')
+    print('Score computing time: ' + str(sum(map(lambda x: x[1], score_computing_time_list))) + 'seconds')
     return answer, local_patterns_list, score_computing_time_list
 
 
@@ -569,7 +588,6 @@ def load_user_question_from_file(global_patterns, global_patterns_dict, uq_path,
             raw_row_data = {}
             agg_col = None
             for k, v in enumerate(headers):
-                print(k, v)
                 if schema is None or v not in schema:
                     if v != 'direction':
                         if is_float(row[v]):
@@ -614,39 +632,52 @@ class ExplanationGenerator:
                 self.config.query_result_table = user_input_config['query_result_table']
             if 'user_question_file' in user_input_config:
                 self.config.user_question_file = user_input_config['user_question_file']
-            if 'outputfile' in user_input_config:
-                self.config.outputfile = user_input_config['outputfile']
+            if 'similarity_matrix_file' in user_input_config:
+                self.config.similarity_matrix_file = user_input_config['similarity_matrix_file']
+            if 'outfile' in user_input_config:
+                self.config.outfile = user_input_config['outfile']
+            if 'exp_id' in user_input_config:
+                self.config.exp_id = user_input_config['exp_id']
+            if 'expl_topk' in user_input_config:
+                self.config.expl_topk = int(user_input_config['expl_topk'])
+            if 'runtime_outfile' in user_input_config:
+                self.config.runtime_outfile = user_input_config['runtime_outfile']
+            if 'pruning' in user_input_config:
+                self.config.pruning = True
             if 'aggregate_column' in user_input_config:
                 self.config.aggregate_column = user_input_config['aggregate_column']
 
     def initialize(self):
         ecf = self.config
-        query_result_table = ecf.query_result_table
-        pattern_table = ecf.pattern_table
-        cur = ecf.cur
+        ecf.expl_topk = int(ecf.expl_topk)
         logger.debug(ecf)
-        logger.debug("pattern_table is")
-        logger.debug(pattern_table)
+        # logger.debug("pattern_table is")
+        # logger.debug(pattern_table)
 
-        logger.debug("query_result_table is")
-        logger.debug(query_result_table)
+        # logger.debug("query_result_table is")
+        # logger.debug(query_result_table)
 
         # print(opts)
         start = time.clock()
         logger.info("start explaining ...")
-        self.global_patterns, self.schema, self.global_patterns_dict = load_patterns(cur, pattern_table,
-                                                                                     query_result_table)
+        self.global_patterns, self.schema, self.global_patterns_dict = load_patterns(
+            ecf.cur, ecf.pattern_table, ecf.query_result_table,
+            ecf.pattern_theta, ecf.pattern_lambda)
         logger.debug("loaded patterns from database")
 
-        if query_result_table.find('crime') == -1:
-            self.category_similarity = CategorySimilarityNaive(cur=cur, table_name=query_result_table)
+
+        if ecf.similarity_matrix_file is None:
+            if ecf.query_result_table.find('crime') == -1:
+                self.category_similarity = CategorySimilarityNaive(cur=ecf.cur, table_name=ecf.query_result_table)
+            else:
+                self.category_similarity = CategorySimilarityNaive(cur=ecf.cur, table_name=ecf.query_result_table,
+                                                                   embedding_table_list=[
+                                                                       ('community_area', 'community_area_loc')])
         else:
-            self.category_similarity = CategorySimilarityNaive(cur=cur, table_name=query_result_table,
-                                                               embedding_table_list=[
-                                                                   ('community_area', 'community_area_loc')])
+            self.category_similarity = CategorySimilarityMatrix(inf=ecf.similarity_matrix_file)
         # category_similarity = CategoryNetworkEmbedding(EXAMPLE_NETWORK_EMBEDDING_PATH, data['df'])
         # num_dis_norm = normalize_numerical_distance(data['df'])
-        self.num_dis_norm = normalize_numerical_distance(cur=cur, table_name=query_result_table)
+        self.num_dis_norm = normalize_numerical_distance(cur=ecf.cur, table_name=ecf.query_result_table)
         end = time.clock()
         print('Loading time: ' + str(end - start) + 'seconds')
         logger.debug(ExplConfig.MATERIALIZED_DICT)
@@ -702,9 +733,7 @@ class ExplanationGenerator:
         query_result_table = ecf.query_result_table
         pattern_table = ecf.pattern_table
         aggregate_column = ecf.aggregate_column
-        conn = ecf.conn
-        cur = ecf.cur
-
+       
         logger.debug("pattern_table is")
         logger.debug(pattern_table)
 
@@ -721,19 +750,18 @@ class ExplanationGenerator:
 
         explanations_list, local_patterns_list, score_computing_time_list = find_explanation_regression_based(
             Q, self.global_patterns, self.global_patterns_dict, self.category_similarity, self.num_dis_norm,
-            aggregate_column, conn, cur,
-            pattern_table, query_result_table
+            aggregate_column, ecf
         )
 
         end = time.clock()
         logger.debug('Total querying time: ' + str(end-start) + 'seconds')
         logger.debug("finding explanations ... DONE")
 
-        # for g_key in ecf.MATERIALIZED_DICT:
-        #     for fv_key in ecf.MATERIALIZED_DICT[g_key]:
-        #         dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(ecf.MATERIALIZED_DICT[g_key][fv_key]))
-        #         cur.execute(dv_query)
-        #         conn.commit()
+        for g_key in ecf.MATERIALIZED_DICT:
+            for fv_key in ecf.MATERIALIZED_DICT[g_key]:
+                dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(ecf.MATERIALIZED_DICT[g_key][fv_key]))
+                ecf.cur.execute(dv_query)
+                ecf.conn.commit()
         return explanations_list[0]
 
     def do_batch_explain(self):
@@ -742,7 +770,6 @@ class ExplanationGenerator:
         query_result_table = ecf.query_result_table
         pattern_table = ecf.pattern_table
         user_question_file = ecf.user_question_file
-        outputfile = ''
         aggregate_column = ecf.aggregate_column
         conn = ecf.conn
         cur = ecf.cur
@@ -751,7 +778,7 @@ class ExplanationGenerator:
         logger.info("start explaining ...")
         global_patterns, schema, global_patterns_dict = load_patterns(cur, pattern_table, query_result_table)
         logger.debug("loaded patterns from database")
-        logger.debug(ExplConfig.MATERIALIZED_DICT)
+        # logger.debug(ExplConfig.MATERIALIZED_DICT)
 
         # # category_similarity = CategorySimilarityMatrix(ecf.EXAMPLE_SIMILARITY_MATRIX_PATH, schema)
         # category_similarity = CategorySimilarityNaive(cur=cur, table_name=query_result_table)
@@ -765,7 +792,7 @@ class ExplanationGenerator:
                 ('community_area', 'community_area_loc')])
 
         num_dis_norm = normalize_numerical_distance(cur=cur, table_name=query_result_table)
-        logger.debug(ExplConfig.MATERIALIZED_DICT)
+        # logger.debug(ExplConfig.MATERIALIZED_DICT)
 
         # pf = PatternFinder(engine.connect(), query_result_table, fit=True, theta_c=0.5, theta_l=0.25,
         #                    lamb=DEFAULT_LAMBDA, dist_thre=0.9, supp_l=10, supp_g=1)
@@ -775,7 +802,7 @@ class ExplanationGenerator:
             schema, conn, cur, pattern_table, query_result_table, None, category_similarity)
 
         logger.debug("loaded user question from file")
-        logger.debug(ExplConfig.MATERIALIZED_DICT)
+        # logger.debug(ExplConfig.MATERIALIZED_DICT)
         end = time.clock()
         print('Loading time: ' + str(end - start) + 'seconds')
 
@@ -787,17 +814,25 @@ class ExplanationGenerator:
 
         explanations_list, local_patterns_list, score_computing_time_list = find_explanation_regression_based(
             Q, global_patterns, global_patterns_dict, category_similarity, num_dis_norm,
-            aggregate_column, conn, cur,
-            pattern_table, query_result_table
+            aggregate_column, ecf
         )
-        logger.debug(ExplConfig.MATERIALIZED_DICT)
+        # logger.debug(ExplConfig.MATERIALIZED_DICT)
         end = time.clock()
         print('Total querying time: ' + str(end - start) + 'seconds')
         logger.debug("finding explanations ... DONE")
 
+        for g_key in ecf.MATERIALIZED_DICT:
+            for fv_key in ecf.MATERIALIZED_DICT[g_key]:
+                dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(ecf.MATERIALIZED_DICT[g_key][fv_key]))
+                ecf.cur.execute(dv_query)
+                ecf.conn.commit()
+        ecf.MATERIALIZED_DICT = dict()
+        ecf.MATERIALIZED_CNT = 0
+
+
         ofile = sys.stdout
-        if outputfile != '':
-            ofile = open(outputfile, 'w')
+        if ecf.outfile != '':
+            ofile = open(ecf.outfile, 'w')
 
         for i, top_k_list in enumerate(explanations_list):
             ofile.write('User question {} in direction {}: {}\n'.format(
@@ -810,13 +845,17 @@ class ExplanationGenerator:
                 ofile.write(e.to_string())
                 ofile.write('------------------------\n')
 
-        # for g_key in ecf.MATERIALIZED_DICT:
-        #     for fv_key in ecf.MATERIALIZED_DICT[g_key]:
-        #         dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(ecf.MATERIALIZED_DICT[g_key][fv_key]))
-        #         cur.execute(dv_query)
-        #         conn.commit()
-        # ecf.MATERIALIZED_DICT = dict()
-        # ecf.MATERIALIZED_CNT = 0
+        logger.debug(ecf.runtime_outfile)
+        if ecf.exp_id is not None and ecf.runtime_outfile != '':
+            att_size_list = []
+            sct_list = []
+            runtime_outfile = open(ecf.runtime_outfile, 'w')
+            for sct in score_computing_time_list:
+               att_size_list.append(len(list(sct[0].keys())) - 1)
+               sct_list.append(sct[1])
+               runtime_outfile.write(str(att_size_list[-1]) + ',' + str(sct_list[-1]) + '\n')
+            runtime_outfile.close()
+            
 
 
 def main(argv=[]):
@@ -825,14 +864,14 @@ def main(argv=[]):
                                    ["help", "ptable=", "qtable=", "ufile=", "ofile=", "aggregate_column="])
     except getopt.GetoptError:
         print('explanation.py -p <pattern_table> -q <query_result_table>  -u <user_question_file>\
-         -o <outputfile> -a <aggregate_column>')
+         -o <outfile> -a <aggregate_column>')
         sys.exit(2)
     # user_input_config = dict()
     user_input_config = ExplConfig()
     for opt, arg in opts:
         if opt in ("-h", "--help"):
             print('explanation.py -p <pattern_table> -q <query_result_table> -u <user_question_file> \
-                -o <outputfile> -a <aggregate_column>')
+                -o <outfile> -a <aggregate_column>')
             sys.exit(2)
         elif opt in ("-p", "--ptable"):
             user_input_config['pattern_table'] = arg
@@ -841,7 +880,7 @@ def main(argv=[]):
         elif opt in ("-u", "--ufile"):
             user_input_config['user_question_file'] = arg
         elif opt in ("-o", "--ofile"):
-            user_input_config['outputfile'] = arg
+            user_input_config['outfile'] = arg
         elif opt in ("-a", "--aggcolumn"):
             user_input_config['aggregate_column'] = arg
 

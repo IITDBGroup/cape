@@ -3,7 +3,7 @@ from capexplain.explain.explanation import logger, ExplConfig
 from capexplain.explain.tuple_retrieval import get_tuples_by_gp_uq
 
 
-def get_local_patterns(F, Fv, V, agg_col, model_type, t, conn, cur, pat_table_name, res_table_name):
+def get_local_patterns(F, Fv, V, agg_col, model_type, t, conn, cur, local_pat_table_name):
 
     if model_type is not None:
         mt_predicate = " AND model='{}'".format(model_type)
@@ -15,7 +15,7 @@ def get_local_patterns(F, Fv, V, agg_col, model_type, t, conn, cur, pat_table_na
             array_to_string(variable, ', ') = '{}' AND
             agg='{}'{};
         '''.format(
-            pat_table_name + '_local', str(F).replace("\'", '').replace('[', '').replace(']', ''),
+            local_pat_table_name, str(F).replace("\'", '').replace('[', '').replace(']', ''),
             str(Fv).replace("\'", '').replace('[', '').replace(']', ''),
             str(V).replace("\'", '').replace('[', '').replace(']', ''),
             agg_col,
@@ -27,7 +27,7 @@ def get_local_patterns(F, Fv, V, agg_col, model_type, t, conn, cur, pat_table_na
             REPLACE(array_to_string(fixed_value, ', '), '"', '') LIKE '%{}%' AND array_to_string(variable, ', ')='{}' AND
             agg='{}'{};
         '''.format(
-            pat_table_name + '_local', str(F).replace("\'", '').replace('[', '').replace(']', ''),
+            local_pat_table_name, str(F).replace("\'", '').replace('[', '').replace(']', ''),
             '%'.join(list(map(str, tF))),
             str(V).replace("\'", '').replace('[', '').replace(']', ''),
             agg_col,
@@ -62,10 +62,10 @@ def find_patterns_refinement(global_patterns_dict, F_prime_set, V_set, agg_col, 
     return gp_list
 
 
-def find_patterns_relevant(global_patterns_dict, t, conn, cur, query_table_name, pattern_table_name, cat_sim):
+def find_patterns_relevant(global_patterns_dict, t, conn, cur, query_table_name, cat_sim):
     res_list = []
     t_set = set(t.keys())
-    logger.debug(global_patterns_dict[0].keys())
+    # logger.debug(global_patterns_dict[1].keys())
     for v_key in global_patterns_dict[0]:
         V_set = set(v_key[1:-1].replace("'", '').split(', '))
         if not V_set.issubset(t_set):
@@ -83,14 +83,15 @@ def find_patterns_relevant(global_patterns_dict, t, conn, cur, query_table_name,
 
                 agg_value = get_tuples_by_gp_uq(pat, get_F_value(pat[0], t), get_V_value(pat[1], t),
                                                 conn, cur, query_table_name, cat_sim)
-                res_list.append([pat, agg_value[0]])
+                if len(agg_value) > 0:
+                    res_list.append([pat, agg_value[0]])
 
     res_list = sorted(res_list, key=lambda x: (len(x[0][0]) + len(x[0][1]), x[1]))
     g_pat_list = list(map(lambda x: x[0], res_list))
     return g_pat_list
 
 
-def load_patterns(cur, pat_table_name, query_table_name):
+def load_patterns(cur, pat_table_name, query_table_name, theta_thres=0.1, lambda_thres=0.1):
     '''
         load pre-defined constraints(currently only fixed attributes and variable attributes)
     '''
@@ -108,8 +109,10 @@ def load_patterns(cur, pat_table_name, query_table_name):
             continue
         if 'year' in pat[0]:
             continue
-        # if 'primary_type' in pat[1] or 'description' in pat[1] or 'location_description' in pat[1] or 'community_area' in pat[1] or 'beat' in pat[1]:
-        #     continue
+        if 'name' in pat[1] or 'venue' in pat[1]:
+            continue
+        if 'primary_type' in pat[1] or 'description' in pat[1] or 'location_description' in pat[1] or 'community_area' in pat[1] or 'beat' in pat[1]:
+            continue
 
         patterns.append(list(pat))
 

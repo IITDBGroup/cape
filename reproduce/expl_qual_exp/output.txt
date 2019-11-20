@@ -1,0 +1,101 @@
+User question 1 in direction low: {'primary_type': 'BATTERY', 'community_area': '26', 'year': 2011, 'count': 16.0}
+------------------------
+Top 1 explanation:
+Directly from local pattern : [community_area][26.0][year][linear][{'Intercept': 7093.7941176476215, 'year': -3.475490196078711}]
+Score: 6.39600376029084
+Distance: 2.12367605815953
+Outlierness: 15.892156862744741
+Denominator: 117.0
+(26,2012,117)
+------------------------
+------------------------
+Top 2 explanation:
+From local pattern: [community_area][26.0][year][linear][{'Intercept': 7093.7941176476215, 'year': -3.475490196078711}]
+drill down to
+: [primary_type,community_area][BATTERY,26.0][year][linear][{'Intercept': 1936.9852941176437, 'year': -0.9534313725490182}]
+Score: 6.303939510059951
+Distance: 0.7211102550927979
+Outlierness: 5.318627450981012
+Denominator: 117.0
+(BATTERY,26,2012,24)
+------------------------
+------------------------
+Top 3 explanation:
+From local pattern: [primary_type][BATTERY][year][linear][{'Intercept': 67327.59029927786, 'year': -33.00825593395265}]
+drill down to
+: [primary_type,community_area][BATTERY,25.0][year][linear][{'Intercept': 7881.455882353077, 'year': -3.884803921568695}]
+Score: 6.053753812921671
+Distance: 0.16055445119415265
+Outlierness: 9.884803921568164
+Denominator: 1017.0
+(BATTERY,25,2011,79)
+------------------------
+------------------------
+Top 4 explanation:
+Directly from local pattern : [primary_type][BATTERY][year][linear][{'Intercept': 67327.59029927786, 'year': -33.00825593395265}]
+Score: 4.902506598118934
+Distance: 2.12367605815953
+Outlierness: 114.00412796696764
+Denominator: 1095.0
+(BATTERY,2010,1095)
+------------------------
+------------------------
+Top 5 explanation:
+From local pattern: [community_area][26.0][year][linear][{'Intercept': 7093.7941176476215, 'year': -3.475490196078711}]
+drill down to
+: [primary_type,community_area][ASSAULT,26.0][year][linear][{'Intercept': 572.9558823529414, 'year': -0.2818627450980393}]
+Score: 4.011345290394135
+Distance: 1.004987562112089
+Outlierness: 3.8700980392156907
+Denominator: 96.0
+(ASSAULT,26,2011,10)
+------------------------
+------------------------
+Top 6 explanation:
+Directly from local pattern : [primary_type][BATTERY][year][linear][{'Intercept': 67327.59029927786, 'year': -33.00825593395265}]
+Score: 3.388705989802215
+Distance: 2.0024984394500787
+Outlierness: 69.01238390091748
+Denominator: 1017.0
+(BATTERY,2011,1017)
+------------------------
+------------------------
+Top 7 explanation:
+Directly from local pattern : [primary_type][BATTERY][year][linear][{'Intercept': 67327.59029927786, 'year': -33.00825593395265}]
+Score: 3.302901419072334
+Distance: 2.12367605815953
+Outlierness: 69.02063983486732
+Denominator: 984.0
+(BATTERY,2012,984)
+------------------------
+------------------------
+Top 8 explanation:
+Directly from local pattern : [community_area][26.0][year][linear][{'Intercept': 7093.7941176476215, 'year': -3.475490196078711}]
+Score: 2.116356453883051
+Distance: 11.489560478973944
+Outlierness: 31.367647058823422
+Denominator: 129.0
+(26,2013,129)
+------------------------
+------------------------
+Top 9 explanation:
+From local pattern: [community_area][26.0][year][linear][{'Intercept': 7093.7941176476215, 'year': -3.475490196078711}]
+drill down to
+: [primary_type,community_area][BATTERY,26.0][year][linear][{'Intercept': 1936.9852941176437, 'year': -0.9534313725490182}]
+Score: 1.8824667292718529
+Distance: 0.7211102550927979
+Outlierness: 1.411764705882888
+Denominator: 104.0
+(BATTERY,26,2010,22)
+------------------------
+------------------------
+Top 10 explanation:
+From local pattern: [community_area][26.0][year][linear][{'Intercept': 7093.7941176476215, 'year': -3.475490196078711}]
+drill down to
+: [location_description,community_area][STREET,26.0][year][linear][{'Intercept': 3128.1029411763984, 'year': -1.5416666666666305}]
+Score: 1.8653668288656007
+Distance: 3.083828789021855
+Outlierness: 6.730392156862308
+Denominator: 117.0
+(STREET,26,2012,33)
+------------------------
