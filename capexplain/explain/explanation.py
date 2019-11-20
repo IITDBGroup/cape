@@ -457,7 +457,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
         t = dict(uq['target_tuple'])
 
         uq['global_patterns'] = find_patterns_relevant(
-            global_patterns_dict, uq['target_tuple'], ecf.conn, ecf.cur, ecf.query_table_name, cat_sim)
+            global_patterns_dict, uq['target_tuple'], ecf.conn, ecf.cur, ecf.query_result_table, cat_sim)
 
         top_k_lists = [[] for i in range(len(uq['global_patterns']))]
         local_patterns = []
@@ -489,8 +489,8 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                 str(uq['global_patterns'][i][1]).replace("\'", '').replace('[', '').replace(']', ''),
                 uq['global_patterns'][i][2], uq['global_patterns'][i][3]
             )
-            cur.execute(local_pattern_query_fixed)
-            res_fixed = cur.fetchall()
+            ecf.cur.execute(local_pattern_query_fixed)
+            res_fixed = ecf.cur.fetchall()
 
             if len(res_fixed) == 0:
                 continue
@@ -810,8 +810,7 @@ class ExplanationGenerator:
 
         explanations_list, local_patterns_list, score_computing_time_list = find_explanation_regression_based(
             Q, global_patterns, global_patterns_dict, category_similarity, num_dis_norm,
-            aggregate_column, conn, cur,
-            pattern_table, query_result_table
+            aggregate_column, ecf
         )
         logger.debug(ExplConfig.MATERIALIZED_DICT)
         end = time.clock()
