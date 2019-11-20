@@ -282,8 +282,11 @@ def score_of_explanation(t1, t2, cat_sim, num_dis_norm, dir, denominator=1, lp1=
         for col in t2:
             if col not in t1:
                 diff += 1
-
-        w = 5
+        if diff > 0 and 'venue' not in t2 and 'name' not in t2:
+            diff += 1 
+        w = 1
+        if 'name' in t2 and 'name' not in t1:
+            w = 10000
         t_dis = math.sqrt(t_dis_raw * t_dis_raw + w * diff * diff)
 
         t1v = dict(zip(lp1[2], map(lambda x: x, get_V_value(lp1[2], t1))))
@@ -636,7 +639,7 @@ class ExplanationGenerator:
             if 'exp_id' in user_input_config:
                 self.config.exp_id = user_input_config['exp_id']
             if 'expl_topk' in user_input_config:
-                self.config.expl_topk = user_input_config['expl_topk']
+                self.config.expl_topk = int(user_input_config['expl_topk'])
             if 'runtime_outfile' in user_input_config:
                 self.config.runtime_outfile = user_input_config['runtime_outfile']
             if 'pruning' in user_input_config:
@@ -646,6 +649,7 @@ class ExplanationGenerator:
 
     def initialize(self):
         ecf = self.config
+        ecf.expl_topk = int(ecf.expl_topk)
         logger.debug(ecf)
         # logger.debug("pattern_table is")
         # logger.debug(pattern_table)
@@ -847,7 +851,7 @@ class ExplanationGenerator:
             sct_list = []
             runtime_outfile = open(ecf.runtime_outfile, 'w')
             for sct in score_computing_time_list:
-               att_size_list.append(len(list(sct[0].keys())) - 2)
+               att_size_list.append(len(list(sct[0].keys())) - 1)
                sct_list.append(sct[1])
                runtime_outfile.write(str(att_size_list[-1]) + ',' + str(sct_list[-1]) + '\n')
             runtime_outfile.close()

@@ -83,7 +83,8 @@ def find_patterns_relevant(global_patterns_dict, t, conn, cur, query_table_name,
 
                 agg_value = get_tuples_by_gp_uq(pat, get_F_value(pat[0], t), get_V_value(pat[1], t),
                                                 conn, cur, query_table_name, cat_sim)
-                res_list.append([pat, agg_value[0]])
+                if len(agg_value) > 0:
+                    res_list.append([pat, agg_value[0]])
 
     res_list = sorted(res_list, key=lambda x: (len(x[0][0]) + len(x[0][1]), x[1]))
     g_pat_list = list(map(lambda x: x[0], res_list))

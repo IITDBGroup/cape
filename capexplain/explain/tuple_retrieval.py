@@ -185,5 +185,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
     # logger.debug(tuples_query)
     cur.execute(tuples_query)
     res = cur.fetchall()
+    if len(res) == 0:
+        return []
     return res[0]
 

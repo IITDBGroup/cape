@@ -1,2 +1,3 @@
 name,venue,year,sum_pubcount,direction
 Jiawei Han,kdd,2007,1,low
+Jiawei Han,kdd,2012,6,high

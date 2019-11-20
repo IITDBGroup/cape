@@ -1,22 +1,21 @@
-year,pubcount,name,venue,sum_pubcount,direction
-2012,*,Alex Bateman,nar,4,high
-2006,*,Divyakant Agrawal,vldb,4,high
-2012,*,Divyakant Agrawal,vldb,4,high
-2011,*,Loo Hay Lee,wsc,3,high
-2012,*,Loo Hay Lee,wsc,3,high
-2002,*,Shaogang Gong,bmvc,1,low
-2006,*,Shaogang Gong,bmvc,6,high
-2009,*,Shu-Ching Chen,iri,6,high
-2000,*,Rob A. Rutenbar,dac,4,high
-2012,*,Wu-chun Feng,ipps,4,high
-2005,*,B+¬la Bollob+ís,rsa,4,high
-2000,*,Jyh-Horng Wen,wpc,2,high
-2010,*,Jyh-Horng Wen,wpc,2,high
-2011,*,+üngel Rodr+¡guez-V+ízquez,iscas,1,low
-2005,*,Xiaoou Tang,mm,1,low
-2006,*,Xiaoou Tang,mm,5,high
-2011,*,Edward H. Shortliffe,jamia,7,high
-2003,*,Paulo S. R. Diniz,iscas,5,high
-2003,*,Joe Saur,sigsoft,4,high
-2005,*,Joe Saur,sigsoft,4,high
-2011,*,Maria Ant+¦nia Mart+¡,pdln,4,high
+venue,year,name,pubcount,sum_pubcount,direction
+miccai,2004,Simon K. Warfield,*,10,high
+nar,2012,Alex Bateman,*,4,high
+ipps,2009,El-Ghazali Talbi,*,3,high
+ipps,2011,El-Ghazali Talbi,*,3,high
+jdi,2013,Bruce I. Reiner,*,12,high
+interspeech,2001,Kuldip K. Paliwal,*,6,high
+icc,2011,Marco Chiani,*,6,high
+sigir,2005,Douglas W. Oard,*,5,high
+sigir,2007,Douglas W. Oard,*,4,high
+vldb,2006,Divyakant Agrawal,*,4,high
+vldb,2012,Divyakant Agrawal,*,4,high
+wsc,2011,Loo Hay Lee,*,3,high
+wsc,2012,Loo Hay Lee,*,3,high
+interspeech,2006,Seiichi Nakagawa,*,1,low
+bmvc,2002,Shaogang Gong,*,1,low
+bmvc,2006,Shaogang Gong,*,6,high
+iri,2009,Shu-Ching Chen,*,6,high
+micro,2010,Mateo Valero,*,3,high
+micro,2012,Mateo Valero,*,3,high
+dac,2000,Rob A. Rutenbar,*,4,high
