@@ -1,5 +1,5 @@
 ########################################
-# Derived from ubuntu distribution
+# Derived from python image
 ########################################
 FROM python:3.7
 MAINTAINER Qitian Zeng <qzeng3@hawk.iit.edu>

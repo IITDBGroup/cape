@@ -14,7 +14,7 @@ The **Cape** system is written in `Python` and uses [PostgreSQL](https://www.pos
 ## B)  Datasets info
 
 We used two real world datasets in the experiments:
-- Publication dataset extracted from DBLP
+- Publication dataset extracted from DBLP: [https://dblp.uni-trier.de/](https://dblp.uni-trier.de/)
 - Crime dataset from the Chicago open data portal: [https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2)
 
 In the experiments we utilized several subsets of these datasets. We provide a docker image with Postgres containing all of these datasets. Please install docker TODO on your machine and run the command below to fetch the image.
