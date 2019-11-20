@@ -230,6 +230,8 @@ EXPLAIN_OPTIONS = COMMON_OPTIONS + DB_OPTIONS + [
               hasarg=True, cfgFieldName='outfile'),
     ConfigOpt(longopt='exp_id', shortopt=None, desc='experiment id for performance experiment',
               hasarg=True, cfgFieldName='exp_id'),
+    ConfigOpt(longopt='expl_topk', shortopt=None, desc='experiment id for performance experiment',
+              hasarg=True, cfgFieldName='expl_topk'),
     ConfigOpt(longopt='rtfile', shortopt=None, desc='file to write explanation generation running time to',
               hasarg=True, cfgFieldName='runtime_outfile'),
     ConfigOpt(longopt='pruning', shortopt=None, desc='whether to apply pruning',

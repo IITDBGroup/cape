@@ -636,6 +636,8 @@ class ExplanationGenerator:
                 self.config.outfile = user_input_config['outfile']
             if 'exp_id' in user_input_config:
                 self.config.exp_id = user_input_config['exp_id']
+            if 'expl_topk' in user_input_config:
+                self.config.expl_topk = user_input_config['expl_topk']
             if 'runtime_outfile' in user_input_config:
                 self.config.runtime_outfile = user_input_config['runtime_outfile']
             if 'pruning' in user_input_config:
