@@ -228,6 +228,12 @@ EXPLAIN_OPTIONS = COMMON_OPTIONS + DB_OPTIONS + [
               hasarg=True, cfgFieldName='similarity_matrix_file'),
     ConfigOpt(longopt='ofile', shortopt='o', desc='file to write output to',
               hasarg=True, cfgFieldName='outfile'),
+    ConfigOpt(longopt='exp_id', shortopt=None, desc='experiment id for performance experiment',
+              hasarg=True, cfgFieldName='exp_id'),
+    ConfigOpt(longopt='rtfile', shortopt=None, desc='file to write explanation generation running time to',
+              hasarg=True, cfgFieldName='runtime_outfile'),
+    ConfigOpt(longopt='pruning', shortopt=None, desc='whether to apply pruning',
+              hasarg=False, cfgFieldName='pruning'),
     ConfigOpt(longopt='aggcolumn', shortopt='a', desc='column that was input to the aggregation function',
               hasarg=True, cfgFieldName='aggregate_column'),
 ]
