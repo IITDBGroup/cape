@@ -73,7 +73,7 @@ class ExplConfig(DictLike):
         self.aggregate_column = aggregate_column
         self.pattern_theta = pattern_theta
         self.pattern_lambda = pattern_lambda
-        self.expl_topk = expl_topk
+        self.expl_topk = int(expl_topk)
         self.exp_id = exp_id
         self.runtime_outfile = runtime_outfile
         self.pruning = pruning
@@ -522,7 +522,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                         marked[expl_temp_str] = True
                         topK_heap.Push(expl_temp)
                         top_k_lists[i][-1].append(expl_temp)
-                        print(t_t, t, compare_tuple(t_t, t))
+                        # print(t_t, t, compare_tuple(t_t, t))
                     if s[-1] < dist_lb:
                         dist_lb = s[-1]
                         # use raw distance (without penalty on missing attributes) as the lower bound
@@ -585,7 +585,6 @@ def load_user_question_from_file(global_patterns, global_patterns_dict, uq_path,
             raw_row_data = {}
             agg_col = None
             for k, v in enumerate(headers):
-                print(k, v)
                 if schema is None or v not in schema:
                     if v != 'direction':
                         if is_float(row[v]):
@@ -775,7 +774,7 @@ class ExplanationGenerator:
         logger.info("start explaining ...")
         global_patterns, schema, global_patterns_dict = load_patterns(cur, pattern_table, query_result_table)
         logger.debug("loaded patterns from database")
-        logger.debug(ExplConfig.MATERIALIZED_DICT)
+        # logger.debug(ExplConfig.MATERIALIZED_DICT)
 
         # # category_similarity = CategorySimilarityMatrix(ecf.EXAMPLE_SIMILARITY_MATRIX_PATH, schema)
         # category_similarity = CategorySimilarityNaive(cur=cur, table_name=query_result_table)
@@ -789,7 +788,7 @@ class ExplanationGenerator:
                 ('community_area', 'community_area_loc')])
 
         num_dis_norm = normalize_numerical_distance(cur=cur, table_name=query_result_table)
-        logger.debug(ExplConfig.MATERIALIZED_DICT)
+        # logger.debug(ExplConfig.MATERIALIZED_DICT)
 
         # pf = PatternFinder(engine.connect(), query_result_table, fit=True, theta_c=0.5, theta_l=0.25,
         #                    lamb=DEFAULT_LAMBDA, dist_thre=0.9, supp_l=10, supp_g=1)
@@ -799,7 +798,7 @@ class ExplanationGenerator:
             schema, conn, cur, pattern_table, query_result_table, None, category_similarity)
 
         logger.debug("loaded user question from file")
-        logger.debug(ExplConfig.MATERIALIZED_DICT)
+        # logger.debug(ExplConfig.MATERIALIZED_DICT)
         end = time.clock()
         print('Loading time: ' + str(end - start) + 'seconds')
 
@@ -813,7 +812,7 @@ class ExplanationGenerator:
             Q, global_patterns, global_patterns_dict, category_similarity, num_dis_norm,
             aggregate_column, ecf
         )
-        logger.debug(ExplConfig.MATERIALIZED_DICT)
+        # logger.debug(ExplConfig.MATERIALIZED_DICT)
         end = time.clock()
         print('Total querying time: ' + str(end - start) + 'seconds')
         logger.debug("finding explanations ... DONE")
@@ -842,6 +841,7 @@ class ExplanationGenerator:
                 ofile.write(e.to_string())
                 ofile.write('------------------------\n')
 
+        logger.debug(ecf.runtime_outfile)
         if ecf.exp_id is not None and ecf.runtime_outfile != '':
             att_size_list = []
             sct_list = []
