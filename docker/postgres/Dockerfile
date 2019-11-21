@@ -6,4 +6,4 @@ MAINTAINER Qitian Zeng <qzeng3@hawk.iit.edu>
 ########################################
 # Copy in postgres cluster (shutdown postgres first!)
 ########################################
-ADD /home/perm/antiprov_cluster/ /var/lib/postgresql/data/
+ADD ./cluster /var/lib/postgresql/data/
