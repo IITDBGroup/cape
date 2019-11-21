@@ -1,7 +1,7 @@
 import sys
 import pprint
 import logging
-from os import path
+from os import fsync, path
 import pandas as pd
 from itertools import combinations
 from time import sleep, time
@@ -133,6 +133,8 @@ class MinerConfig(DictLike):
             fd = 't' if fd_on else 'f'
             f.write(',' + fd)
         f.write('\n')
+        f.flush()
+        fsync()
         f.close()
 
     def __str__(self):
@@ -939,8 +941,8 @@ class PatternFinder:
                                 return
                             lr = sm.ols(agg+'~'+'+'.join([attr if attr in self.num else 'C('+attr+')' for attr in v]),
                                         data=df, missing='drop').fit()
-                            # theta_l=lr.rsquared_adj
-                            theta_l = chisquare(df[agg], lr.predict())[1]
+                            theta_l=lr.rsquared_adj
+                            #theta_l = chisquare(df[agg], lr.predict())[1]
                             param = Json(dict(lr.params))
                             dev_pos = max(lr.resid)
                             dev_neg = min(lr.resid)
