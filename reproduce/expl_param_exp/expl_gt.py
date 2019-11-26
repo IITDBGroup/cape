@@ -671,14 +671,23 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                 F_set, T_set.difference(F_set.union(V_set)), V_set, t_coarser_copy, t_coarser_copy, t, t,
                 conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm, epsilon,
                 dir, uq['query_result'], the)
+            
             for tk in top_k_lists[i][-1]:
-                mark_key = str(list(map(lambda y: y[1], sorted(tk[2].items(), key=lambda x: x[0]))))
-                if mark_key not in marked:
-                    marked[mark_key] = True
-                    topK_heap.Push([tk[0], tk[1], 
-                        # list(map(lambda y: str(y[1]), sorted(tk[2].items(), key=lambda x: x[0]))), 
-                        tk[2].items(),
-                        tk[3], tk[4], tk[5]])
+                # if str(tk.tuple_value) not in marked:
+                #    marked[str(tk.tuple_value)] = True
+                tk_str = tk.ordered_tuple_string()
+                if tk_str not in marked:
+                    marked[tk_str] = True
+                    topK_heap.Push(tk)
+
+            # for tk in top_k_lists[i][-1]:
+            #     mark_key = str(list(map(lambda y: y[1], sorted(tk[2].items(), key=lambda x: x[0]))))
+            #     if mark_key not in marked:
+            #         marked[mark_key] = True
+            #         topK_heap.Push([tk[0], tk[1], 
+            #             # list(map(lambda y: str(y[1]), sorted(tk[2].items(), key=lambda x: x[0]))), 
+            #             tk[2].items(),
+            #             tk[3], tk[4], tk[5]])
             
 
             end = time.time()

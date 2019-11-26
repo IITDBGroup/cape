@@ -3,6 +3,8 @@ import traceback
 from itertools import combinations, permutations
 from math import factorial
 from tqdm import tqdm
+from heapq import *
+
 
 MATERIALIZED_DICT = dict()
 MATERIALIZED_CNT = 0
