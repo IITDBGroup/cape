@@ -57,7 +57,6 @@ def find_patterns_refinement(global_patterns_dict, F_prime_set, V_set, agg_col, 
                     pat_key = f_key + '|,|' + v_key + '|,|' + pat[2] + '|,|' + pat[3]
 
                     gp_list.append(pat)
-                    global utils.VISITED_DICT
                     if pat_key not in utils.VISITED_DICT:
                         utils.VISITED_DICT[pat_key] = True
     return gp_list

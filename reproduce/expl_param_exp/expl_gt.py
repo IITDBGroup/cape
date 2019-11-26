@@ -616,7 +616,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                     expl_temp = Explanation(0, s[0], s[1], s[2], s[3], uq['dir'],
                                                    # list(map(lambda y: y[1], sorted(t_t.items(), key=lambda x: x[0]))),
                                                    dict(t_t),
-                                                   TopK, local_patterns[i], None)
+                                                   TOP_K, local_patterns[i], None)
 
                     expl_temp_str = expl_temp.ordered_tuple_string()
                     if expl_temp_str not in marked:
