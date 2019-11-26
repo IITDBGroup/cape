@@ -21,15 +21,13 @@ import datetime
 import random
 # import matplotlib.pyplot as plt
 
-sys.path.append('./')
-# sys.path.append('../')
-from capexplain.similarity.category_similarity_matrix import *
-from capexplain.similarity.category_network_embedding import *
-from capexplain.similarity.category_similarity_naive import *
-from capexplain.explanation_model.explanation_model import *
-from capexplain.utils import *
-from capexplain.explain.pattern_retrieval import find_patterns_relevant, find_patterns_refinement, load_patterns
-from capexplain.explain.tuple_retrieval import get_tuples_by_F_V
+from similarity.category_similarity_matrix import *
+from similarity.category_network_embedding import *
+from similarity.category_similarity_naive import *
+from explanation_model.explanation_model import *
+from utils import *
+from explain.pattern_retrieval import find_patterns_relevant, find_patterns_refinement, load_patterns
+from explain.tuple_retrieval import get_tuples_by_F_V
 
 
 
@@ -60,12 +58,6 @@ DEFAULT_EPSILON = 0.25
 DEFAULT_LAMBDA = 0.5
 TOP_K = 30
 PARAMETER_DEV_WEIGHT = 1.0
-global MATERIALIZED_CNT
-MATERIALIZED_CNT = 0
-global MATERIALIZED_DICT
-MATERIALIZED_DICT = dict()
-global VISITED_DICT
-VISITED_DICT = dict()
 TEST_ID = '_7'
 
 
@@ -541,7 +533,6 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
         
         psi = []
         
-        # global VISITED_DICT
         VISITED_DICT = dict()
         score_computing_time_cur_uq = 0
         score_computing_start = time.time()
@@ -556,10 +547,8 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             # if F_key.find('community_area') == -1:
             #     continue
             # print(955, uq['global_patterns'][i])
-            # global VISITED_DICT
             if pat_key in VISITED_DICT:
                 continue
-            # global VISITED_DICT
             VISITED_DICT[pat_key] = True
 
             local_pattern_query_count = '''SELECT count(*) FROM {} 
