@@ -91,33 +91,6 @@ from capexplain.explain.pattern_retrieval import get_local_patterns, find_patter
     find_patterns_refinement, load_patterns
 from capexplain.explain.tuple_retrieval import get_tuples_by_F_V
 
-
-class TopkHeap(object):
-    def __init__(self, k):
-        self.topk = k
-        self.data = []
-
-    def Push(self, elem):
-        if len(self.data) < self.topk:
-            heappush(self.data, elem)
-        else:
-            topk_small = self.data[0]
-            if elem.score > topk_small.score:
-                heapreplace(self.data, elem)
-
-    def MinValue(self):
-        return min(list(map(lambda x: x.score, self.data)))
-
-    def MaxValue(self):
-        return max(list(map(lambda x: x.score, self.data)))
-
-    def TopK(self):
-        return [x for x in reversed([heappop(self.data) for x in range(len(self.data))])]
-
-    def HeapSize(self):
-        return len(self.data)
-
-
 def predict(local_pattern, t):
     if local_pattern[4] == 'const':
         predict_y = float(local_pattern[6][1:-1].split(',')[0])
