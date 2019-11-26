@@ -26,6 +26,7 @@ from similarity.category_network_embedding import *
 from similarity.category_similarity_naive import *
 from explanation_model.explanation_model import *
 from utils import *
+import utils
 from explain.pattern_retrieval import find_patterns_relevant, find_patterns_refinement, load_patterns
 from explain.tuple_retrieval import get_tuples_by_F_V
 
@@ -40,6 +41,8 @@ from explain.tuple_retrieval import get_tuples_by_F_V
 # DEFAULT_QUERY_RESULT_TABLE = 'crime_partial'
 # DEFAULT_PATTERN_TABLE = 'dev.crime_partial'
 # DEFAULT_PATTERN_TABLE = 'crime_2017_2'
+
+TEST_ID = '_7'
 DEFAULT_QUESTION_PATH = './exp_parameter/user_question_expl_gt_7.txt'
 
 DEFAULT_QUERY_RESULT_TABLE = 'synthetic.crime_exp' + TEST_ID
@@ -58,7 +61,6 @@ DEFAULT_EPSILON = 0.25
 DEFAULT_LAMBDA = 0.5
 TOP_K = 30
 PARAMETER_DEV_WEIGHT = 1.0
-TEST_ID = '_7'
 
 
 def predict(local_pattern, t):
@@ -533,7 +535,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
         
         psi = []
         
-        VISITED_DICT = dict()
+        utils.VISITED_DICT = dict()
         score_computing_time_cur_uq = 0
         score_computing_start = time.time()
         explanation_type = 0
@@ -547,9 +549,9 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             # if F_key.find('community_area') == -1:
             #     continue
             # print(955, uq['global_patterns'][i])
-            if pat_key in VISITED_DICT:
+            if pat_key in utils.VISITED_DICT:
                 continue
-            VISITED_DICT[pat_key] = True
+            utils.VISITED_DICT[pat_key] = True
 
             local_pattern_query_count = '''SELECT count(*) FROM {} 
                     WHERE array_to_string(fixed, ', ')='{}' AND 
@@ -1125,9 +1127,9 @@ def main(argv=[]):
             # break
     
     
-    for g_key in MATERIALIZED_DICT:
-        for fv_key in MATERIALIZED_DICT[g_key]:
-            dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(MATERIALIZED_DICT[g_key][fv_key]))
+    for g_key in utils.MATERIALIZED_DICT:
+        for fv_key in utils.MATERIALIZED_DICT[g_key]:
+            dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(utils.MATERIALIZED_DICT[g_key][fv_key]))
             cur.execute(dv_query)
             conn.commit()
 

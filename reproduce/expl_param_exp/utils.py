@@ -4,9 +4,9 @@ from itertools import combinations, permutations
 from math import factorial
 from tqdm import tqdm
 
- MATERIALIZED_DICT = dict()
- MATERIALIZED_CNT = 0
- VISITED_DICT = dict()
+MATERIALIZED_DICT = dict()
+MATERIALIZED_CNT = 0
+VISITED_DICT = dict()
  
 class TopkHeap(object):
     def __init__(self, k):
