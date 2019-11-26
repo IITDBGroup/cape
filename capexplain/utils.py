@@ -3,7 +3,7 @@ import traceback
 from itertools import combinations, permutations
 from math import factorial
 from tqdm import tqdm
-from utils import *
+from heapq import *
 
 class TopkHeap(object):
     def __init__(self, k):
