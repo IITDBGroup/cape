@@ -216,7 +216,7 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
                     else:
                         temp = abs(float(t1[col]) - float(t2[col]))
 
-                    dis += 0.5 * math.pow(temp, 8)
+                    dis += 0.5 * math.pow(temp, 4)
                     if temp > max_dis:
                         max_dis = temp
                 cnt += 1

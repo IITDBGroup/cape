@@ -6,7 +6,7 @@ def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim
     def tuple_column_to_str_in_where_clause_2(col_value):
         # logger.debug(col_value)
         # logger.debug(cat_sim.is_categorical(col_value[0]))
-        if cat_sim.is_categorical(col_value[0]):
+        if cat_sim.is_categorical(col_value[0]) or col_value[0] == 'year'::
             # return "like '%" + (
             #     str(col_value[1]).replace('.0', '') if col_value[1][-2:] == '.0' else str(col_value[1])) + "%'"
             return "= '" + str(col_value[1]) + "'"
@@ -20,7 +20,7 @@ def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim
     def tuple_column_to_str_in_where_clause_3(col_value):
         # logger.debug(col_value)
         # logger.debug(cat_sim.is_categorical(col_value[0]))
-        if cat_sim.is_categorical(col_value[0]):
+        if cat_sim.is_categorical(col_value[0]) or col_value[0] == 'year'::
             # return "like '%" + (
             #     str(col_value[1]).replace('.0', '') if col_value[1][-2:] == '.0' else str(col_value[1])) + "%'"
             return "= '" + str(col_value[1]) + "'"
@@ -33,7 +33,7 @@ def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim
     def tuple_column_to_str_in_where_clause_4(col_value):
         # logger.debug(col_value)
         # logger.debug(cat_sim.is_categorical(col_value[0]))
-        if cat_sim.is_categorical(col_value[0]):
+        if cat_sim.is_categorical(col_value[0]) or col_value[0] == 'year'::
             # return "like '%" + (
             #     str(col_value[1]).replace('.0', '') if col_value[1][-2:] == '.0' else str(col_value[1])) + "%'"
             return "= '" + str(col_value[1]) + "'"
@@ -127,7 +127,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
     def tuple_column_to_str_in_where_clause_2(col_value):
         # logger.debug(col_value)
         # logger.debug(cat_sim.is_categorical(col_value[0]))
-        if cat_sim.is_categorical(col_value[0]):
+        if cat_sim.is_categorical(col_value[0]) or col_value[0] == 'year':
             # return "like '%" + (
             #     str(col_value[1]).replace('.0', '') if col_value[1][-2:] == '.0' else str(col_value[1])) + "%'"
             return "= '" + str(col_value[1]) + "'"

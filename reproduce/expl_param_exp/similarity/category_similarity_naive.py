@@ -41,7 +41,7 @@ class CategorySimilarityNaive(object):
         self.cate_cols = {}
         self.vector_dict = {}
         for (col, dt) in res:
-            if (dt == 'boolean' or dt.find('character') != -1) and (col != 'year' or len(embedding_table_list) == 0):
+            if (dt == 'boolean' or dt.find('character') != -1) and col != 'year':
                 self.cate_cols[col] = True
 
         if table_name.startswith('synthetic'):
