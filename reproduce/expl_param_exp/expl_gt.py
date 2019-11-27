@@ -53,6 +53,7 @@ DEFAULT_PATTERN_TABLE = 'dev.crime_exp'+ TEST_ID
 # # DEFAULT_PATTERN_TABLE = 'crime_2017_2'
 # DEFAULT_QUESTION_PATH = '../input/user_question_crime_partial_1.csv'
 DEFAULT_LOCAL_SUPPORT = 5
+DEFAULT_EPSILON = 0.1
 EXAMPLE_NETWORK_EMBEDDING_PATH = '../input/NETWORK_EMBEDDING'
 EXAMPLE_SIMILARITY_MATRIX_PATH = '../input/SIMILARITY_DEFINITION'
 DEFAULT_AGGREGATE_COLUMN = '*'
@@ -216,7 +217,7 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
                     else:
                         temp = abs(float(t1[col]) - float(t2[col]))
 
-                    dis += 0.5 * math.pow(temp, 8)
+                    dis += 0.5 * math.pow(temp, temp+5)
                     if temp > max_dis:
                         max_dis = temp
                 cnt += 1
