@@ -21,11 +21,11 @@ test_id_used = [1,2,3,4,5,7]
 
 for test_id in test_id_used:
 # sct_df = pandas.DataFrame({'#attr': att_size_list, 'time':sct_list})
-	sct_df_prune_3 = pd.read_csv('../expl_perf_expcd/time_record/dblp_pruning_top3_exp_{}.csv'.format(str(test_id)),		
+	sct_df_prune_3 = pd.read_csv('../expl_perf_exp/time_record/dblp_pruning_top3_exp_{}.csv'.format(str(test_id)),		
 		names=['#attr', 'time'])
-	sct_df_prune_10 = pd.read_csv('../expl_perf_expcd/time_record/dblp_pruning_top10_exp_{}.csv'.format(str(test_id)),		
+	sct_df_prune_10 = pd.read_csv('../expl_perf_exp/time_record/dblp_pruning_top10_exp_{}.csv'.format(str(test_id)),		
 		names=['#attr', 'time'])
-	sct_df_no_prune = pd.read_csv('../expl_perf_expcd/time_record/dblp_no_pruning_top3_exp_{}.csv'.format(str(test_id)),		
+	sct_df_no_prune = pd.read_csv('../expl_perf_exp/time_record/dblp_no_pruning_top3_exp_{}.csv'.format(str(test_id)),		
 		names=['#attr', 'time'])
 
 	
