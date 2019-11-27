@@ -1121,7 +1121,7 @@ def main(argv=[]):
                 # quality_dict[exp_key] = compute_expl_quality(standard_expl_dict, explanations_list)
                 quality_dict[exp_key] = compute_expl_quality_gt(cur, explanations_list)
                 expl_time_dict[exp_key] = sum(map(lambda x: x[1], score_computing_time_list))
-                # print(quality_dict[exp_key], expl_time_dict[exp_key])
+                print(quality_dict[exp_key], expl_time_dict[exp_key])
                 ofile.write('Running time: {}\n'.format(
                     # str(quality_dict[exp_key]),
                     exp_key,
@@ -1138,7 +1138,7 @@ def main(argv=[]):
             cur.execute(dv_query)
             conn.commit()
 
-    gt_ofile = open('./exp_parameter/gt_params_{}_7_delta_{}.txt'.format(str(TOP_K), str(DEFAULT_LOCAL_SUPPORT)), 'w')
+    gt_ofile = open('./gt_params_{}_7_delta_{}.txt'.format(str(TOP_K), str(DEFAULT_LOCAL_SUPPORT)), 'w')
     for ek in quality_dict:
         gt_ofile.write(ek + '\n')
         gt_ofile.write(str(quality_dict[ek]) + '\n')

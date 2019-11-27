@@ -1,5 +1,9 @@
 import matplotlib
 matplotlib.use('PDF')
+matplotlib.rcParams['ps.useafm'] = True
+matplotlib.rcParams['pdf.use14corefonts'] = True
+matplotlib.rcParams['text.usetex'] = True
+
 import matplotlib.pyplot as plt
 import time
 import re
