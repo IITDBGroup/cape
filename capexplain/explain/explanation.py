@@ -216,7 +216,7 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
                     else:
                         temp = abs(float(t1[col]) - float(t2[col]))
 
-                    dis += 0.5 * math.pow(temp, 4)
+                    dis += 0.5 * math.pow(temp, 8)
                     if temp > max_dis:
                         max_dis = temp
                 cnt += 1
@@ -320,6 +320,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
         else:
             dev_ub = abs(gp2[6])
         k_score = tkheap.MinValue()
+        print(888, dev_ub, k_score, 100 * float(dev_ub) / (dist_lb * float(norm_lb)))
         if ecf.pruning and tkheap.HeapSize() == ecf.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
             # prune
             continue
@@ -518,6 +519,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             norm_lb = min(list(map(lambda x: x[agg_col], t_coarser_copy)))
 
             k_score = topK_heap.MinValue()
+            print(k_score, 100 * float(dev_ub) / (dist_lb * float(norm_lb)))
             # prune
             if ecf.pruning and topK_heap.HeapSize() == ecf.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
                 continue
