@@ -55,12 +55,8 @@ DEFAULT_PATTERN_TABLE = 'dev.crime_exp'+ TEST_ID
 DEFAULT_LOCAL_SUPPORT = 5
 EXAMPLE_NETWORK_EMBEDDING_PATH = '../input/NETWORK_EMBEDDING'
 EXAMPLE_SIMILARITY_MATRIX_PATH = '../input/SIMILARITY_DEFINITION'
-DEFAULT_USER_QUESTION_NUMBER = 5
 DEFAULT_AGGREGATE_COLUMN = '*'
-DEFAULT_EPSILON = 0.25
-DEFAULT_LAMBDA = 0.5
-TOP_K = 30
-PARAMETER_DEV_WEIGHT = 1.0
+TOP_K = 10
 
 
 def predict(local_pattern, t):
@@ -671,7 +667,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                 F_set, T_set.difference(F_set.union(V_set)), V_set, t_coarser_copy, t_coarser_copy, t, t,
                 conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm, epsilon,
                 dir, uq['query_result'], the)
-            
+
             for tk in top_k_lists[i][-1]:
                 # if str(tk.tuple_value) not in marked:
                 #    marked[str(tk.tuple_value)] = True

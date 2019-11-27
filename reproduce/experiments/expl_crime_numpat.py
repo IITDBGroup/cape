@@ -14,16 +14,11 @@ prune_time_list = []
 no_prune_time_list = []
 source_list = []
 test_id_list = []
-size_legend = ['250k', '100k', ' 40k', ' 20k', ' 10k', '  4k']
-for test_id in range(1, 6):
-# sct_df = pandas.DataFrame({'#attr': att_size_list, 'time':sct_list})
-	# sct_df_prune = pd.read_csv('../time_record/pub_time_prune_{}.csv'.format(str(test_id)),
-	sct_df_prune = pd.read_csv('./jmiao-antiprov/explanation/time_record/crime_time_prune_ordered_top3_{}.csv'.format(str(test_id)),		
+size_legend = ['800k', '400k', '200k', '100k', ' 50k', ' 25k']
+for test_id in range(0, 6):
+	sct_df_prune = pd.read_csv('../expl_perf_exp/time_record/crime_pruning_top3_exp{}.csv'.format(str(test_id)),		
 		names=['#attr', 'time'])
-	# sct_df_no_prune = pd.read_csv('../time_record/pub_time_no_prune_{}.csv'.format(str(test_id)),
-	# sct_df_no_prune = pd.read_csv('../time_record/crime_time_no_prune_sort_ordered_top3_{}.csv'.format(str(test_id)),
-	# 	names=['#attr', 'time'])
-	sct_df_no_prune = pd.read_csv('./jmiao-antiprov/explanation/time_record/crime_time_no_prune_ordered_top3_{}.csv'.format(str(test_id)),		
+	sct_df_no_prune = pd.read_csv('../expl_perf_exp/time_record/crime_no_pruning_top3_exp{}.csv'.format(str(test_id)),		
 		names=['#attr', 'time'])
 
 	
@@ -36,9 +31,6 @@ for test_id in range(1, 6):
 			test_id_list.append(size_legend[test_id-1])
 	for idx, row in sct_df_no_prune.iterrows():
 		if row['time'] > 0:
-	# 	# attr_list.append(row['#attr'])
-	# 	# time_list.append(row['time'])
-	# 	# source_list.append('No Pruning')
 			no_prune_time_list.append(row['time'])
 
 
