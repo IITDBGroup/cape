@@ -255,6 +255,7 @@ def get_local_patterns(F, Fv, V, agg_col, model_type, t, conn, cur, pat_table_na
         mt_predicate = " AND model='{}'".format(model_type)
     else:
         mt_predicate = ''
+    global TEST_ID
     if Fv is not None:
         local_pattern_query = '''SELECT * FROM {} WHERE array_to_string(fixed, ', ')='{}' AND 
             REPLACE(array_to_string(fixed_value, ', '), '"', '') LIKE '%{}%' AND 
@@ -707,7 +708,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
     result_merging_time = 0
     local_patterns_list = []
     # print(492, global_patterns)
-
+    global TEST_ID
     for j, uq in enumerate(user_question_list):
         dir = uq['dir']
         topK_heap = TopkHeap(TOP_K)
@@ -976,6 +977,7 @@ def find_patterns_relevant_old(global_patterns_dict, t, cur, table_name):
     l_pat_list = []
     res_list = []
     t_set = set(t.keys())
+    global TEST_ID
     # print(global_patterns_dict.keys())
     for v_key in global_patterns_dict[0]:
         # print(pat, pat[0])
