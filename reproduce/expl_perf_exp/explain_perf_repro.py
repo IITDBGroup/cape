@@ -22,9 +22,9 @@ import datetime
 
 sys.path.append('./')
 # sys.path.append('../')
-from similarity_calculation.category_similarity_matrix import *
-from similarity_calculation.category_network_embedding import *
-from similarity_calculation.category_similarity_naive import *
+from similarity.category_similarity_matrix import *
+from similarity.category_network_embedding import *
+from similarity.category_similarity_naive import *
 from utils import *
 
 TEST_ID = '_1'
@@ -591,7 +591,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
             dev_ub = abs(gp2[6])
         # dev_ub = agg_maxmin[0][0] - agg_maxmin[0][1]
         k_score = tkheap.MinValue()
-        print(888, dev_ub, k_score, 100 * float(dev_ub) / (dist_lb * float(norm_lb)))
+        # print(888, dev_ub, k_score, 100 * float(dev_ub) / (dist_lb * float(norm_lb)))
         # if tkheap.HeapSize() == TOP_K and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
         #     print(890, dev_ub, dist_lb, norm_lb, gp2[0], gp2[1])
         #     continue
@@ -715,7 +715,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
         marked = {}
 
         t = uq['target_tuple']
-        print(505, t)
+        # print(505, t)
         uq['global_patterns'] = find_patterns_relevant(
                 global_patterns_dict, uq['target_tuple'], conn, cur, res_table_name, pat_table_name, cat_sim)
         score_computing_time_start = time.time()
@@ -861,7 +861,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             # k_score = min(map(lambda x:x[0], cur_top_k_res))
             k_score = topK_heap.MinValue()
             # k_score = topK_heap.MaxValue()
-            print(993, k_score, 100 * float(dev_ub) / (dist_lb * float(norm_lb)))
+            # print(993, k_score, 100 * float(dev_ub) / (dist_lb * float(norm_lb)))
             # if topK_heap.HeapSize() == TOP_K and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
             #     print(998, dev_ub, dist_lb, norm_lb, local_patterns[i][0], local_patterns[i][1])
             #     continue
@@ -1013,7 +1013,7 @@ def find_patterns_relevant_old(global_patterns_dict, t, cur, table_name):
                     pat[2], pat[3] 
                 )
                 cur.execute(local_pattern_query_fixed)
-                print(1195, local_pattern_query_fixed)
+                # print(1195, local_pattern_query_fixed)
                 res_fixed = cur.fetchall()
                 # print(res_fixed)
                 pat_list = res_fixed
@@ -1026,7 +1026,7 @@ def find_patterns_relevant_old(global_patterns_dict, t, cur, table_name):
     res_list = sorted(res_list, key = lambda x: (len(x[0][0]) + len(x[0][1]), x[2]))
     g_pat_list = list(map(lambda x: x[0], res_list))
     l_pat_list = list(map(lambda x: x[1], res_list))
-    print(1175, len(g_pat_list))
+    # print(1175, len(g_pat_list))
     return g_pat_list, l_pat_list
 
     # g_pat_list = []
