@@ -27,7 +27,7 @@ from similarity_calculation.category_network_embedding import *
 from similarity_calculation.category_similarity_naive import *
 from utils import *
 
-TEST_ID = '_6'
+TEST_ID = '_1'
 
 class TopkHeap(object):
     def __init__(self, k):
@@ -1353,7 +1353,7 @@ def main(argv=[]):
 
     load_start = time.time()
     global_patterns, schema, global_patterns_dict = load_patterns(cur, pattern_table, query_result_table)
-    Q, global_patterns, global_patterns_dict = load_user_question(global_patterns, global_patterns_dict, user_question_file, schema, cur, pattern_table, query_result_table, pf)
+    Q, global_patterns, global_patterns_dict = load_user_question(global_patterns, global_patterns_dict, user_question_file, schema, cur, pattern_table, query_result_table)
         
 
     # category_similarity = CategorySimilarityMatrix(EXAMPLE_SIMILARITY_MATRIX_PATH, schema)
@@ -1465,7 +1465,7 @@ def main(argv=[]):
 
     att_size_list = []
     sct_list = []
-    time_o_file = open('../time_record_old/crime_perf/crime_expl_time_no_prune_sort_{}{}_new.csv'.format(str(TOP_K), TEST_ID), 'w')
+    time_o_file = open('./time_record_old/crime_perf/crime_expl_time_no_prune_sort_{}{}_new.csv'.format(str(TOP_K), TEST_ID), 'w')
     for sct in score_computing_time_list:
         att_size_list.append(len(list(sct[0].keys())) - 2)
         sct_list.append(sct[1])
