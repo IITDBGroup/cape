@@ -29,7 +29,7 @@ from utils import *
 
 TEST_ID = '_1'
 
-class ExplConfig(DictLike):
+class ExplConfig():
     # DEFAULT_RESULT_TABLE = 'pub_large_no_domain'
     DEFAULT_RESULT_TABLE = 'crime_clean_100000_2'
     # DEFAULT_PATTERN_TABLE = 'dev.pub'
