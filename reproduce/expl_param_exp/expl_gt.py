@@ -420,7 +420,7 @@ def score_of_explanation(t1, t2, cat_sim, num_dis_norm, dir, denominator=1, lp1=
         # print(746, t2, t2fv)
         # print(lp1[0], lp1[2])
         # print(lp2[0], lp2[2])
-        t_dis = tuple_distance(t1fv, t2fv, None, cat_sim, num_dis_norm, agg_col)
+        t_dis_raw = tuple_distance(t1fv, t2fv, None, cat_sim, num_dis_norm, agg_col)
         cnt1 = 0
         cnt2 = 0
         for a1 in t1:
@@ -453,7 +453,7 @@ def score_of_explanation(t1, t2, cat_sim, num_dis_norm, dir, denominator=1, lp1=
                 if col != 'lambda' and col not in t1:
                     diff += 1
         w = 1
-        t_dis = math.sqrt(t_dis * t_dis + w * diff * diff)
+        t_dis = math.sqrt(t_dis_raw * t_dis_raw + w * diff * diff)
             # print(488, t1, t2)
         # print local_cons[i].var_attr, row
         t1v = dict(zip(lp1[2], map(lambda x:x, get_V_value(lp1[2], t1))))        
