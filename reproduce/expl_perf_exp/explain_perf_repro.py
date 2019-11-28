@@ -1351,7 +1351,8 @@ def main(argv=[]):
             aggregate_column = arg
         elif opt in ("-t", "--test_id"):
             global TEST_ID
-            TEST_ID = '_' + str(arg)
+            TEST_ID = '_' + arg
+    print('TEST ID: '+ TEST_ID)
 
     load_start = time.time()
     global_patterns, schema, global_patterns_dict = load_patterns(cur, pattern_table, query_result_table)
