@@ -117,9 +117,9 @@ class TopkHeap(object):
         return len(self.data)
 
 
-from capexplain.explain.pattern_retrieval import get_local_patterns, find_patterns_relevant, \
+from pattern_retrieval import get_local_patterns, find_patterns_relevant, \
     find_patterns_refinement, load_patterns
-# from capexplain.explain.tuple_retrieval import get_tuples_by_F_V
+# from tuple_retrieval import get_tuples_by_F_V
 
 DEFAULT_QUERY_RESULT_TABLE = 'crime_subset'
 DEFAULT_PATTERN_TABLE = 'dev.crime_subset'
