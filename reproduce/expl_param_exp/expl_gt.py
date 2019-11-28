@@ -203,7 +203,7 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
 
             cnt += 1
         else:
-            if col != 'year' and col not in num_dis_norm or num_dis_norm[col]['range'] is None:
+            if col != 'year' and (col not in num_dis_norm or num_dis_norm[col]['range'] is None):
                 if t1[col] == t2[col]:
                     dis += 0
                 else:
