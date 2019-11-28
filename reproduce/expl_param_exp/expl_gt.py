@@ -134,6 +134,96 @@ def predict(local_pattern, t):
 
     return predictY
 
+# def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
+#     """Compute the similarity between two tuples t1 and t2 on their attributes var_attr
+
+#     Args:
+#         t1, t2: two tuples
+#         var_attr: variable attributes
+#         cat_sim: the similarity measure for categorical attributes
+#         num_dis_norm: normalization terms for numerical attributes
+#         agg_col: the column of aggregated value
+#     Returns:
+#         the Gower similarity between t1 and t2
+#     """
+#     dis = 0.0
+#     cnt = 0
+#     if var_attr is None:
+#         var_attr = t1.keys()
+#     max_dis = 0.0
+
+#     for v_col in var_attr:
+#         col = v_col.replace(' ', '')
+
+#         if col not in t1 and col not in t2:
+#             # if col == 'name':
+#             #     dis += 10000
+#             # else:
+#             #     dis += 100
+#             # cnt += 1
+#             continue
+#         if col not in t1 or col not in t2:
+#             # if col == 'name':
+#             #     dis += 10000
+#             # else:
+#             #     dis += 100
+#             # cnt += 1
+#             continue
+
+#         if col == 'name':
+#             if t1[col] != t2[col]:
+#                 dis += 10000
+#             cnt += 1
+#             continue
+
+#         if col == 'venue' or col == 'pubkey':
+#             if t1[col] != t2[col]:
+#                 dis += 0.25
+#             cnt += 1
+#             continue
+
+#         if cat_sim.is_categorical(col):
+
+#             t1_key = str(t1[col]).replace("'", '').replace(' ', '')
+#             t2_key = str(t2[col]).replace("'", '').replace(' ', '')
+#             s = 0
+#             if t1[col] == t2[col]:
+#                 s = 1
+#             else:
+#                 s = cat_sim.compute_similarity(col, t1_key, t2_key, agg_col)
+
+#             if s == 0:
+#                 dis += 1
+#                 max_dis = 1
+#             else:
+#                 dis += (((1.0 / s)) * ((1.0 / s))) / 100
+#                 # dis += (1-s) * (1-s)
+#                 if math.sqrt((((1.0 / s)) * ((1.0 / s)) - 1) / 100) > max_dis:
+#                     max_dis = math.sqrt((((1.0 / s)) * ((1.0 / s)) - 1) / 100)
+
+#             cnt += 1
+#         else:
+#             if col != 'year' and (col not in num_dis_norm or num_dis_norm[col]['range'] is None):
+#                 if t1[col] == t2[col]:
+#                     dis += 0
+#                 else:
+#                     dis += 1
+#             else:
+#                 if col != agg_col and col != 'index':
+#                     if isinstance(t1[col], datetime.date):
+#                         diff = datetime.datetime(t1[col].year, t1[col].month, t1[col].day) - datetime.datetime.strptime(
+#                             t2[col], "%Y-%m-%d")
+#                         temp = diff.days
+#                     else:
+#                         temp = abs(float(t1[col]) - float(t2[col]))
+
+#                     dis += 0.5 * math.pow(temp, temp+5)
+#                     if temp > max_dis:
+#                         max_dis = temp
+#                 cnt += 1
+
+#     return math.pow(dis, 0.5)
+
 def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
     """Compute the similarity between two tuples t1 and t2 on their attributes var_attr
 
@@ -154,36 +244,20 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
 
     for v_col in var_attr:
         col = v_col.replace(' ', '')
-
+        
         if col not in t1 and col not in t2:
-            # if col == 'name':
-            #     dis += 10000
-            # else:
-            #     dis += 100
-            # cnt += 1
+            if col == 'name':
+                dis += 10000
+                cnt += 1
             continue
         if col not in t1 or col not in t2:
-            # if col == 'name':
-            #     dis += 10000
-            # else:
-            #     dis += 100
-            # cnt += 1
-            continue
-
-        if col == 'name':
-            if t1[col] != t2[col]:
+            if col == 'name':
                 dis += 10000
-            cnt += 1
+                cnt += 1
             continue
-
-        if col == 'venue' or col == 'pubkey':
-            if t1[col] != t2[col]:
-                dis += 0.25
-            cnt += 1
-            continue
-
-        if cat_sim.is_categorical(col):
-
+    
+        if cat_sim.is_categorical(col) and col != 'year':
+            
             t1_key = str(t1[col]).replace("'", '').replace(' ', '')
             t2_key = str(t2[col]).replace("'", '').replace(' ', '')
             s = 0
@@ -191,18 +265,28 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
                 s = 1
             else:
                 s = cat_sim.compute_similarity(col, t1_key, t2_key, agg_col)
-
+            # print(359, col, t1, t2, s)
+            # if col == 'community_area':
+            #     s = 
             if s == 0:
                 dis += 1
                 max_dis = 1
             else:
-                dis += (((1.0 / s)) * ((1.0 / s))) / 100
+                dis += (((1.0/s)) * ((1.0/s))) / 100
                 # dis += (1-s) * (1-s)
-                if math.sqrt((((1.0 / s)) * ((1.0 / s)) - 1) / 100) > max_dis:
-                    max_dis = math.sqrt((((1.0 / s)) * ((1.0 / s)) - 1) / 100)
-
+                if math.sqrt((((1.0/s)) * ((1.0/s)) - 1) / 100) > max_dis:
+                    max_dis = math.sqrt((((1.0/s)) * ((1.0/s)) - 1) / 100)
+            # if s == 0:
+            #     dis += 1
+            #     max_dis = 1
+            # else:
+            #     dis += (((1.0/s)) * ((1.0/s))) / 100
+            #     # dis += (1-s) * (1-s)
+            #     if math.sqrt((((1.0/s)) * ((1.0/s)) - 1) / 100) > max_dis:
+            #         max_dis = math.sqrt((((1.0/s)) * ((1.0/s)) - 1) / 100)
             cnt += 1
         else:
+            # print(387, col)
             if col != 'year' and (col not in num_dis_norm or num_dis_norm[col]['range'] is None):
                 if t1[col] == t2[col]:
                     dis += 0
@@ -210,19 +294,31 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
                     dis += 1
             else:
                 if col != agg_col and col != 'index':
+                    # temp = (t1[col] - t2[col]) * (t1[col] - t2[col]) / (num_dis_norm[col]['range'] * num_dis_norm[col]['range'])
+                    # temp = abs(t1[col] - t2[col]) / (num_dis_norm[col]['range'])
                     if isinstance(t1[col], datetime.date):
-                        diff = datetime.datetime(t1[col].year, t1[col].month, t1[col].day) - datetime.datetime.strptime(
-                            t2[col], "%Y-%m-%d")
+                        # print(398, t1, t2)
+                        # print(col, t1[col], t2[col])
+                        diff = datetime.datetime(t1[col].year, t1[col].month, t1[col].day) - datetime.datetime.strptime(t2[col], "%Y-%m-%d")
                         temp = diff.days
                     else:
+                        # print(398, t1, t2)
+                        # print(col, t1[col], t2[col])
                         temp = abs(float(t1[col]) - float(t2[col]))
-
+                    # if temp != 0:
+                    #     temp = 1/(1+(math.exp(-temp+2)))
+                    # print(408, temp)
                     dis += 0.5 * math.pow(temp, temp+5)
+                    # dis += 0.5 * math.pow(temp, temp+3)
                     if temp > max_dis:
                         max_dis = temp
                 cnt += 1
-
+                    # sim += x * x * x * x
+            # print(2, col, sim, t1[col], t2[col])
+        
+    # print(t1, t2, var_attr)
     return math.pow(dis, 0.5)
+
 
 def get_local_patterns(F, Fv, V, agg_col, model_type, t, conn, cur, pat_table_name, res_table_name, cat_sim, theta_lb=0.1):
     def validate_local_support(F_list, V_list, f_value, cur, table_name, cat_sim):
