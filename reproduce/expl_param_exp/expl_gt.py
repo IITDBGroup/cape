@@ -203,7 +203,7 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
 
             cnt += 1
         else:
-            if col not in num_dis_norm or num_dis_norm[col]['range'] is None:
+            if col != 'year' and col not in num_dis_norm or num_dis_norm[col]['range'] is None:
                 if t1[col] == t2[col]:
                     dis += 0
                 else:
@@ -304,16 +304,27 @@ def score_of_explanation(t1, t2, cat_sim, num_dis_norm, dir, denominator=1, lp1=
     if lp1 is None:
         return 1.0
     else:
-        # print(lp1, lp2, t1, t2)
+        #print(lp1, lp2, t1, t2)
         agg_col = lp1[3]
+
+        # t1fv = dict(zip(lp1[0] + lp1[2], map(lambda x:x, get_F_value(lp1[0] + lp1[2], t1))))
+        # t2fv = dict(zip(lp2[0] + lp2[2], map(lambda x:x, get_F_value(lp2[0] + lp2[2], t2))))
         t1fv = dict()
         t2fv = dict()
         for a in lp2[0] + lp2[2]:
             t1fv[a] = t1[a]
             if a in t2:
                 t2fv[a] = t2[a]
-
-        t_dis_raw = tuple_distance(t1fv, t2fv, None, cat_sim, num_dis_norm, agg_col)
+        # if lp1 == lp2:
+        #     t_sim = tuple_similarity(t1fv, t2fv, lp1[2], cat_sim, num_dis_norm, agg_col)
+        # else:
+        #     t_sim = tuple_similarity(t1fv, t2fv, None, cat_sim, num_dis_norm, agg_col)
+        # t_sim = tuple_similarity(t1fv, t2fv, None, cat_sim, num_dis_norm, agg_col)
+        # print(745, t1, t1fv)
+        # print(746, t2, t2fv)
+        # print(lp1[0], lp1[2])
+        # print(lp2[0], lp2[2])
+        t_dis = tuple_distance(t1fv, t2fv, None, cat_sim, num_dis_norm, agg_col)
         cnt1 = 0
         cnt2 = 0
         for a1 in t1:
@@ -322,39 +333,95 @@ def score_of_explanation(t1, t2, cat_sim, num_dis_norm, dir, denominator=1, lp1=
         for a2 in t2:
             if a2 != 'lambda' and a2 != agg_col:
                 cnt2 += 1
-
+        
         diff = 0
-
-        for col in t1:
-            if col not in t2:
-                diff += 1
-        for col in t2:
-            if col not in t1:
-                diff += 1
-        if diff > 0 and 'venue' not in t2 and 'name' not in t2:
-            diff += 1 
+        if len(t1.keys()) + 1 != len(t2.keys()):
+            # diff = len(t2.keys()) - len(t1.keys()) - 1
+            # if 'lambda' not in t2:
+            #     diff += 1
+            # w = 1
+            # if 'name' in t2 and 'name' not in t1:
+            #     w = 10000
+            for col in t1:
+                if col not in t2:
+                    diff += 1
+            for col in t2:
+                if col not in t1:
+                    diff += 1
+        else:
+            diff = 0
+            for col in t1:
+                if col != 'lambda' and col not in t2:
+                    diff += 1
+            for col in t2:
+                if col != 'lambda' and col not in t1:
+                    diff += 1
         w = 1
-        if 'name' in t2 and 'name' not in t1:
-            w = 10000
-        t_dis = math.sqrt(t_dis_raw * t_dis_raw + w * diff * diff)
-
-        t1v = dict(zip(lp1[2], map(lambda x: x, get_V_value(lp1[2], t1))))
+        t_dis = math.sqrt(t_dis * t_dis + w * diff * diff)
+            # print(488, t1, t2)
+        # print local_cons[i].var_attr, row
+        t1v = dict(zip(lp1[2], map(lambda x:x, get_V_value(lp1[2], t1))))        
         predicted_agg1 = predict(lp1, t1v)
-        # t2v = dict(zip(lp2[2], map(lambda x: x, get_V_value(lp2[2], t2))))
-
+        t2v = dict(zip(lp2[2], map(lambda x:x, get_V_value(lp2[2], t2))))        
+        predicted_agg2 = predict(lp2, t2v)
+        # deviation - counterbalance_needed 
         deviation = float(t1[agg_col]) - predicted_agg1
+        # counterbalance = float(t2[agg_col]) - predicted_agg2
+        # deviation_normalized = (t1[agg_col] - predicted_agg1) / predicted_agg1
+        # influence = -deviation / counterbalance
+        #score = (deviation + counterbalance) * t_sim
+        #score = deviation * (math.exp(t_sim) - 1)
+        
+
+        # if t_sim == 1:
+        #     score = deviation * -dir
+        # else:
+        #     score = deviation * math.exp(t_sim) * -dir
         if t_dis == 0:
             score = deviation * -dir
         else:
             score = deviation / t_dis * -dir
-
+        
+        # score = deviation * t_sim * -dir * 1 / (1 + math.exp(-(influence - 0.5)))
+        # score *= math.log(deviation_normalized + 3)
+        # score /= counterbalance
+        # print(414, t1fv, t2fv)
+        # print(t_dis, deviation, score)
+        # return score / float(denominator) * cnt1 / cnt2
         return [100 * score / float(denominator), t_dis, deviation, float(denominator), t_dis_raw]
+
+# def compare_tuple(t1, t2):
+#     flag1 = True
+#     for a in t1:
+#         # if (a != 'lambda' and a.find('_') == -1):
+#         if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
+#             if a not in t2:
+#                 flag1 = False
+#             elif t1[a] != t2[a]:
+#                 return 0
+#     flag2 = True
+#     for a in t2:
+#         # if (a != 'lambda' and a.find('_') == -1):
+#         if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
+#             if a not in t1:
+#                 flag2 = False
+#             elif t1[a] != t2[a]:
+#                 return 0
+
+#     if flag1 and flag2:
+#         return -1
+#     elif flag1:
+#         return -1
+#     else:
+#         return 0
 
 def compare_tuple(t1, t2):
     flag1 = True
+    # if 'year' in t1 and t1['year'] == '2014' and 'primary_type' in t1 and t1['primary_type'] == 'CRIMINAL DAMAGE':
+    #     print(788, t1, t2)
     for a in t1:
         # if (a != 'lambda' and a.find('_') == -1):
-        if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
+        if (a != 'lambda' and a != 'count'):
             if a not in t2:
                 flag1 = False
             elif t1[a] != t2[a]:
@@ -362,12 +429,12 @@ def compare_tuple(t1, t2):
     flag2 = True
     for a in t2:
         # if (a != 'lambda' and a.find('_') == -1):
-        if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
+        if (a != 'lambda' and a != 'count'):
             if a not in t1:
                 flag2 = False
             elif t1[a] != t2[a]:
                 return 0
-
+    # print(t1, t2, flag1, flag2)
     if flag1 and flag2:
         return -1
     elif flag1:
@@ -1129,8 +1196,8 @@ def main(argv=[]):
                     str(expl_time_dict[exp_key])
                 ))
                 ofile.write('-------------------------------------------\n')
-            #     break
-            # break
+                break
+            break
     
     
     for g_key in utils.MATERIALIZED_DICT:
