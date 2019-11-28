@@ -29,6 +29,68 @@ from utils import *
 
 TEST_ID = '_1'
 
+class ExplConfig(DictLike):
+    # DEFAULT_RESULT_TABLE = 'pub_large_no_domain'
+    DEFAULT_RESULT_TABLE = 'crime_clean_100000_2'
+    # DEFAULT_PATTERN_TABLE = 'dev.pub'
+    DEFAULT_PATTERN_TABLE = 'dev.crime_clean_100000'
+    # DEFAULT_RESULT_TABLE = 'crime_exp'
+    # DEFAULT_PATTERN_TABLE = 'dev.crime_exp'
+    DEFAULT_QUESTION_PATH = './input/user_question.csv'
+
+    DEFAULT_NETWORK_EMBEDDING_PATH = './input/NETWORK_EMBEDDING'
+    DEFAULT_SIMILARITY_MATRIX_PATH = './input/SIMILARITY_DEFINITION'
+    DEFAULT_AGGREGATE_COLUMN = '*'
+    DEFAULT_THETA = 0.1
+    DEFAULT_LAMBDA = 0.1
+    DEFAULT_TOP_K = 10
+
+    # global MATERIALIZED_CNT
+    MATERIALIZED_CNT = 0
+    # global MATERIALIZED_DICT
+    MATERIALIZED_DICT = dict()
+    # global VISITED_DICT
+    VISITED_DICT = dict()
+
+    REGRESSION_PACKAGES = ['scikit-learn', 'statsmodels']
+
+    def __init__(self,
+                 query_result_table=DEFAULT_RESULT_TABLE,
+                 pattern_table=DEFAULT_PATTERN_TABLE,
+                 user_question_file=DEFAULT_QUESTION_PATH,
+                 similarity_matrix_file=None,
+                 outfile='',
+                 runtime_outfile=None,
+                 aggregate_column=DEFAULT_AGGREGATE_COLUMN,
+                 pattern_theta=DEFAULT_THETA,
+                 pattern_lambda=DEFAULT_LAMBDA,
+                 expl_topk=DEFAULT_TOP_K,
+                 regression_package='statsmodels',
+                 exp_id=None,
+                 pruning=False
+                 ):
+        self.pattern_table = pattern_table
+        self.query_result_table = query_result_table
+        self.user_question_file = user_question_file
+        self.similarity_matrix_file = similarity_matrix_file
+        self.outfile = outfile
+        self.aggregate_column = aggregate_column
+        self.pattern_theta = pattern_theta
+        self.pattern_lambda = pattern_lambda
+        self.expl_topk = int(expl_topk)
+        self.exp_id = exp_id
+        self.runtime_outfile = runtime_outfile
+        self.pruning = pruning
+        self.regression_package = regression_package
+        self.global_patterns = None
+        self.schema = None
+        self.global_patterns_dict = None
+        self.conn = self.cur = None
+
+    def __str__(self):
+        return self.__dict__.__str__()
+
+
 class TopkHeap(object):
     def __init__(self, k):
         self.k = k
@@ -55,6 +117,10 @@ class TopkHeap(object):
         return len(self.data)
 
 
+from capexplain.explain.pattern_retrieval import get_local_patterns, find_patterns_relevant, \
+    find_patterns_refinement, load_patterns
+# from capexplain.explain.tuple_retrieval import get_tuples_by_F_V
+
 DEFAULT_QUERY_RESULT_TABLE = 'crime_subset'
 DEFAULT_PATTERN_TABLE = 'dev.crime_subset'
 DEFAULT_QUESTION_PATH = './input/crime_small.csv'
@@ -68,12 +134,12 @@ DEFAULT_EPSILON = 0.25
 DEFAULT_LAMBDA = 0.5
 TOP_K = 3
 PARAMETER_DEV_WEIGHT = 1.0
-global MATERIALIZED_CNT
-MATERIALIZED_CNT = 0
-global MATERIALIZED_DICT
-MATERIALIZED_DICT = dict()
-global VISITED_DICT
-VISITED_DICT = dict()
+# global MATERIALIZED_CNT
+# MATERIALIZED_CNT = 0
+# global MATERIALIZED_DICT
+# MATERIALIZED_DICT = dict()
+# global VISITED_DICT
+# VISITED_DICT = dict()
 
 
 def predict(local_pattern, t):
@@ -245,7 +311,7 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
     return math.pow(dis, 0.5)
     # return max_dis
 
-def get_local_patterns(F, Fv, V, agg_col, model_type, t, conn, cur, pat_table_name, res_table_name):
+def get_local_patterns_old(F, Fv, V, agg_col, model_type, t, conn, cur, pat_table_name, res_table_name):
     local_patterns = []
     local_patterns_dict = {}
     
@@ -421,7 +487,7 @@ def find_global_patterns_exact_match(global_patterns_dict, F_prime_set, V_set, a
                 gp_list.append(pat)
     return gp_list
 
-def find_patterns_refinement(global_patterns_dict, F_prime_set, V_set, agg_col, reg_type):
+def find_patterns_refinement_old(global_patterns_dict, F_prime_set, V_set, agg_col, reg_type):
     # pattern refinement can have different model types
     # e.g., JH’s #pub increases linearly, but JH’s #pub on VLDB remains a constant
     gp_list = []
@@ -584,6 +650,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
     # print(792, gp2_list)
     if len(gp2_list) == 0:
         return []
+    global TEST_ID
     for gp2 in gp2_list:
         if dir == 1:
             dev_ub = abs(gp2[7])
@@ -596,8 +663,9 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
         #     print(890, dev_ub, dist_lb, norm_lb, gp2[0], gp2[1])
         #     continue
     
-        # lp2_list = get_local_patterns(gp2[0], None, gp2[1], gp2[2], None, t_prime, conn, cur, pat_table_name, res_table_name)
-        lp2_list = get_local_patterns(gp2[0], None, gp2[1], gp2[2], gp2[3], t_prime, conn, cur, pat_table_name, res_table_name)
+        # lp2_list = get_local_patterns_old(gp2[0], None, gp2[1], gp2[2], gp2[3], t_prime, conn, cur, pat_table_name, res_table_name)
+        lp2_list = get_local_patterns(gp2[0], None, gp2[1], gp2[2], gp2[3], t_prime, conn, cur,
+            (pat_table_name + '_local') + TEST_ID)
         
         if len(lp2_list) == 0:
             continue
@@ -612,7 +680,9 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
             # [get_V_value(local_pattern[2], t_prime), [[-3, 3]]],
             None,
             conn, cur, res_table_name, cat_sim)
-        lp3_list = get_local_patterns(lp2[0], f_value, lp2[2], lp2[3], lp2[4], t_prime, conn, cur, pat_table_name, res_table_name)
+        # lp3_list = get_local_patterns_old(lp2[0], f_value, lp2[2], lp2[3], lp2[4], t_prime, conn, cur, pat_table_name, res_table_name)
+        lp3_list = get_local_patterns(lp2[0], f_value, lp2[2], lp2[3], lp2[4], t_prime, conn, cur, 
+            (pat_table_name + '_local') + TEST_ID)
         # tuples_same_F, agg_range = get_tuples_by_F(local_pattern, lp2, f_value, 
         #     conn, cur, res_table_name, cat_sim)
         # tuples_same_F, agg_range, tuples_same_F_dict = get_tuples_by_F_V(local_pattern, lp2, f_value, None,
@@ -716,8 +786,10 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
 
         t = uq['target_tuple']
         # print(505, t)
+        # uq['global_patterns'] = find_patterns_relevant_old(
+        #         global_patterns_dict, uq['target_tuple'], conn, cur, res_table_name, pat_table_name, cat_sim)
         uq['global_patterns'] = find_patterns_relevant(
-                global_patterns_dict, uq['target_tuple'], conn, cur, res_table_name, pat_table_name, cat_sim)
+                global_patterns_dict, uq['target_tuple'], conn, cur, res_table_name, cat_sim)
         score_computing_time_start = time.time()
 
         start = time.time()
@@ -971,117 +1043,6 @@ def load_query_result(t, cur, query_result_table, agg_col):
     
     return qr
 
-def find_patterns_relevant_old(global_patterns_dict, t, cur, table_name):
-    
-    g_pat_list = []
-    l_pat_list = []
-    res_list = []
-    t_set = set(t.keys())
-    global TEST_ID
-    # print(global_patterns_dict.keys())
-    for v_key in global_patterns_dict[0]:
-        # print(pat, pat[0])
-        V_set = set(v_key[1:-1].replace("'", '').split(', '))
-        # print(545, f_key)
-        # F_set = set(f_key)
-        # print(579, v_key, V_set, t_set)
-        if not V_set.issubset(t_set):
-            continue
-        
-        for f_key in global_patterns_dict[0][v_key]:
-            for pat in global_patterns_dict[0][v_key][f_key]:
-                # F_set = set(f_key.split(','))
-                F_set = set(f_key[1:-1].replace("'", '').split(', '))
-                # print(587, f_key, F_set, V_set, t_set)
-                if not F_set.issubset(t_set):
-                    continue
-                # print(pat)
-                if pat[2] not in t:
-                    continue
-
-                tF = get_F_value(pat[0], t)
-                local_pattern_query_fixed = '''SELECT * FROM {} 
-                        WHERE array_to_string(fixed, ', ')='{}' AND 
-                        array_to_string(fixed_value, ', ')='{}' AND
-                        array_to_string(variable, ', ')='{}' AND 
-                        agg='{}' AND model='{}'
-                    ORDER BY theta;
-                '''.format(
-                    table_name + '_local'+TEST_ID, str(pat[0]).replace("\'", '').replace('[', '').replace(']', ''),
-                    str(tF)[1:-1].replace("\'", ''),
-                    str(pat[1]).replace("\'", '').replace('[', '').replace(']', ''), 
-                    pat[2], pat[3] 
-                )
-                cur.execute(local_pattern_query_fixed)
-                # print(1195, local_pattern_query_fixed)
-                res_fixed = cur.fetchall()
-                # print(res_fixed)
-                pat_list = res_fixed
-                if len(pat_list) > 0:
-                    g_pat_list.append(pat)
-                    l_pat_list.append(pat_list[0])
-                    res_list.append([pat, pat_list[0], predict(pat_list[0], t)])
-    # g_pat_list = sorted(g_pat_list, key=lambda x: len(x[0])+len(x[1]))
-    # l_pat_list = sorted(l_pat_list, key=lambda x: len(x[0])+len(x[2]))
-    res_list = sorted(res_list, key = lambda x: (len(x[0][0]) + len(x[0][1]), x[2]))
-    g_pat_list = list(map(lambda x: x[0], res_list))
-    l_pat_list = list(map(lambda x: x[1], res_list))
-    # print(1175, len(g_pat_list))
-    return g_pat_list, l_pat_list
-
-    # g_pat_list = []
-    # l_pat_list = []
-    # res_list = []
-    # t_set = set(t.keys())
-    # t_list = list(t.keys())
-    # size_t = len(t_list) - 1
-    # for i in range(1, 1 << size_t):
-    #     for j in range(1, 1 << size_t):
-    #         if i & j == 0:
-    #             F_list = []
-    #             V_list = []
-    #             for k in range(0, size_t):
-    #                 if ((1 << k) & i) > 0:
-    #                     F_list.append(t_list[k])
-    #                 if ((1 << k) & j) > 0:
-    #                     V_list.append(t_list[k])
-    #             v_key = str(sorted(V_list))
-    #             f_key = str(sorted(F_list))
-    #             if v_key in global_patterns_dict[0] and f_key in global_patterns_dict[0][v_key]:
-    #                 for pat in global_patterns_dict[0][v_key][f_key]:
-    #                     print(pat)
-    #                     if pat[2] not in t:
-    #                         continue
-
-    #                     tF = get_F_value(pat[0], t)
-    #                     local_pattern_query_fixed = '''SELECT * FROM {} 
-    #                             WHERE array_to_string(fixed, ', ')='{}' AND 
-    #                             array_to_string(fixed_value, ', ')='{}' AND
-    #                             array_to_string(variable, ', ')='{}' AND 
-    #                             agg='{}' AND model='{}'
-    #                         ORDER BY theta;
-    #                     '''.format(
-    #                         table_name + '_local', str(pat[0]).replace("\'", '').replace('[', '').replace(']', ''),
-    #                         str(tF)[1:-1].replace("\'", ''),
-    #                         str(pat[1]).replace("\'", '').replace('[', '').replace(']', ''), 
-    #                         pat[2], pat[3] 
-    #                     )
-    #                     cur.execute(local_pattern_query_fixed)
-    #                     print(local_pattern_query_fixed)
-    #                     res_fixed = cur.fetchall()
-    #                     print(res_fixed)
-    #                     pat_list = res_fixed
-    #                     if len(pat_list) > 0:
-    #                         g_pat_list.append(pat)
-    #                         l_pat_list.append(pat_list[0])
-    #                         res_list.append([pat, pat_list[0], predict(pat_list[0], t)])
-    # # g_pat_list = sorted(g_pat_list, key=lambda x: len(x[0])+len(x[1]))
-    # # l_pat_list = sorted(l_pat_list, key=lambda x: len(x[0])+len(x[2]))
-    # res_list = sorted(res_list, key = lambda x: (len(x[0][0]) + len(x[0][1]), x[2]))
-    # g_pat_list = list(map(lambda x: x[0], res_list))
-    # l_pat_list = list(map(lambda x: x[1], res_list))
-    # print(1175, len(g_pat_list))
-    # return g_pat_list, l_pat_list
 
 def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
     def tuple_column_to_str_in_where_clause_2(col_value):
@@ -1151,7 +1112,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
 
 
 
-def find_patterns_relevant(global_patterns_dict, t, conn, cur, query_table_name, pattern_table_name, cat_sim):
+def find_patterns_relevant_old(global_patterns_dict, t, conn, cur, query_table_name, pattern_table_name, cat_sim):
     
     g_pat_list = []
     l_pat_list = []
@@ -1251,7 +1212,7 @@ def load_user_question(global_patterns, global_patterns_dict, uq_path=DEFAULT_QU
             uq[-1]['query_result'] = []
     return uq, global_patterns, global_patterns_dict
 
-def load_patterns(cur, pat_table_name, query_table_name):
+def load_patterns_old(cur, pat_table_name, query_table_name):
     '''
         load pre-defined constraints(currently only fixed attributes and variable attributes)
     '''
