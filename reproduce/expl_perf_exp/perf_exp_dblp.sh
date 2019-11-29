@@ -26,3 +26,4 @@ do
     done
 done
 
+python3 expl_DBLP_numpat.py

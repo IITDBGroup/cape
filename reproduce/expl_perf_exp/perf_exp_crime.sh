@@ -26,3 +26,5 @@ do
     done
 done
 
+python3 expl_crime_numpat.py
+python3 expl_crime_numatt.py

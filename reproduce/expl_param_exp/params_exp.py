@@ -1292,8 +1292,8 @@ def main(argv=[]):
                     str(expl_time_dict[exp_key])
                 ))
                 ofile.write('-------------------------------------------\n')
-                break
-            break
+            #     break
+            # break
     
     
     for g_key in utils.MATERIALIZED_DICT:
@@ -1302,7 +1302,7 @@ def main(argv=[]):
             cur.execute(dv_query)
             conn.commit()
 
-    gt_ofile = open('./gt_params_{}_7_delta_{}.txt'.format(str(TOP_K), str(DEFAULT_LOCAL_SUPPORT)), 'w')
+    gt_ofile = open('./output/params_top_{}_delta_{}.txt'.format(str(TOP_K), str(DEFAULT_LOCAL_SUPPORT)), 'w')
     for ek in quality_dict:
         gt_ofile.write(ek + '\n')
         gt_ofile.write(str(quality_dict[ek]) + '\n')
