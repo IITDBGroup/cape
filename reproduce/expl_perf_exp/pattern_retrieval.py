@@ -1,6 +1,6 @@
-from capexplain.utils import *
-from capexplain.explain.explanation import logger, ExplConfig
-from capexplain.explain.tuple_retrieval import get_tuples_by_gp_uq
+from utils import *
+from explain_perf_repro import ExplConfig
+from tuple_retrieval import get_tuples_by_gp_uq
 
 
 def get_local_patterns(F, Fv, V, agg_col, model_type, t, conn, cur, local_pat_table_name):
