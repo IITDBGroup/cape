@@ -1,0 +1,4 @@
+id,primary_type,description,location_description,community_area,beat,date,year,month,week,day,count,direction
+*,MOTOR VEHICLE THEFT,*,*,67,*,*,2005,*,*,3,3,high
+*,MOTOR VEHICLE THEFT,*,*,44,0632,*,2006,5,*,31,2,high
+*,CRIMINAL DAMAGE,TO PROPERTY,LIBRARY,*,*,*,2004,7,*,*,2,high
