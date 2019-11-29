@@ -4,6 +4,7 @@ echo 'Running experiments for Figure 6 (a)'
 
 pattern_size_dblp=('800k' '400k' '200k' '100k' '40k' '20k' '10k')
 
+mkdir -p ./time_record
 for exp_id in 1 2 3 4 5 7
 do
     for topk in 3 10

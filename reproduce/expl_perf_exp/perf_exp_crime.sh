@@ -4,6 +4,7 @@ echo 'Running experiments for Figure 6 (b)(c)'
 
 pattern_size_crime=('800k' '400k' '200k' '100k' '50k' '25k')
 
+mkdir -p ./time_record
 for exp_id in 1 2 3 4 5 6
 do
     for topk in 3
