@@ -1,5 +1,6 @@
-from capexplain.utils import *
-from capexplain.explain.explanation import logger, ExplConfig
+from utils import *
+# from explain_perf_repro import MATERIALIZED_DICT
+import explain_perf_repro as ExplConfig
 
 
 def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim):
