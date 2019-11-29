@@ -193,9 +193,13 @@ To reproduce the result:
 bash perf_exp_crime.sh
 bash perf_exp_dblp.sh
 ~~~
+
+The result of Figure 6 (a) is in `expl_DBLP_numpat.pdf`; Figure 6 (b) is in `expl_crime_numpat.pdf`; Figure 6 (c) is in `expl_crime_numatt.pdf`.
+
 #### Explanation Quality
 
 - TODO materialize the subset pattern tables
+
 To reproduce the result:
 ~~~shell
 bash qual_exp_crime.sh
