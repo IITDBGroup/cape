@@ -69,6 +69,7 @@ Please clone the Cape git repository and check out the `sigmod-reproducibility` 
 
 ~~~shell
 git clone git@github.com:IITDBGroup/cape.git capexplain
+git checkout sigmod-reproducibility
 cd capexplain
 ~~~
 
@@ -181,11 +182,27 @@ In our experiments we evaluated three things:
 
 - TODO materialize the subset pattern tables
 - TODO setup the script
+To test if the experiment environment has been setup correctly, run
+~~~shell
+bash perf_exp_crime_small.sh
+~~~
+to see if the code runs and plots `expl_crime_numpat.pdf` and `expl_crime_numatt.pdf` generated.
 
+To reproduce the result:
+~~~shell
+bash perf_exp_crime.sh
+bash perf_exp_dblp.sh
+~~~
 #### Explanation Quality
 
 - TODO materialize the subset pattern tables
+To reproduce the result:
+~~~shell
+bash qual_exp_crime.sh
+bash qual_exp_dblp.sh
+~~~
 
+The results for Table 3 and Table 4 are in `output_dblp.txt`, and the results for Table 5 are in `output_crime.txt`.
 
 ### Suggestions and Instructions for Alternative Experiments
 
