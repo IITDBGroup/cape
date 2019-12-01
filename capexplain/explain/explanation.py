@@ -756,20 +756,22 @@ class ExplanationGenerator:
         logger.info("start explaining ...")
         global_patterns, schema, global_patterns_dict = load_patterns(cur, pattern_table, query_result_table)
         logger.debug("loaded patterns from database")
-        # logger.debug(ExplConfig.MATERIALIZED_DICT)
+        print(ecf)
+        logger.debug(ecf.pruning)
+
 
         # # category_similarity = CategorySimilarityMatrix(ecf.EXAMPLE_SIMILARITY_MATRIX_PATH, schema)
         # category_similarity = CategorySimilarityNaive(cur=cur, table_name=query_result_table)
         # # category_similarity = CategoryNetworkEmbedding(EXAMPLE_NETWORK_EMBEDDING_PATH, data['df'])
         # #num_dis_norm = normalize_numerical_distance(data['df'])
         # num_dis_norm = normalize_numerical_distance(cur=cur, table_name=query_result_table)
-        if query_result_table.find('crime') == -1:
-            category_similarity = CategorySimilarityNaive(cur=cur, table_name=query_result_table)
-        else:
-            category_similarity = CategorySimilarityNaive(cur=cur, table_name=query_result_table, embedding_table_list=[
-                ('community_area', 'community_area_loc')])
+        # if query_result_table.find('crime') == -1:
+        #     category_similarity = CategorySimilarityNaive(cur=cur, table_name=query_result_table)
+        # else:
+        #     category_similarity = CategorySimilarityNaive(cur=cur, table_name=query_result_table, embedding_table_list=[
+        #         ('community_area', 'community_area_loc')])
 
-        num_dis_norm = normalize_numerical_distance(cur=cur, table_name=query_result_table)
+        # num_dis_norm = normalize_numerical_distance(cur=cur, table_name=query_result_table)
         # logger.debug(ExplConfig.MATERIALIZED_DICT)
 
         # pf = PatternFinder(engine.connect(), query_result_table, fit=True, theta_c=0.5, theta_l=0.25,
@@ -777,7 +779,7 @@ class ExplanationGenerator:
 
         Q, global_patterns, global_patterns_dict = load_user_question_from_file(
             global_patterns, global_patterns_dict, user_question_file,
-            schema, conn, cur, pattern_table, query_result_table, None, category_similarity)
+            schema, conn, cur, pattern_table, query_result_table, None, self.category_similarity)
 
         logger.debug("loaded user question from file")
         # logger.debug(ExplConfig.MATERIALIZED_DICT)
@@ -791,7 +793,7 @@ class ExplanationGenerator:
         # regression_package = 'statsmodels'
 
         explanations_list, local_patterns_list, score_computing_time_list = find_explanation_regression_based(
-            Q, global_patterns, global_patterns_dict, category_similarity, num_dis_norm,
+            Q, global_patterns, global_patterns_dict, self.category_similarity, self.num_dis_norm,
             aggregate_column, ecf
         )
         # logger.debug(ExplConfig.MATERIALIZED_DICT)

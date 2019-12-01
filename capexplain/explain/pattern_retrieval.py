@@ -109,8 +109,8 @@ def load_patterns(cur, pat_table_name, query_table_name, theta_thres=0.1, lambda
             continue
         # if 'year' in pat[0]:
         #     continue
-        if 'name' in pat[1] or 'venue' in pat[1]:
-            continue
+        # if 'name' in pat[1] or 'venue' in pat[1]:
+        #     continue
         if 'primary_type' in pat[1] or 'description' in pat[1] or 'location_description' in pat[1] or 'community_area' in pat[1] or 'beat' in pat[1]:
             continue
 

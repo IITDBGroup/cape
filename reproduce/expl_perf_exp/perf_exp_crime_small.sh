@@ -6,7 +6,8 @@ mkdir -p ./time_record
 
 pattern_size_crime=('800k' '400k' '200k' '100k' '50k' '25k')
 
-for exp_id in 1 2 3 4 5 6
+# for exp_id in 1 2 3 4 5 6
+for exp_id in 1
 do
     for topk in 3
     do
@@ -17,7 +18,8 @@ do
     done
 done
 
-for exp_id in 1 2 3 4 5 6
+# for exp_id in 1 2 3 4 5 6
+for exp_id in 1
 do
     for topk in 3
     do
