@@ -12,7 +12,7 @@ do
         echo "Find top-${topk} explanations for Chicago crime data with ${pattern_size_crime[$topk]} patterns using ExplGen-Naive"
         capexplain explain -u antiprov -d antiprov -p antiprov -P 5436 --ptable dev.crime_subset --qtable crime_subset \
             --ufile ./input/crime.csv --ofile output/crime_no_pruning_top${topk}_exp_${exp_id}.txt \
-            --exp_id $exp_id --expl_topk=$topk --rtfile ./time_record/crime_no_pruning_top_${topk}_exp${exp_id}.csv
+            --exp_id $exp_id --expl_topk=$topk --rtfile ./time_record/crime_no_pruning_top${topk}_exp_${exp_id}.csv
     done
 done
 

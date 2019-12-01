@@ -717,6 +717,9 @@ class ExplanationGenerator:
 
         Q = self.wrap_user_question(self.global_patterns, self.global_patterns_dict, uq_tuple, self.schema)
 
+        print(ecf)
+        logger.debug(ecf.pruning)
+
         logger.debug("start finding explanations ...")
 
         start = time.clock()

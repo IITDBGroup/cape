@@ -13,7 +13,7 @@ do
         echo "Find top-${topk} explanations for Chicago crime data with ${pattern_size_crime[$topk]} patterns using ExplGen-Naive"
         capexplain explain -u antiprov -d antiprov -p antiprov -P 5436 --ptable dev.crime_subset --qtable crime_subset \
             --ufile ./input/crime_small.csv --ofile output/crime_small_no_pruning_top${topk}_exp_${exp_id}.txt \
-            --exp_id $exp_id --expl_topk=$topk --rtfile ./time_record/crime_no_pruning_top${topk}_exp_${exp_id}.csv
+            --exp_id $exp_id --expl_topk=$topk --rtfile ./time_record_small/crime_no_pruning_top${topk}_exp_${exp_id}.csv
     done
 done
 
@@ -24,9 +24,9 @@ do
         echo "Find top-${topk} explanations for Chicago crime data with ${pattern_size_crime[$topk]} patterns using ExplGen-Opt"
         capexplain explain -u antiprov -d antiprov -p antiprov -P 5436 --ptable dev.crime_subset --qtable crime_subset \
             --ufile ./input/crime_small.csv --ofile output/crime_small_pruning_top${topk}_exp_${exp_id}.txt \
-            --exp_id $exp_id --expl_topk=$topk --pruning --rtfile ./time_record/crime_pruning_top${topk}_exp_${exp_id}.csv
+            --exp_id $exp_id --expl_topk=$topk --pruning --rtfile ./time_record_small/crime_pruning_top${topk}_exp_${exp_id}.csv
     done
 done
 
-python3 expl_crime_numpat.py
-python3 expl_crime_numatt.py
+# python3 expl_crime_numpat.py
+# python3 expl_crime_numatt.py
