@@ -978,8 +978,8 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             #     continue
             # print(955, uq['global_patterns'][i])
             # global VISITED_DICT
-            # if pat_key in VISITED_DICT:
-            #     continue
+            if pat_key in VISITED_DICT:
+                continue
             # global VISITED_DICT
             VISITED_DICT[pat_key] = True
 
