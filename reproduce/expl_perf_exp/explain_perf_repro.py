@@ -116,6 +116,31 @@ class TopkHeap(object):
     def HeapSize(self):
         return len(self.data)
 
+# from pattern_retrieval import get_local_patterns, find_patterns_relevant, \
+#     find_patterns_refinement, load_patterns
+# from tuple_retrieval import get_tuples_by_F_V
+
+DEFAULT_QUERY_RESULT_TABLE = 'crime_subset'
+DEFAULT_PATTERN_TABLE = 'dev.crime_subset'
+DEFAULT_QUESTION_PATH = './input/crime_small.csv'
+
+
+EXAMPLE_NETWORK_EMBEDDING_PATH = './input/NETWORK_EMBEDDING'
+EXAMPLE_SIMILARITY_MATRIX_PATH = './input/SIMILARITY_DEFINITION'
+DEFAULT_USER_QUESTION_NUMBER = 5
+DEFAULT_AGGREGATE_COLUMN = '*'
+DEFAULT_EPSILON = 0.25
+DEFAULT_LAMBDA = 0.5
+TOP_K = 3
+PARAMETER_DEV_WEIGHT = 1.0
+global MATERIALIZED_CNT
+MATERIALIZED_CNT = 0
+global MATERIALIZED_DICT
+MATERIALIZED_DICT = dict()
+global VISITED_DICT
+VISITED_DICT = dict()
+
+
 def get_local_patterns(F, Fv, V, agg_col, model_type, t, conn, cur, local_pat_table_name):
 
     if model_type is not None:
@@ -160,6 +185,7 @@ def find_patterns_refinement(global_patterns_dict, F_prime_set, V_set, agg_col, 
     v_key = str(sorted(list(V_set)))
     if v_key not in global_patterns_dict[0]:
         return []
+    global VISITED_DICT
     for f_key in global_patterns_dict[0][v_key]:
         if f_key.find('arrest') != -1 or f_key.find('domestic') != -1:
             continue
@@ -170,8 +196,8 @@ def find_patterns_refinement(global_patterns_dict, F_prime_set, V_set, agg_col, 
                     pat_key = f_key + '|,|' + v_key + '|,|' + pat[2] + '|,|' + pat[3]
 
                     gp_list.append(pat)
-                    if pat_key not in ExplConfig.VISITED_DICT:
-                        ExplConfig.VISITED_DICT[pat_key] = True
+                    if pat_key not in VISITED_DICT:
+                        VISITED_DICT[pat_key] = True
     return gp_list
 
 
@@ -252,29 +278,6 @@ def load_patterns(cur, pat_table_name, query_table_name, theta_thres=0.1, lambda
     return patterns, schema, pattern_dict
 
 
-# from pattern_retrieval import get_local_patterns, find_patterns_relevant, \
-#     find_patterns_refinement, load_patterns
-# from tuple_retrieval import get_tuples_by_F_V
-
-DEFAULT_QUERY_RESULT_TABLE = 'crime_subset'
-DEFAULT_PATTERN_TABLE = 'dev.crime_subset'
-DEFAULT_QUESTION_PATH = './input/crime_small.csv'
-
-
-EXAMPLE_NETWORK_EMBEDDING_PATH = './input/NETWORK_EMBEDDING'
-EXAMPLE_SIMILARITY_MATRIX_PATH = './input/SIMILARITY_DEFINITION'
-DEFAULT_USER_QUESTION_NUMBER = 5
-DEFAULT_AGGREGATE_COLUMN = '*'
-DEFAULT_EPSILON = 0.25
-DEFAULT_LAMBDA = 0.5
-TOP_K = 3
-PARAMETER_DEV_WEIGHT = 1.0
-global MATERIALIZED_CNT
-MATERIALIZED_CNT = 0
-global MATERIALIZED_DICT
-MATERIALIZED_DICT = dict()
-global VISITED_DICT
-VISITED_DICT = dict()
 
 
 def predict(local_pattern, t):
