@@ -197,6 +197,7 @@ def find_patterns_refinement(global_patterns_dict, F_prime_set, V_set, agg_col, 
 
                     gp_list.append(pat)
                     if pat_key not in VISITED_DICT:
+                        global VISITED_DICT
                         VISITED_DICT[pat_key] = True
     return gp_list
 
@@ -547,9 +548,11 @@ def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim
     global MATERIALIZED_DICT
     global MATERIALIZED_CNT
     if G_key not in MATERIALIZED_DICT:
+        global MATERIALIZED_DICT
         MATERIALIZED_DICT[G_key] = dict()
         
     if f_value_key not in MATERIALIZED_DICT[G_key]:
+        global MATERIALIZED_DICT
         MATERIALIZED_DICT[G_key][f_value_key] = MATERIALIZED_CNT
         dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(MATERIALIZED_CNT))
         cur.execute(dv_query)
@@ -568,6 +571,7 @@ def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim
         )
         cur.execute(cmv_query)
         conn.commit()
+        global MATERIALIZED_CNT
         MATERIALIZED_CNT += 1
 
 
@@ -643,6 +647,7 @@ def find_patterns_refinement_old(global_patterns_dict, F_prime_set, V_set, agg_c
                     gp_list.append(pat)
                     global VISITED_DICT
                     if pat_key not in VISITED_DICT:
+                        global VISITED_DICT
                         VISITED_DICT[pat_key] = True
     # f_key = str(sorted(list(F_prime_set)))
     # for v_key in global_patterns_dict[1][f_key]:
@@ -956,7 +961,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
         
         psi = []
         
-        # global VISITED_DICT
+        global VISITED_DICT
         VISITED_DICT = dict()
         score_computing_time_cur_uq = 0
         score_computing_start = time.time()
@@ -971,10 +976,10 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             # if F_key.find('community_area') == -1:
             #     continue
             # print(955, uq['global_patterns'][i])
-            # global VISITED_DICT
+            global VISITED_DICT
             if pat_key in VISITED_DICT:
                 continue
-            # global VISITED_DICT
+            global VISITED_DICT
             VISITED_DICT[pat_key] = True
 
             
@@ -1207,9 +1212,11 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
     global MATERIALIZED_DICT
     global MATERIALIZED_CNT
     if G_key not in MATERIALIZED_DICT:
+        global MATERIALIZED_DICT
         MATERIALIZED_DICT[G_key] = dict()
         
     if f_value_key not in MATERIALIZED_DICT[G_key]:
+        global MATERIALIZED_DICT
         MATERIALIZED_DICT[G_key][f_value_key] = MATERIALIZED_CNT
         dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(MATERIALIZED_CNT))
         cur.execute(dv_query)
@@ -1229,6 +1236,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
         # print(585, cmv_query)
         cur.execute(cmv_query)
         conn.commit()
+        global MATERIALIZED_CNT
         MATERIALIZED_CNT += 1
 
 
