@@ -551,8 +551,8 @@ def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim
         # global MATERIALIZED_DICT
         MATERIALIZED_DICT[G_key] = dict()
         
-    # if f_value_key not in MATERIALIZED_DICT[G_key]:
-    if True:
+    if f_value_key not in MATERIALIZED_DICT[G_key]:
+    # if True:
         # global MATERIALIZED_DICT
         MATERIALIZED_DICT[G_key][f_value_key] = MATERIALIZED_CNT
         dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(MATERIALIZED_CNT))
@@ -1216,8 +1216,8 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
         # global MATERIALIZED_DICT
         MATERIALIZED_DICT[G_key] = dict()
         
-    # if f_value_key not in MATERIALIZED_DICT[G_key]:
-    if True:
+    if f_value_key not in MATERIALIZED_DICT[G_key]:
+    # if True:
         # global MATERIALIZED_DICT
         MATERIALIZED_DICT[G_key][f_value_key] = MATERIALIZED_CNT
         dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(MATERIALIZED_CNT))
