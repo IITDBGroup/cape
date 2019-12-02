@@ -19,7 +19,8 @@ RUN git clone --single-branch --branch sigmod-reproducibility https://github.com
 RUN cd /usr/local/cape && \
 	python3 setup.py install
 ########################################
-# Cape is entrypoint
+# Start a sleeper script as entrypoint to keep container running
 ########################################
-ENTRYPOINT [ "capexplain" ]
-CMD [ "help" ]
+ADD ./mesleeps.sh /mesleeps.sh
+ENTRYPOINT [ "/mesleeps.sh" ]
+##CMD [ "help" ]
