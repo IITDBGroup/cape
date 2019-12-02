@@ -134,7 +134,7 @@ class MinerConfig(DictLike):
             f.write(',' + fd)
         f.write('\n')
         f.flush()
-        fsync()
+        fsync(f)
         f.close()
 
     def __str__(self):
