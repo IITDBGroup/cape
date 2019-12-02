@@ -71,7 +71,9 @@ def find_patterns_relevant(global_patterns_dict, t, conn, cur, query_table_name,
         if not V_set.issubset(t_set):
             continue
         logger.debug(v_key)
+        logger.debug(len(list(global_patterns_dict[0][v_key].keys())))
         for f_key in global_patterns_dict[0][v_key]:
+            logger.debug(len(list(global_patterns_dict[0][v_key][f_key])))
             for pat in global_patterns_dict[0][v_key][f_key]:
                 F_set = set(f_key[1:-1].replace("'", '').split(', '))
                 if not F_set.issubset(t_set):
