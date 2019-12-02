@@ -40,6 +40,7 @@ cape_mine() {
         echo "mining $2 with $algo";
         capexplain mine -u antiprov -d antiprov -p antiprov -P ${port} -t $2 --algorithm $algo --local-support $lsup --global-support $gsup --show-progress False --experiment $1 --rep $rep --csv $3;
     fi;
+    cp -nR experiments/ $OUTPUTDIR;
 }
 
 
@@ -53,15 +54,13 @@ for algo in $algorithms
 do
     for num_attribute in {4..11}
     do
-	echo 'placeholder';
-        #cape_mine 'num_attribute' crime_exp_${num_attribute} ${FILE3A};
+        cape_mine 'num_attribute' crime_exp_${num_attribute} ${FILE3A};
     done
 done
 algo='naive';
 for num_attribute in {4..7}
 do
-    echo 'placeholder';
-    #cape_mine 'num_attribute' crime_exp_${num_attribute} ${FILE3A};
+    cape_mine 'num_attribute' crime_exp_${num_attribute} ${FILE3A};
 done
 
 
@@ -72,8 +71,7 @@ do
     for size in '10000' '18000' '32000' '56000' '100000' \
         '180000' '320000' '560000' '1000000'
     do
-	echo 'placeholder';
-        #cape_mine 'size' crime_${size} ${FILE3B};
+        cape_mine 'size' crime_${size} ${FILE3B};
     done
 done
 
@@ -100,6 +98,5 @@ echo 'Running experiments for Figure 5'
 algo='optimized'
 for size in '10000' '50000' '100000'
 do
-    echo 'placeholder';
-    #cape_mine 'fd' crime_fd_${size} ${FILE5}
+    cape_mine 'fd' crime_fd_${size} ${FILE5}
 done
