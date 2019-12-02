@@ -439,7 +439,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
         top_k_lists = [[] for i in range(len(uq['global_patterns']))]
         local_patterns = []
 
-        # ExplConfig.VISITED_DICT = dict()
+        ExplConfig.VISITED_DICT = dict()
         score_computing_start = time.time()
 
         for i in range(0, len(uq['global_patterns'])):
@@ -448,9 +448,9 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             F_key = str(sorted(uq['global_patterns'][i][0]))
             V_key = str(sorted(uq['global_patterns'][i][1]))
             pat_key = F_key + '|,|' + V_key + '|,|' + uq['global_patterns'][i][2] + '|,|' + uq['global_patterns'][i][3]
-            # if pat_key in ExplConfig.VISITED_DICT:
-            #     continue
-            # ExplConfig.VISITED_DICT[pat_key] = True
+            if pat_key in ExplConfig.VISITED_DICT:
+                continue
+            ExplConfig.VISITED_DICT[pat_key] = True
 
             tF = get_F_value(uq['global_patterns'][i][0], t)
             local_pattern_query_fixed = '''SELECT * FROM {} 
