@@ -379,6 +379,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
     local_patterns_list = []
 
     for j, uq in enumerate(user_question_list):
+        logger.debug(uq)
         dir = uq['dir']
         topK_heap = TopkHeap(ecf.expl_topk)
         marked = {}
@@ -387,7 +388,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
 
         uq['global_patterns'] = find_patterns_relevant(
             global_patterns_dict, uq['target_tuple'], ecf.conn, ecf.cur, ecf.query_result_table, cat_sim)
-
+        logger.debug(len(uq['global_patterns']))
         top_k_lists = [[] for i in range(len(uq['global_patterns']))]
         local_patterns = []
 
@@ -421,6 +422,8 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             ecf.cur.execute(local_pattern_query_fixed)
             res_fixed = ecf.cur.fetchall()
 
+            logger.debug(len(res_fixed))
+
             if len(res_fixed) == 0:
                 continue
 
@@ -434,6 +437,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                                                               None,
                                                               ecf.conn, ecf.cur, ecf.query_result_table, cat_sim)
 
+            logger.debug(len(t_t_list))
             dist_lb = 1e10
             dev_ub = 0
             for t_t in t_t_list:
