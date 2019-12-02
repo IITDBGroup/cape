@@ -233,7 +233,7 @@ class PatternFinder:
 
         log.debug("possible grouping attributes: %s", self.grouping_attr)
 
-        if self.config.num:
+        if self.config.num is not None:
             self.num = self.config.num.split(',')
             self.summable = self.config.summable.split(',')
             log.debug("input given numerical attributes %s and summable attributes %s",
