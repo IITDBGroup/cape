@@ -44,6 +44,8 @@ def mineCommand(c, log):
     log.debug("connected to database")
     if config.experiment: # this is a performance experiment
         config.run_experiment()
+        if config.experiment == 'fd':
+            config.run_experiment(fd_on = True)
     else:
         p = PatternFinder(config)
         log.debug("created pattern miner object")

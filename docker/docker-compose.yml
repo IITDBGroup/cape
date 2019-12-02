@@ -1,0 +1,25 @@
+version: "2.0"
+services:
+  thecape:
+    image: iitdbgroup/2019-sigmod-reproducibility-cape:latest
+    depends_on:
+      - postgres
+    container_name: "cape-system"
+    networks:
+       app_net:
+         ipv4_address: 17.17.0.2
+  postgres:
+    image: iitdbgroup/2019-sigmod-reproducibility-cape-postgres:latest
+    container_name: "postgres-cape"
+    ports:
+      - "5436:5436"
+    networks:
+       app_net:
+         ipv4_address: 17.17.0.3
+networks:
+  app_net:
+      driver: bridge
+      ipam:
+          config:
+              - subnet: 17.17.0.0/8
+                gateway: 17.17.0.1

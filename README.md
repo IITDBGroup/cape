@@ -17,24 +17,6 @@ We used two real world datasets in the experiments:
 - Publication dataset extracted from DBLP: [https://dblp.uni-trier.de/](https://dblp.uni-trier.de/)
 - Crime dataset from the Chicago open data portal: [https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2)
 
-In the experiments we utilized several subsets of these datasets. We provide a docker image with Postgres containing all of these datasets. Please install docker TODO on your machine and run the command below to fetch the image.
-
-~~~sh
-docker pull iitdbgroup/cape-experimentsTODO
-~~~
-
-You can create a container from this image using
-
-~~~sh
-docker run --name cape-postgres -d -p 5433:5432 iitdbgroup/cape-experiments
-~~~
-
-To test the container you can connect to the database and test it using:
-
-~~~sh
-docker exec -ti cape-postgres psql TODO
-~~~
-
 ## C) Hardware Info
 
 All runtime experiments were executed on a server with the following specs:
@@ -143,24 +125,24 @@ We provide a docker image with a Postgres database that contains the datasets us
 
 here: First pull the image from dockerhub:
 
-~~~shell
+~~~sh
 docker pull iitdbgroup/2019-sigmod-reproducibility-cape-postgres
 ~~~
 
-To start a container and forward its port to your local machine run the command shown below. Postgres will be available at port `5440`. Using these settings the container will be deleted once it is stopped.
+You can create a container from this image using
 
-~~~shell
-docker run -d -p 5432:5440 --name capepostgres iitdbgroup/2019-sigmod-reproducibility-cape-postgres
+~~~sh
+docker run --name cape-postgres -d -p 5436:5436 iitdbgroup/2019-sigmod-reproducibility-cape-postgres
 ~~~
 
-To test the postgres container run:
+To test the container you can connect to the database and test it using:
 
 ~~~shell
-docker exec -ti mypostgres psql -U postgres postgres
-psql (10.0)
+PGPASSWORD='antiprov' docker exec -ti cape-postgres psql -U antiprov -p 5436
+psql (10.10)
 Type "help" for help.
 
-postgres=#
+antiprov=# 
 ~~~
 
 This will connect to the Postgres instance using Postgre's commandline client `psql`. You can quit the client using `\q`.
@@ -173,10 +155,17 @@ In our experiments we evaluated three things:
 - performance of the online explanation generation algorithm
 - quality of the generated explanations
 
+All experiment scripts are under reproduce folder. Firt enter with
+
+~~~shell
+cd reproduce
+~~~
+
 #### Pattern mining
 
-- TODO finding the right parameters
-- TODO generating the subset tables
+~~~shell
+./mining.sh
+~~~
 
 #### Explanation generation
 

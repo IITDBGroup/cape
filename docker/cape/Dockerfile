@@ -19,7 +19,13 @@ RUN git clone --single-branch --branch sigmod-reproducibility https://github.com
 RUN cd /usr/local/cape && \
 	python3 setup.py install
 ########################################
-# Cape is entrypoint
+# set environment variables for experiments
 ########################################
-ENTRYPOINT [ "capexplain" ]
-CMD [ "help" ]
+ENV port 5436  # postgres port for experiments
+ENV pgip 17.17.0.3 # postgres host IP address
+########################################
+# Start a sleeper script as entrypoint to keep container running
+########################################
+ADD ./mesleeps.sh /mesleeps.sh
+ENTRYPOINT [ "/mesleeps.sh" ]
+##CMD [ "help" ]
