@@ -340,8 +340,7 @@ def compare_tuple(t1, t2):
 #         return 0
 
 def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_coarser, t_coarser, t_prime, target_tuple,
-        conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm, 
-        epsilon, dir, query_result, theta_lb=0.1):
+        conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm, dir, query_result, theta_lb=0.1):
     reslist = []
     F_prime_set = F_set.union(U_set)
     agg_col = local_pattern[3]
@@ -391,7 +390,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
     return reslist
 
 def find_explanation_regression_based(user_question_list, global_patterns, global_patterns_dict, 
-    cat_sim, num_dis_norm, epsilon, agg_col, conn, cur, pat_table_name, res_table_name,
+    cat_sim, num_dis_norm, agg_col, conn, cur, pat_table_name, res_table_name,
     lam, the, gs, local_patterns_count):
 
     """Find explanations for user questions
@@ -554,7 +553,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                 continue
             top_k_lists[i][-1] += DrillDown(global_patterns_dict, local_patterns[i], 
                 F_set, T_set.difference(F_set.union(V_set)), V_set, t_coarser_copy, t_coarser_copy, t, t,
-                conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm, epsilon,
+                conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm,
                 dir, uq['query_result'], the)
 
             for tk in top_k_lists[i][-1]:
@@ -809,7 +808,7 @@ def main(argv=[]):
                 regression_package = 'statsmodels'
                 explanations_list, local_patterns_list, score_computing_time_list = find_explanation_regression_based(
                     Q, global_patterns, global_patterns_dict, category_similarity, 
-                    num_dis_norm, epsilon, 
+                    num_dis_norm, 
                     aggregate_column, 
                     conn, cur, 
                     pattern_table, query_result_table, lam, the, gs, local_patterns_count)
