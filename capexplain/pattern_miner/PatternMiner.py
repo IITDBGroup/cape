@@ -41,7 +41,7 @@ class MinerConfig(DictLike):
                  theta_c=0.1,
                  theta_l=0.1,
                  lamb=0.1,
-                 dist_thre=0.9,
+                 dist_thre=0.99,
                  reg_package='statsmodels',
                  supp_l=5,
                  supp_g=5,
@@ -114,6 +114,9 @@ class MinerConfig(DictLike):
             f = open(self.csv, 'a+')
 
         self.fd_check = fd_on
+
+        if self.experiment == 'fd':
+            self.dist_thre = 0.9
 
         #run pattern miner self.rep times
         query = regression = total = 0
