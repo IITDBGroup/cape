@@ -3,7 +3,7 @@
 #parameters
 if [ -z ${port} ];
 then
-    port=5440;
+    port=5437;
 fi;
 
 
@@ -28,6 +28,7 @@ echo "parameters: port=${port}, lsup=${lsup}, gsup=${gsup}, rep=${rep}";
 FILE3A='experiments/crime_num_att.csv';
 FILE3B='experiments/crime_size.csv';
 FILE3C='experiments/dblp_size.csv';
+FILE5='experiments/crime_fd_on_off.csv'
 
 
 #convenient function for mining
@@ -37,7 +38,7 @@ cape_mine() {
         echo "result exists in output, skip experiment";
     else
         echo "mining $2 with $algo";
-        #capexplain mine -u antiprov -d antiprov -p antiprov -P ${port} -t $2 --algorithm $algo --local-support $lsup --global-support $gsup --show-progress False --experiment $1 --rep $rep --csv $3;
+        capexplain mine -u antiprov -d antiprov -p antiprov -P ${port} -t $2 --algorithm $algo --local-support $lsup --global-support $gsup --show-progress False --experiment $1 --rep $rep --csv $3;
     fi;
 }
 
@@ -52,13 +53,15 @@ for algo in $algorithms
 do
     for num_attribute in {4..11}
     do
-        cape_mine 'num_attribute' crime_exp_${num_attribute} ${FILE3A};
+	echo 'placeholder';
+        #cape_mine 'num_attribute' crime_exp_${num_attribute} ${FILE3A};
     done
 done
 algo='naive';
 for num_attribute in {4..7}
 do
-    cape_mine 'num_attribute' crime_exp_${num_attribute} ${FILE3A};
+    echo 'placeholder';
+    #cape_mine 'num_attribute' crime_exp_${num_attribute} ${FILE3A};
 done
 
 
@@ -69,7 +72,8 @@ do
     for size in '10000' '18000' '32000' '56000' '100000' \
         '180000' '320000' '560000' '1000000'
     do
-        cape_mine 'size' crime_${size} ${FILE3B};
+	echo 'placeholder';
+        #cape_mine 'size' crime_${size} ${FILE3B};
     done
 done
 
@@ -96,6 +100,6 @@ echo 'Running experiments for Figure 5'
 algo='optimized'
 for size in '10000' '50000' '100000'
 do
-    echo "mining crime_fd_$size with $algo for both fd detection on and off"
-    capexplain mine -u antiprov -d antiprov -p antiprov -P ${port} -t crime_fd_$size --algorithm $algo --show-progress False --experiment 'fd' --rep 1 --csv 'experiments/crime_fd_on_off.csv'
+    echo 'placeholder';
+    #cape_mine 'fd' crime_fd_${size} ${FILE5}
 done
