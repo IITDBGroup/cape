@@ -151,6 +151,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
     else:
         agg_fun = gp[2].replace('_', '(') + ')'
 
+    logger.debug(G_key, f_value_key)
     if G_key not in ExplConfig.MATERIALIZED_DICT:
         ExplConfig.MATERIALIZED_DICT[G_key] = dict()
 
