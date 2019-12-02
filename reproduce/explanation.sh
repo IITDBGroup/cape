@@ -87,4 +87,4 @@ done
 
 
 echo 'Running experiments for Figure 7'
-python3 params_exp.py -P ${port} --ufile ./expl_param_exp/input/user_question_expl_gt_7.txt --rtfile ./experiments/expl_params_top_10_delta_5.txt
+python3 params_exp.py -P ${port} --ufile ./expl_param_exp/input/user_question.txt --rtfile ./experiments/expl_params_top_10_delta_5.txt
