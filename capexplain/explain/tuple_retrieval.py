@@ -151,14 +151,13 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
     else:
         agg_fun = gp[2].replace('_', '(') + ')'
 
-    logger.debug(G_key)
     if G_key not in ExplConfig.MATERIALIZED_DICT:
         ExplConfig.MATERIALIZED_DICT[G_key] = dict()
-    logger.debug(f_value_key)
+
     if f_value_key not in ExplConfig.MATERIALIZED_DICT[G_key]:
         ExplConfig.MATERIALIZED_DICT[G_key][f_value_key] = ExplConfig.MATERIALIZED_CNT
         dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(ExplConfig.MATERIALIZED_CNT))
-        logger.debug(dv_query)
+        # logger.debug(dv_query)
         cur.execute(dv_query)
 
         cmv_query = '''
@@ -169,7 +168,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
                                   zip(gp[0], map(tuple_column_to_str_in_where_clause_2, zip(F1_list, f_value)))))),
             G_key
         )
-        logger.debug(cmv_query)
+        # logger.debug(cmv_query)
         cur.execute(cmv_query)
         conn.commit()
         ExplConfig.MATERIALIZED_CNT += 1
@@ -184,7 +183,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
     tuples_query = '''SELECT {} FROM MV_{} WHERE {};'''.format(
         gp[2], str(ExplConfig.MATERIALIZED_DICT[G_key][f_value_key]), where_clause
     )
-    logger.debug(tuples_query)
+    # logger.debug(tuples_query)
     cur.execute(tuples_query)
     res = cur.fetchall()
     if len(res) == 0:
