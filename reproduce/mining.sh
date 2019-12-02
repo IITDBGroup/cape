@@ -93,11 +93,9 @@ cp experiments/crime_num_att.csv experiments/crime_bar.csv
 
 #5
 echo 'Running experiments for Figure 5'
-for algo in $algorithms
+algo='optimized'
+for size in '10000' '50000' '100000'
 do
-    for size in '10000' '50000' '100000'
-    do
-        echo "mining crime_fd_$size with $algo for both fd detection on and off"
-        capexplain mine -u antiprov -d antiprov -p antiprov -P {port} -t crime_fd_$size --algorithm $algo --show-progress False --experiment 'fd' --csv 'experiments/crime_fd_on_off.csv'
-    done
+    echo "mining crime_fd_$size with $algo for both fd detection on and off"
+    capexplain mine -u antiprov -d antiprov -p antiprov -P ${port} -t crime_fd_$size --algorithm $algo --show-progress False --experiment 'fd' --rep 1 --csv 'experiments/crime_fd_on_off.csv'
 done
