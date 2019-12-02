@@ -1,5 +1,5 @@
 from utils import *
-import utils
+from params_exp import global_vars
 from explain.tuple_retrieval import get_tuples_by_gp_uq
 
 
@@ -57,8 +57,8 @@ def find_patterns_refinement(global_patterns_dict, F_prime_set, V_set, agg_col, 
                     pat_key = f_key + '|,|' + v_key + '|,|' + pat[2] + '|,|' + pat[3]
 
                     gp_list.append(pat)
-                    if pat_key not in utils.VISITED_DICT:
-                        utils.VISITED_DICT[pat_key] = True
+                    if pat_key not in global_vars.VISITED_DICT:
+                        global_vars.VISITED_DICT[pat_key] = True
     return gp_list
 
 

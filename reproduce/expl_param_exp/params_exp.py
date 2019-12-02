@@ -26,7 +26,14 @@ from similarity.category_network_embedding import *
 from similarity.category_similarity_naive import *
 from explanation_model.explanation_model import *
 from utils import *
-import utils
+
+
+class global_vars:
+
+    MATERIALIZED_DICT = dict()
+    MATERIALIZED_CNT = 0
+    VISITED_DICT = dict()
+
 from explain.pattern_retrieval import find_patterns_relevant, find_patterns_refinement, load_patterns
 from explain.tuple_retrieval import get_tuples_by_F_V
 
@@ -48,11 +55,6 @@ DEFAULT_AGGREGATE_COLUMN = '*'
 DEFAULT_PORT = 5436
 TOP_K = 10
 
-class global_vars:
-
-    MATERIALIZED_DICT = dict()
-    MATERIALIZED_CNT = 0
-    VISITED_DICT = dict()
 
 
 

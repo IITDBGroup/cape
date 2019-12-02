@@ -1,5 +1,5 @@
 from utils import *
-import utils
+from params_exp import global_vars
 
 
 def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim):
@@ -61,17 +61,17 @@ def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim
     else:
         agg_fun = lp2[3].replace('_', '(') + ')'
 
-    if G_key not in utils.MATERIALIZED_DICT:
-        utils.MATERIALIZED_DICT[G_key] = dict()
+    if G_key not in global_vars.MATERIALIZED_DICT:
+        global_vars.MATERIALIZED_DICT[G_key] = dict()
 
-    if f_value_key not in utils.MATERIALIZED_DICT[G_key]:
-        utils.MATERIALIZED_DICT[G_key][f_value_key] = utils.MATERIALIZED_CNT
-        dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(utils.MATERIALIZED_CNT))
+    if f_value_key not in global_vars.MATERIALIZED_DICT[G_key]:
+        global_vars.MATERIALIZED_DICT[G_key][f_value_key] = global_vars.MATERIALIZED_CNT
+        dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(global_vars.MATERIALIZED_CNT))
         cur.execute(dv_query)
         cmv_query = '''
             CREATE VIEW MV_{} AS SELECT {}, {} as {} FROM {} WHERE {} GROUP BY {};
         '''.format(
-            str(utils.MATERIALIZED_CNT), G_key, agg_fun, lp2[3], table_name,
+            str(global_vars.MATERIALIZED_CNT), G_key, agg_fun, lp2[3], table_name,
             ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]),
                                   zip(lp1[0], map(tuple_column_to_str_in_where_clause_2, zip(F1_list, f_value)))))),
             G_key
@@ -79,7 +79,7 @@ def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim
 
         cur.execute(cmv_query)
         conn.commit()
-        utils.MATERIALIZED_CNT += 1
+        global_vars.MATERIALIZED_CNT += 1
 
     where_clause = ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]), zip(lp1[0], map(
         tuple_column_to_str_in_where_clause_2, zip(F1_list, f_value))))))
@@ -99,7 +99,7 @@ def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim
                                                       zip(V1_list, v_range_r))))))
 
     tuples_query = '''SELECT {},{},{} FROM MV_{} WHERE {};'''.format(
-        F2, V2, lp2[3], str(utils.MATERIALIZED_DICT[G_key][f_value_key]), where_clause
+        F2, V2, lp2[3], str(global_vars.MATERIALIZED_DICT[G_key][f_value_key]), where_clause
     )
 
     column_name = F2_list + V2_list + [lp2[3]]
@@ -151,18 +151,18 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
     else:
         agg_fun = gp[2].replace('_', '(') + ')'
 
-    if G_key not in utils.MATERIALIZED_DICT:
-        utils.MATERIALIZED_DICT[G_key] = dict()
+    if G_key not in global_vars.MATERIALIZED_DICT:
+        global_vars.MATERIALIZED_DICT[G_key] = dict()
 
-    if f_value_key not in utils.MATERIALIZED_DICT[G_key]:
-        utils.MATERIALIZED_DICT[G_key][f_value_key] = utils.MATERIALIZED_CNT
-        dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(utils.MATERIALIZED_CNT))
+    if f_value_key not in global_vars.MATERIALIZED_DICT[G_key]:
+        global_vars.MATERIALIZED_DICT[G_key][f_value_key] = global_vars.MATERIALIZED_CNT
+        dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(global_vars.MATERIALIZED_CNT))
         cur.execute(dv_query)
 
         cmv_query = '''
             CREATE VIEW MV_{} AS SELECT {}, {} as {} FROM {} WHERE {} GROUP BY {};
         '''.format(
-            str(utils.MATERIALIZED_CNT), G_key, agg_fun, gp[2], table_name,
+            str(global_vars.MATERIALIZED_CNT), G_key, agg_fun, gp[2], table_name,
             ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]),
                                   zip(gp[0], map(tuple_column_to_str_in_where_clause_2, zip(F1_list, f_value)))))),
             G_key
@@ -170,7 +170,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
         # logger.debug(cmv_query)
         cur.execute(cmv_query)
         conn.commit()
-        utils.MATERIALIZED_CNT += 1
+        global_vars.MATERIALIZED_CNT += 1
 
     where_clause = ' AND '.join(
         list(map(lambda x: "{} {}".format(x[0], x[1]), zip(gp[0], map(
@@ -180,7 +180,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
                                              map(tuple_column_to_str_in_where_clause_2, zip(V1_list, v_value))))))
 
     tuples_query = '''SELECT {} FROM MV_{} WHERE {};'''.format(
-        gp[2], str(utils.MATERIALIZED_DICT[G_key][f_value_key]), where_clause
+        gp[2], str(global_vars.MATERIALIZED_DICT[G_key][f_value_key]), where_clause
     )
     # logger.debug(tuples_query)
     cur.execute(tuples_query)
