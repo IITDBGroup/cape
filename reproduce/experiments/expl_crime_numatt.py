@@ -21,9 +21,9 @@ source_list = []
 test_id_list = []
 size_legend = ['800k', '400k', '200k', '100k', ' 50k', ' 25k']
 for test_id in range(1,2):
-    sct_df_prune = pd.read_csv('../expl_perf_exp/time_record/crime_pruning_top3_exp{}.csv'.format(str(test_id)),        
+    sct_df_prune = pd.read_csv('./expl_time_record/crime_pruning_top3_exp{}.csv'.format(str(test_id)),        
         names=['#attr', 'time'])
-    sct_df_no_prune = pd.read_csv('../expl_perf_exp/time_record/crime_no_pruning_top3_exp{}.csv'.format(str(test_id)),      
+    sct_df_no_prune = pd.read_csv('./expl_time_record/crime_no_pruning_top3_exp{}.csv'.format(str(test_id)),      
         names=['#attr', 'time'])
     
     for idx, row in sct_df_prune.iterrows():
