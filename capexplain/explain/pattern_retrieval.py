@@ -65,12 +65,12 @@ def find_patterns_refinement(global_patterns_dict, F_prime_set, V_set, agg_col, 
 def find_patterns_relevant(global_patterns_dict, t, conn, cur, query_table_name, cat_sim):
     res_list = []
     t_set = set(t.keys())
-    # logger.debug(global_patterns_dict[1].keys())
+    logger.debug(global_patterns_dict[1].keys())
     for v_key in global_patterns_dict[0]:
         V_set = set(v_key[1:-1].replace("'", '').split(', '))
         if not V_set.issubset(t_set):
             continue
-
+        logger.debug(v_key)
         for f_key in global_patterns_dict[0][v_key]:
             for pat in global_patterns_dict[0][v_key][f_key]:
                 F_set = set(f_key[1:-1].replace("'", '').split(', '))
