@@ -673,11 +673,36 @@ def score_of_explanation(t1, t2, cat_sim, num_dis_norm, dir, denominator = 1, lp
         # return score / float(denominator) * cnt1 / cnt2
         return [100 * score / float(denominator), t_dis, 0, deviation, float(denominator), t_dis_old]
 
+# def compare_tuple(t1, t2):
+#     flag1 = True
+#     for a in t1:
+#         # if (a != 'lambda' and a.find('_') == -1):
+#         if (a != 'lambda' and a != 'count'):
+#             if a not in t2:
+#                 flag1 = False
+#             elif t1[a] != t2[a]:
+#                 return 0
+#     flag2 = True
+#     for a in t2:
+#         # if (a != 'lambda' and a.find('_') == -1):
+#         if (a != 'lambda' and a != 'count'):
+#             if a not in t1:
+#                 flag2 = False
+#             elif t1[a] != t2[a]:
+#                 return 0
+    
+#     if flag1 and flag2:
+#         return -1
+#     elif flag1:
+#         return -1
+#     else:
+#         return 0
+
 def compare_tuple(t1, t2):
     flag1 = True
     for a in t1:
         # if (a != 'lambda' and a.find('_') == -1):
-        if (a != 'lambda' and a != 'count'):
+        if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
             if a not in t2:
                 flag1 = False
             elif t1[a] != t2[a]:
@@ -685,12 +710,12 @@ def compare_tuple(t1, t2):
     flag2 = True
     for a in t2:
         # if (a != 'lambda' and a.find('_') == -1):
-        if (a != 'lambda' and a != 'count'):
+        if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
             if a not in t1:
                 flag2 = False
             elif t1[a] != t2[a]:
                 return 0
-    
+
     if flag1 and flag2:
         return -1
     elif flag1:
