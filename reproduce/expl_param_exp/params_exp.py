@@ -913,7 +913,7 @@ def load_user_question(global_patterns, global_patterns_dict, uq_path=DEFAULT_QU
     '''
         load user questions
     '''
-    print(global_patterns_dict)
+    # print(global_patterns_dict)
     uq = []
 
     with open(uq_path, 'rt') as uqfile:
@@ -966,7 +966,6 @@ def load_patterns(cur, pat_table_name, query_table_name):
     
     cur.execute(load_query)
     res = cur.fetchall()
-    print(res)
     patterns = []
     pattern_dict = [{}, {}]
     for pat in res:
@@ -1122,6 +1121,7 @@ def main(argv=[]):
         for the in theta_list:
             for gs in global_supp_list:
                 exp_key = str(lam)[:4] + ',' + str(the)[:4] + ',' + str(gs)
+                print('Lambda, Theta, Global Support: {}, {}, {}'.format(str(lam), str(the), str(gs)))
                 ofile.write('Lambda, Theta, Global Support: {}, {}, {}\n'.format(str(lam), str(the), str(gs)))
                 expl_start = time.time()
                 regression_package = 'statsmodels'
@@ -1150,7 +1150,7 @@ def main(argv=[]):
                 # quality_dict[exp_key] = compute_expl_quality(standard_expl_dict, explanations_list)
                 quality_dict[exp_key] = compute_expl_quality_gt(cur, explanations_list)
                 expl_time_dict[exp_key] = sum(map(lambda x: x[1], score_computing_time_list))
-                print(quality_dict[exp_key], expl_time_dict[exp_key])
+                # print(quality_dict[exp_key], expl_time_dict[exp_key])
                 ofile.write('Running time: {}\n'.format(
                     # str(quality_dict[exp_key]),
                     exp_key,
