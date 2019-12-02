@@ -5,6 +5,8 @@ services:
     depends_on:
       - postgres
     container_name: "cape-system"
+    volumes:
+      - .:/experiment_results
     networks:
        app_net:
          ipv4_address: 17.17.0.2
