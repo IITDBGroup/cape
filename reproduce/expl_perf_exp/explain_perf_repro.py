@@ -45,11 +45,8 @@ class ExplConfig():
     DEFAULT_LAMBDA = 0.1
     DEFAULT_TOP_K = 10
 
-    # global MATERIALIZED_CNT
     MATERIALIZED_CNT = 0
-    # global MATERIALIZED_DICT
     MATERIALIZED_DICT = dict()
-    # global VISITED_DICT
     VISITED_DICT = dict()
 
     REGRESSION_PACKAGES = ['scikit-learn', 'statsmodels']
@@ -133,11 +130,11 @@ DEFAULT_EPSILON = 0.25
 DEFAULT_LAMBDA = 0.5
 TOP_K = 3
 PARAMETER_DEV_WEIGHT = 1.0
-global MATERIALIZED_CNT
+# global MATERIALIZED_CNT
 MATERIALIZED_CNT = 0
-global MATERIALIZED_DICT
+# global MATERIALIZED_DICT
 MATERIALIZED_DICT = dict()
-global VISITED_DICT
+# global VISITED_DICT
 VISITED_DICT = dict()
 
 
@@ -545,17 +542,17 @@ def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim
     G_key = str(G_list).replace("\'", '')[1:-1]
     f_value_key = str(f_value).replace("\'", '')[1:-1]
 
-    global MATERIALIZED_DICT
-    global MATERIALIZED_CNT
-    if G_key not in MATERIALIZED_DICT:
-        # global MATERIALIZED_DICT
-        MATERIALIZED_DICT[G_key] = dict()
+    # global MATERIALIZED_DICT
+    # global MATERIALIZED_CNT
+    if G_key not in ExplConfig.MATERIALIZED_DICT:
+        # global ExplConfig.MATERIALIZED_DICT
+        ExplConfig.MATERIALIZED_DICT[G_key] = dict()
         
-    if f_value_key not in MATERIALIZED_DICT[G_key]:
+    if f_value_key not in ExplConfig.MATERIALIZED_DICT[G_key]:
     # if True:
-        # global MATERIALIZED_DICT
-        MATERIALIZED_DICT[G_key][f_value_key] = MATERIALIZED_CNT
-        dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(MATERIALIZED_CNT))
+        # global ExplConfig.MATERIALIZED_DICT
+        ExplConfig.MATERIALIZED_DICT[G_key][f_value_key] = ExplConfig.MATERIALIZED_CNT
+        dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(ExplConfig.MATERIALIZED_CNT))
         cur.execute(dv_query)
         if lp2[3] == 'count':
             agg_fun = 'count(*)'
@@ -565,15 +562,15 @@ def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim
         cmv_query = '''
             CREATE VIEW MV_{} AS SELECT {}, {} as {} FROM {} WHERE {} GROUP BY {};
         '''.format(
-            str(MATERIALIZED_CNT), G_key, agg_fun, lp2[3], table_name,
+            str(ExplConfig.MATERIALIZED_CNT), G_key, agg_fun, lp2[3], table_name,
             ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]), 
                 zip(lp1[0], map(tuple_column_to_str_in_where_clause_2, zip(F1_list, f_value)))))),
             G_key
         )
         cur.execute(cmv_query)
         conn.commit()
-        # global MATERIALIZED_CNT
-        MATERIALIZED_CNT += 1
+        # global ExplConfig.MATERIALIZED_CNT
+        ExplConfig.MATERIALIZED_CNT += 1
 
 
     where_clause = ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]), zip(lp1[0], map(tuple_column_to_str_in_where_clause_2, zip(F1_list, f_value))))))
@@ -587,7 +584,7 @@ def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim
         where_clause += ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]), zip(lp1[2], 
             map(tuple_column_to_str_in_where_clause_4, zip(V1_list, v_range_r))))))
     tuples_query = '''SELECT {},{},{} FROM MV_{} WHERE {};'''.format(
-            F2, V2, lp2[3], str(MATERIALIZED_DICT[G_key][f_value_key]), where_clause
+            F2, V2, lp2[3], str(ExplConfig.MATERIALIZED_DICT[G_key][f_value_key]), where_clause
         )
     column_name = F2_list + V2_list + [lp2[3]]
     cur.execute(tuples_query)
@@ -978,8 +975,8 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             #     continue
             # print(955, uq['global_patterns'][i])
             # global VISITED_DICT
-            if pat_key in VISITED_DICT:
-                continue
+            # if pat_key in VISITED_DICT:
+            #     continue
             # global VISITED_DICT
             VISITED_DICT[pat_key] = True
 
@@ -1212,17 +1209,17 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
 
     global MATERIALIZED_DICT
     global MATERIALIZED_CNT
-    if G_key not in MATERIALIZED_DICT:
-        # global MATERIALIZED_DICT
-        MATERIALIZED_DICT[G_key] = dict()
+    if G_key not in ExplConfig.MATERIALIZED_DICT:
+        # global ExplConfig.MATERIALIZED_DICT
+        ExplConfig.MATERIALIZED_DICT[G_key] = dict()
         
-    if f_value_key not in MATERIALIZED_DICT[G_key]:
+    if f_value_key not in ExplConfig.MATERIALIZED_DICT[G_key]:
     # if True:
-        # global MATERIALIZED_DICT
-        MATERIALIZED_DICT[G_key][f_value_key] = MATERIALIZED_CNT
-        dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(MATERIALIZED_CNT))
+        # global ExplConfig.MATERIALIZED_DICT
+        ExplConfig.MATERIALIZED_DICT[G_key][f_value_key] = ExplConfig.MATERIALIZED_CNT
+        dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(ExplConfig.MATERIALIZED_CNT))
         cur.execute(dv_query)
-        # print(504, MATERIALIZED_CNT)
+        # print(504, ExplConfig.MATERIALIZED_CNT)
         if gp[2] == 'count':
             agg_fun = 'count(*)'
         else:
@@ -1230,7 +1227,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
         cmv_query = '''
             CREATE VIEW MV_{} AS SELECT {}, {} as {} FROM {} WHERE {} GROUP BY {};
         '''.format(
-            str(MATERIALIZED_CNT), G_key, agg_fun, gp[2], table_name,
+            str(ExplConfig.MATERIALIZED_CNT), G_key, agg_fun, gp[2], table_name,
             ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]), 
                 zip(gp[0], map(tuple_column_to_str_in_where_clause_2, zip(F1_list, f_value)))))),
             G_key
@@ -1238,8 +1235,8 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
         # print(585, cmv_query)
         cur.execute(cmv_query)
         conn.commit()
-        # global MATERIALIZED_CNT
-        MATERIALIZED_CNT += 1
+        # global ExplConfig.MATERIALIZED_CNT
+        ExplConfig.MATERIALIZED_CNT += 1
 
 
     where_clause = ' AND '.join(
@@ -1249,7 +1246,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
                 zip(gp[1], map(tuple_column_to_str_in_where_clause_2, zip(V1_list, v_value))))))
 
     tuples_query = '''SELECT {} FROM MV_{} WHERE {};'''.format(
-            gp[2], str(MATERIALIZED_DICT[G_key][f_value_key]), where_clause
+            gp[2], str(ExplConfig.MATERIALIZED_DICT[G_key][f_value_key]), where_clause
         )
     # print(604, tuples_query)
     cur.execute(tuples_query)
@@ -1569,9 +1566,9 @@ def main(argv=[]):
         ofile.write('------------------------\n\n')
     ofile.close()
 
-    for g_key in MATERIALIZED_DICT:
-        for fv_key in MATERIALIZED_DICT[g_key]:
-            dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(MATERIALIZED_DICT[g_key][fv_key]))
+    for g_key in ExplConfig.MATERIALIZED_DICT:
+        for fv_key in ExplConfig.MATERIALIZED_DICT[g_key]:
+            dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(ExplConfig.MATERIALIZED_DICT[g_key][fv_key]))
             cur.execute(dv_query)
             conn.commit()
 
