@@ -47,6 +47,7 @@ class ExplConfig(DictLike):
     MATERIALIZED_DICT = dict()
     # global VISITED_DICT
     VISITED_DICT = dict()
+    prune_cnt = 0
 
     REGRESSION_PACKAGES = ['scikit-learn', 'statsmodels']
 
@@ -324,6 +325,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
         if ecf.pruning and tkheap.HeapSize() == ecf.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
             # prune
             print('326 Prune')
+            ExplConfig.prune_cnt += 1
             continue
 
         lp2_list = get_local_patterns(gp2[0], None, gp2[1], gp2[2], gp2[3], t_prime, ecf.conn, ecf.cur, 
@@ -354,6 +356,7 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
             if ecf.pruning and tkheap.HeapSize() == ecf.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
                 # prune
                 print('355 Prune')
+                ExplConfig.prune_cnt += 1
                 continue
             f_key = str(lp3[1]).replace('\'', '')[1:-1]
             f_key = f_key.replace('.0', '')
@@ -502,8 +505,10 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                         topK_heap.Push(expl_temp)
                         top_k_lists[i][-1].append(expl_temp)
                         # print(t_t, t, compare_tuple(t_t, t))
-                    if s[-1] < dist_lb:
-                        dist_lb = s[-1]
+                    # if s[-1] < dist_lb:
+                    #     dist_lb = s[-1]
+                    if s[1] < dist_lb:
+                        dist_lb = s[1]
                         # use raw distance (without penalty on missing attributes) as the lower bound
                     if abs(s[2]) > dev_ub:
                         dev_ub = abs(s[2])
@@ -525,6 +530,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             # prune
             if ecf.pruning and topK_heap.HeapSize() == ecf.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
                 print('526 Prune')
+                ExplConfig.prune_cnt += 1
                 continue
             top_k_lists[i][-1] += DrillDown(global_patterns_dict, local_patterns[i],
                                             F_set, T_set.difference(F_set.union(V_set)), V_set, t_coarser_copy,
@@ -812,7 +818,7 @@ class ExplanationGenerator:
         ecf.MATERIALIZED_DICT = dict()
         ecf.MATERIALIZED_CNT = 0
 
-
+        logger.debug(ExplConfig.prune_cnt)
         ofile = sys.stdout
         if ecf.outfile != '':
             ofile = open(ecf.outfile, 'w')
