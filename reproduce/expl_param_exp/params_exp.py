@@ -34,9 +34,6 @@ class global_vars:
     MATERIALIZED_CNT = 0
     VISITED_DICT = dict()
 
-from explain.pattern_retrieval import find_patterns_relevant, find_patterns_refinement, load_patterns
-from explain.tuple_retrieval import get_tuples_by_F_V
-
 
 TEST_ID = '_7'
 DEFAULT_QUESTION_PATH = './exp_parameter/user_question_expl_gt_7.txt'
@@ -55,6 +52,326 @@ DEFAULT_AGGREGATE_COLUMN = '*'
 DEFAULT_PORT = 5436
 TOP_K = 10
 
+def get_tuples_by_F_V(lp1, lp2, f_value, v_value, conn, cur, table_name, cat_sim):
+    def tuple_column_to_str_in_where_clause_2(col_value):
+        # logger.debug(col_value)
+        # logger.debug(cat_sim.is_categorical(col_value[0]))
+        if cat_sim.is_categorical(col_value[0]) or col_value[0] == 'year':
+            # return "like '%" + (
+            #     str(col_value[1]).replace('.0', '') if col_value[1][-2:] == '.0' else str(col_value[1])) + "%'"
+            return "= '" + str(col_value[1]) + "'"
+        else:
+            if is_float(col_value[1]):
+                return '=' + str(col_value[1])
+            else:
+                # return "like '%" + str(col_value[1]) + "%'"
+                return "= '" + str(col_value[1]) + "'"
+
+    def tuple_column_to_str_in_where_clause_3(col_value):
+        # logger.debug(col_value)
+        # logger.debug(cat_sim.is_categorical(col_value[0]))
+        if cat_sim.is_categorical(col_value[0]) or col_value[0] == 'year':
+            # return "like '%" + (
+            #     str(col_value[1]).replace('.0', '') if col_value[1][-2:] == '.0' else str(col_value[1])) + "%'"
+            return "= '" + str(col_value[1]) + "'"
+        else:
+            if is_float(col_value[1]):
+                return '>=' + str(col_value[1])
+            else:
+                return "= '" + str(col_value[1]) + "'"
+
+    def tuple_column_to_str_in_where_clause_4(col_value):
+        # logger.debug(col_value)
+        # logger.debug(cat_sim.is_categorical(col_value[0]))
+        if cat_sim.is_categorical(col_value[0]) or col_value[0] == 'year':
+            # return "like '%" + (
+            #     str(col_value[1]).replace('.0', '') if col_value[1][-2:] == '.0' else str(col_value[1])) + "%'"
+            return "= '" + str(col_value[1]) + "'"
+        else:
+            if is_float(col_value[1]):
+                return '<=' + str(col_value[1])
+            else:
+                return "= '" + str(col_value[1]) + "'"
+
+    V1 = str(lp1[2]).replace("\'", '')[1:-1]
+    F1 = str(lp1[0]).replace("\'", '')[1:-1]
+    F1_list = F1.split(', ')
+    V1_list = V1.split(', ')
+
+    F2 = str(lp2[0]).replace("\'", '')[1:-1]
+    V2 = str(lp2[2]).replace("\'", '')[1:-1]
+    F2_list = F2.split(', ')
+    V2_list = V2.split(', ')
+    G_list = sorted(F2_list + V2_list)
+    G_key = str(G_list).replace("\'", '')[1:-1]
+    f_value_key = str(f_value).replace("\'", '')[1:-1]
+
+    if lp2[3] == 'count':
+        agg_fun = 'count(*)'
+    else:
+        agg_fun = lp2[3].replace('_', '(') + ')'
+
+    if G_key not in global_vars.MATERIALIZED_DICT:
+        global_vars.MATERIALIZED_DICT[G_key] = dict()
+
+    if f_value_key not in global_vars.MATERIALIZED_DICT[G_key]:
+        global_vars.MATERIALIZED_DICT[G_key][f_value_key] = global_vars.MATERIALIZED_CNT
+        dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(global_vars.MATERIALIZED_CNT))
+        cur.execute(dv_query)
+        cmv_query = '''
+            CREATE VIEW MV_{} AS SELECT {}, {} as {} FROM {} WHERE {} GROUP BY {};
+        '''.format(
+            str(global_vars.MATERIALIZED_CNT), G_key, agg_fun, lp2[3], table_name,
+            ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]),
+                                  zip(lp1[0], map(tuple_column_to_str_in_where_clause_2, zip(F1_list, f_value)))))),
+            G_key
+        )
+
+        cur.execute(cmv_query)
+        conn.commit()
+        global_vars.MATERIALIZED_CNT += 1
+
+    where_clause = ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]), zip(lp1[0], map(
+        tuple_column_to_str_in_where_clause_2, zip(F1_list, f_value))))))
+
+    if v_value is not None:
+        where_clause += ' AND '
+        v_range_l = map(lambda x: v_value[0][x] + v_value[1][x][0], range(len(v_value[0])))
+        v_range_r = map(lambda x: v_value[0][x] + v_value[1][x][1], range(len(v_value[0])))
+        where_clause += ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]),
+                                              zip(lp1[2],
+                                                  map(tuple_column_to_str_in_where_clause_3,
+                                                      zip(V1_list, v_range_l))))))
+        where_clause += ' AND '
+        where_clause += ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]),
+                                              zip(lp1[2],
+                                                  map(tuple_column_to_str_in_where_clause_4,
+                                                      zip(V1_list, v_range_r))))))
+
+    tuples_query = '''SELECT {},{},{} FROM MV_{} WHERE {};'''.format(
+        F2, V2, lp2[3], str(global_vars.MATERIALIZED_DICT[G_key][f_value_key]), where_clause
+    )
+
+    column_name = F2_list + V2_list + [lp2[3]]
+    cur.execute(tuples_query)
+    # logger.debug(tuples_query)
+    tuples = []
+    tuples_dict = dict()
+    res = cur.fetchall()
+    min_agg = 1e10
+    max_agg = -1e10
+    for row in res:
+        min_agg = min(min_agg, row[-1])
+        max_agg = max(max_agg, row[-1])
+        tuples.append(dict(zip(map(lambda x: x, column_name), row)))
+        fv = get_F_value(lp2[0], tuples[-1])
+        f_key = str(fv).replace('\'', '')[1:-1]
+        if f_key not in tuples_dict:
+            tuples_dict[f_key] = []
+        tuples_dict[f_key].append(tuples[-1])
+    # logger.debug(tuples_dict)
+    return tuples, (min_agg, max_agg), tuples_dict
+
+
+def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
+    def tuple_column_to_str_in_where_clause_2(col_value):
+        # logger.debug(col_value)
+        # logger.debug(cat_sim.is_categorical(col_value[0]))
+        if cat_sim.is_categorical(col_value[0]) or col_value[0] == 'year':
+            # return "like '%" + (
+            #     str(col_value[1]).replace('.0', '') if col_value[1][-2:] == '.0' else str(col_value[1])) + "%'"
+            return "= '" + str(col_value[1]) + "'"
+        else:
+            if is_float(col_value[1]):
+                return '=' + str(col_value[1])
+            else:
+                # return "like '%" + str(col_value[1]) + "%'"
+                return "= '" + str(col_value[1]) + "'"
+
+    F1 = str(gp[0]).replace("\'", '')[1:-1]
+    V1 = str(gp[1]).replace("\'", '')[1:-1]
+    F1_list = F1.split(', ')
+    V1_list = V1.split(', ')
+    G_list = sorted(F1_list + V1_list)
+    G_key = str(G_list).replace("\'", '')[1:-1]
+    f_value_key = str(f_value).replace("\'", '')[1:-1]
+
+    if gp[2] == 'count':
+        agg_fun = 'count(*)'
+    else:
+        agg_fun = gp[2].replace('_', '(') + ')'
+
+    if G_key not in global_vars.MATERIALIZED_DICT:
+        global_vars.MATERIALIZED_DICT[G_key] = dict()
+
+    if f_value_key not in global_vars.MATERIALIZED_DICT[G_key]:
+        global_vars.MATERIALIZED_DICT[G_key][f_value_key] = global_vars.MATERIALIZED_CNT
+        dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(global_vars.MATERIALIZED_CNT))
+        cur.execute(dv_query)
+
+        cmv_query = '''
+            CREATE VIEW MV_{} AS SELECT {}, {} as {} FROM {} WHERE {} GROUP BY {};
+        '''.format(
+            str(global_vars.MATERIALIZED_CNT), G_key, agg_fun, gp[2], table_name,
+            ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]),
+                                  zip(gp[0], map(tuple_column_to_str_in_where_clause_2, zip(F1_list, f_value)))))),
+            G_key
+        )
+        # logger.debug(cmv_query)
+        cur.execute(cmv_query)
+        conn.commit()
+        global_vars.MATERIALIZED_CNT += 1
+
+    where_clause = ' AND '.join(
+        list(map(lambda x: "{} {}".format(x[0], x[1]), zip(gp[0], map(
+            tuple_column_to_str_in_where_clause_2, zip(F1_list, f_value)))))) + ' AND ' + \
+                   ' AND '.join(list(map(lambda x: "{} {}".format(x[0], x[1]),
+                                         zip(gp[1],
+                                             map(tuple_column_to_str_in_where_clause_2, zip(V1_list, v_value))))))
+
+    tuples_query = '''SELECT {} FROM MV_{} WHERE {};'''.format(
+        gp[2], str(global_vars.MATERIALIZED_DICT[G_key][f_value_key]), where_clause
+    )
+    # logger.debug(tuples_query)
+    cur.execute(tuples_query)
+    res = cur.fetchall()
+    if len(res) == 0:
+        return []
+    return res[0]
+
+def get_local_patterns(F, Fv, V, agg_col, model_type, t, conn, cur, local_pat_table_name):
+
+    if model_type is not None:
+        mt_predicate = " AND model='{}'".format(model_type)
+    else:
+        mt_predicate = ''
+    if Fv is not None:
+        local_pattern_query = '''SELECT * FROM {} WHERE array_to_string(fixed, ', ')='{}' AND 
+            REPLACE(array_to_string(fixed_value, ', '), '"', '') LIKE '%{}%' AND 
+            array_to_string(variable, ', ') = '{}' AND
+            agg='{}'{};
+        '''.format(
+            local_pat_table_name, str(F).replace("\'", '').replace('[', '').replace(']', ''),
+            str(Fv).replace("\'", '').replace('[', '').replace(']', ''),
+            str(V).replace("\'", '').replace('[', '').replace(']', ''),
+            agg_col,
+            mt_predicate
+        )
+    else:
+        tF = get_F_value(F, t)
+        local_pattern_query = '''SELECT * FROM {} WHERE array_to_string(fixed, ', ')='{}' AND
+            REPLACE(array_to_string(fixed_value, ', '), '"', '') LIKE '%{}%' AND array_to_string(variable, ', ')='{}' AND
+            agg='{}'{};
+        '''.format(
+            local_pat_table_name, str(F).replace("\'", '').replace('[', '').replace(']', ''),
+            '%'.join(list(map(str, tF))),
+            str(V).replace("\'", '').replace('[', '').replace(']', ''),
+            agg_col,
+            mt_predicate
+        )
+
+    cur.execute(local_pattern_query)
+    local_patterns = cur.fetchall()
+
+    return local_patterns
+
+
+def find_patterns_refinement(global_patterns_dict, F_prime_set, V_set, agg_col, reg_type):
+    # pattern refinement can have different model types
+    # e.g., JH’s #pub increases linearly, but JH’s #pub on VLDB remains a constant
+    gp_list = []
+    v_key = str(sorted(list(V_set)))
+    if v_key not in global_patterns_dict[0]:
+        return []
+    for f_key in global_patterns_dict[0][v_key]:
+        if f_key.find('arrest') != -1 or f_key.find('domestic') != -1:
+            continue
+        F_key_set = set(f_key[1:-1].replace("'", '').split(', '))
+        if F_prime_set.issubset(F_key_set):
+            for pat in global_patterns_dict[0][v_key][f_key]:
+                if pat[2] == agg_col:
+                    pat_key = f_key + '|,|' + v_key + '|,|' + pat[2] + '|,|' + pat[3]
+
+                    gp_list.append(pat)
+                    if pat_key not in global_vars.VISITED_DICT:
+                        global_vars.VISITED_DICT[pat_key] = True
+    return gp_list
+
+
+def find_patterns_relevant(global_patterns_dict, t, conn, cur, query_table_name, cat_sim):
+    res_list = []
+    t_set = set(t.keys())
+    for v_key in global_patterns_dict[0]:
+        V_set = set(v_key[1:-1].replace("'", '').split(', '))
+        if not V_set.issubset(t_set):
+            continue
+
+        for f_key in global_patterns_dict[0][v_key]:
+            for pat in global_patterns_dict[0][v_key][f_key]:
+                F_set = set(f_key[1:-1].replace("'", '').split(', '))
+                if not F_set.issubset(t_set):
+                    continue
+                # if pat[2] not in t and pat[2] + '_star' not in t:
+                #     continue
+                if pat[2] not in t:
+                    continue
+
+                agg_value = get_tuples_by_gp_uq(pat, get_F_value(pat[0], t), get_V_value(pat[1], t),
+                                                conn, cur, query_table_name, cat_sim)
+                if len(agg_value) > 0:
+                    res_list.append([pat, agg_value[0]])
+
+    res_list = sorted(res_list, key=lambda x: (len(x[0][0]) + len(x[0][1]), x[1]))
+    g_pat_list = list(map(lambda x: x[0], res_list))
+    return g_pat_list
+
+
+def load_patterns(cur, pat_table_name, query_table_name, theta_thres=0.1, lambda_thres=0.1):
+    '''
+        load pre-defined constraints(currently only fixed attributes and variable attributes)
+    '''
+    global_pattern_table = pat_table_name + '_global'
+    load_query = "SELECT * FROM {};".format(global_pattern_table)
+
+    cur.execute(load_query)
+    res = cur.fetchall()
+    patterns = []
+    pattern_dict = [{}, {}]
+    for pat in res:
+        if 'date' in pat[0] or 'date' in pat[1]:
+            continue
+        if 'id' in pat[0] or 'id' in pat[1]:
+            continue
+        # if 'year' in pat[0]:
+        #     continue
+        # if 'name' in pat[1] or 'venue' in pat[1]:
+        #     continue
+        if 'primary_type' in pat[1] or 'description' in pat[1] or 'location_description' in pat[1] or 'community_area' in pat[1] or 'beat' in pat[1]:
+            continue
+
+        patterns.append(list(pat))
+
+        f_key = str(sorted(patterns[-1][0]))
+        v_key = str(sorted(patterns[-1][1]))
+        if v_key not in pattern_dict[0]:
+            pattern_dict[0][v_key] = {}
+        if f_key not in pattern_dict[0][v_key]:
+            pattern_dict[0][v_key][f_key] = []
+        pattern_dict[0][v_key][f_key].append(patterns[-1])
+        if f_key not in pattern_dict[1]:
+            pattern_dict[1][f_key] = {}
+        if v_key not in pattern_dict[1][f_key]:
+            pattern_dict[1][f_key][v_key] = []
+        pattern_dict[1][f_key][v_key].append(patterns[-1])
+    schema_query = '''select column_name, data_type, character_maximum_length
+        from INFORMATION_SCHEMA.COLUMNS where table_name=\'{}\''''.format(query_table_name);
+    cur.execute(schema_query)
+    res = cur.fetchall()
+    schema = {}
+    for s in res:
+        schema[s[0]] = s[1]
+
+    return patterns, schema, pattern_dict
 
 
 
