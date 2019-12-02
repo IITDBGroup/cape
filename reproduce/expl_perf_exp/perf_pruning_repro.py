@@ -22,12 +22,10 @@ import datetime
 
 sys.path.append('./')
 # sys.path.append('../')
-from similarity_calculation.category_similarity_matrix import *
-from similarity_calculation.category_network_embedding import *
-from similarity_calculation.category_similarity_naive import *
+from similarity.category_similarity_matrix import *
+from similarity.category_network_embedding import *
+from similarity.category_similarity_naive import *
 from utils import *
-from constraint_definition.LocalRegressionConstraint import *
-from PatternDetection.PatternFinderForExpl import PatternFinder
 
 TEST_ID = '_1'
 
@@ -77,7 +75,8 @@ DEFAULT_PATTERN_TABLE = 'dev.crime_subset'
 # DEFAULT_PATTERN_TABLE = 'crime_2017_2'
 # DEFAULT_QUESTION_PATH = '../input/user_question_crime_qual_small.csv'
 # DEFAULT_QUESTION_PATH = '../input/user_question_crime_subset_gen_ordered_6.csv'
-DEFAULT_QUESTION_PATH = '../input/user_question_crime_subset_gen_new_6.csv'
+# DEFAULT_QUESTION_PATH = '../input/user_question_crime_subset_gen_new_6.csv'
+DEFAULT_QUESTION_PATH = './input/crime_small.csv'
 # DEFAULT_QUERY_RESULT_TABLE = 'crime_exp'
 # DEFAULT_PATTERN_TABLE = 'dev.crime_exp'
 # # DEFAULT_PATTERN_TABLE = 'crime_2017_2'
@@ -138,6 +137,7 @@ def build_local_pattern(g_pat, t, tF, conn, cur, table_name):
         'linear', theta_l, str(describe).replace("'",""), str(lr.params).replace("'", "")]
     print(l_pat)
     return l_pat
+
 
 def predict(local_pattern, t):
     # print('In predict ', local_pattern)
@@ -212,123 +212,6 @@ def predict(local_pattern, t):
         # predictY = sum(map(lambda x: x[0]*x[1], zip(params[:-1], v))) + params[-1]
 
     return predictY
-
-def validate_local_regression_pattern(local_pattern, epsilon, t, dir, agg_col, cur, table_name):
-    """Check the validicity of the user question under a local regression constraint
-
-    Args:
-        local_pattern:
-        t: target tuple in Q(R)
-        dir: whether user thinks t[agg_col] is high or low
-        agg_col: the column of aggregated value
-    Returns:
-        the actual direction that t[agg_col] compares to its expected value wrt to local_pattern
-    """
-    test_tuple = {}
-    # print('PAT', local_pattern)
-    if isinstance(local_pattern, dict):
-        return -2, 0
-    for v in local_pattern[2]:
-        test_tuple[v] = t[v.replace(' ', '')]
-    # if regression_package == 'scikit-learn':
-    #     for v in local_con.var_attr:
-    #         if v in data['le']:
-    #             test_tuple[v] = data['le'][v].transform(test_tuple[v])
-    #             test_tuple[v] = data['ohe'][v].transform(test_tuple[v].reshape(-1, 1))
-    #         else:
-    #             test_tuple[v] = np.array(test_tuple[v]).reshape(-1, 1)
-        
-    #     test_tuple = np.concatenate(list(test_tuple.values()), axis=-1)
-    #     predictY = local_con.predict_sklearn(test_tuple)
-    # else:
-    #     predictY = local_con.predict(pandas.DataFrame(test_tuple))
-    
-    if agg_col not in t:
-        # agg_col = '{}({})'.format(local_pattern[4], local_pattern[3])
-        agg_col = local_pattern[3]
-    predictY = predict(local_pattern, test_tuple)
-    # print(local_pattern)
-    # print(181, t, test_tuple, predictY)
-    if t[agg_col] < (1-epsilon) * predictY:
-        # print(test_tuple, predictY)
-        return -dir, predictY
-    elif t[agg_col] > (1+epsilon) * predictY:
-        # print(test_tuple, predictY)
-        return dir, predictY
-    else:
-        return 0, predictY
-        
-def tuple_similarity(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
-    """Compute the similarity between two tuples t1 and t2 on their attributes var_attr
-
-    Args:
-        t1, t2: two tuples
-        var_attr: variable attributes
-        cat_sim: the similarity measure for categorical attributes
-        num_dis_norm: normalization terms for numerical attributes
-        agg_col: the column of aggregated value
-    Returns:
-        the Gower similarity between t1 and t2
-    """
-    sim = 0.0
-    cnt = 0
-    if var_attr is None:
-        var_attr = t1.keys()
-    for v_col in var_attr:
-        col = v_col.replace(' ', '')
-        
-        if (col not in t1 or col not in t2) and col != agg_col and col != 'lambda':
-            # if col == 'name':
-            #     cnt += 3
-            # else:
-                # cnt += 1
-            cnt += 1
-            continue
-        if cat_sim.is_categorical(col):
-            t1_key = t1[col].replace("'", '').replace(' ', '')
-            t2_key = t2[col].replace("'", '').replace(' ', '')
-            s = cat_sim.compute_similarity(col, t1_key, t2_key, agg_col)
-            w = 1
-            if col == 'name':
-                w  = 5
-            sim += w * s
-            cnt += w * 1
-            # print(1, col, sim, t1[col], t2[col])
-        else:
-            # print( num_dis_norm[col])
-            if col not in num_dis_norm or num_dis_norm[col]['range'] is None:
-                if t1[col] == t2[col]:
-                    sim += 1
-                    cnt += 1
-            else:
-                if col != agg_col and col != 'index':
-                    # temp = (t1[col] - t2[col]) * (t1[col] - t2[col]) / (num_dis_norm[col]['range'] * num_dis_norm[col]['range'])
-                    temp = abs(t1[col] - t2[col]) / (num_dis_norm[col]['range'])
-                    # temp = abs(t1[col] - t2[col])
-                    # if t1[col] == t2[col]:
-                    #     sim += 1
-                    # else:
-                    #     sim += max(math.log(1-temp), 0)
-                    # ((E^x-x) -1) / (E - 2)
-                    # x = 1 - temp
-                    # y = ((math.exp(x) - x) - 1) / (math.exp(1) - 2)
-                    x = temp
-                    if x == 0:
-                        y = 1
-                    else:
-                        y = (1-x) * (1-x)
-                        # y = 1-1/(1+(math.exp(-x+1)))
-                        # y = (1-1/(1+(math.exp(-x+1)))) * (x / (num_dis_norm[col]['range']))
-                    w = 5
-                    sim += w * y
-                    cnt += w
-            
-                    # sim += x * x * x * x
-            # print(2, col, sim, t1[col], t2[col])
-        
-    # print(t1, t2, var_attr)
-    return (sim) / (cnt )
-
 
 def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
     """Compute the similarity between two tuples t1 and t2 on their attributes var_attr
@@ -1595,8 +1478,7 @@ def main(argv=[]):
 
     load_start = time.time()
     global_patterns, schema, global_patterns_dict = load_patterns(cur, pattern_table, query_result_table)
-    pf = PatternFinder(engine.connect(), query_result_table, fit=True, theta_c=0.5, theta_l=0.25, lamb=DEFAULT_LAMBDA, dist_thre=0.9,  supp_l=10,supp_g=1)
-    Q, global_patterns, global_patterns_dict = load_user_question(global_patterns, global_patterns_dict, user_question_file, schema, cur, pattern_table, query_result_table, pf)
+    Q, global_patterns, global_patterns_dict = load_user_question(global_patterns, global_patterns_dict, user_question_file, schema, cur, pattern_table, query_result_table)
         
 
     # category_similarity = CategorySimilarityMatrix(EXAMPLE_SIMILARITY_MATRIX_PATH, schema)
@@ -1708,7 +1590,7 @@ def main(argv=[]):
 
     att_size_list = []
     sct_list = []
-    time_o_file = open('../time_record_rev/crime_perf/crime_expl_time_prune_sort_{}{}_new.csv'.format(str(TOP_K), TEST_ID), 'w')
+    time_o_file = open('./time_record_old/crime_perf/crime_expl_time_prune_sort_{}{}_new.csv'.format(str(TOP_K), TEST_ID), 'w')
     for sct in score_computing_time_list:
         att_size_list.append(len(list(sct[0].keys())) - 2)
         sct_list.append(sct[1])
