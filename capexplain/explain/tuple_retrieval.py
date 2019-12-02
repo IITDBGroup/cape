@@ -167,7 +167,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
                                   zip(gp[0], map(tuple_column_to_str_in_where_clause_2, zip(F1_list, f_value)))))),
             G_key
         )
-        # logger.debug(cmv_query)
+        logger.debug(cmv_query)
         cur.execute(cmv_query)
         conn.commit()
         ExplConfig.MATERIALIZED_CNT += 1
@@ -182,7 +182,7 @@ def get_tuples_by_gp_uq(gp, f_value, v_value, conn, cur, table_name, cat_sim):
     tuples_query = '''SELECT {} FROM MV_{} WHERE {};'''.format(
         gp[2], str(ExplConfig.MATERIALIZED_DICT[G_key][f_value_key]), where_clause
     )
-    # logger.debug(tuples_query)
+    logger.debug(tuples_query)
     cur.execute(tuples_query)
     res = cur.fetchall()
     if len(res) == 0:
