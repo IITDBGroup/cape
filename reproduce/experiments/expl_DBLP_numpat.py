@@ -25,11 +25,11 @@ test_id_used = [1,2,3,4,5,7]
 
 for test_id in test_id_used:
 # sct_df = pandas.DataFrame({'#attr': att_size_list, 'time':sct_list})
-	sct_df_prune_3 = pd.read_csv('../expl_perf_exp/time_record/dblp_pruning_top3_exp_{}.csv'.format(str(test_id)),		
+	sct_df_prune_3 = pd.read_csv('./dblp_pruning_top3_exp_{}.csv'.format(str(test_id)),		
 		names=['#attr', 'time'])
-	sct_df_prune_10 = pd.read_csv('../expl_perf_exp/time_record/dblp_pruning_top10_exp_{}.csv'.format(str(test_id)),		
+	sct_df_prune_10 = pd.read_csv('./dblp_pruning_top10_exp_{}.csv'.format(str(test_id)),		
 		names=['#attr', 'time'])
-	sct_df_no_prune = pd.read_csv('../expl_perf_exp/time_record/dblp_no_pruning_top3_exp_{}.csv'.format(str(test_id)),		
+	sct_df_no_prune = pd.read_csv('./dblp_no_pruning_top3_exp_{}.csv'.format(str(test_id)),		
 		names=['#attr', 'time'])
 
 	
@@ -57,48 +57,6 @@ for string in list(tot['#patterns']):
 	tempcol.append(int(string[:-1]))
 tot['temp']=tempcol
 tot=tot.sort_values('temp').reset_index(drop=True)
-print(tot)
-##tot_list=[[],[],[]]
-##for idx, val in means.iterrows():
-##    tot_list[0].append(val['Prune(Top-10)'])
-##    tot_list[1].append(val['Prune(Top-3)'])
-##    tot_list[2].append(val['No Prune'])
-##means = gp.mean()
-##errors = gp.std()
-##min_data = gp.min()
-##max_data = gp.max()
-##err = [[[],[]],[[],[]],[[],[]]]
-##mean_list = [[],[],[]]
-##for idx, val in means.iterrows():
-##    mean_list[0].append(val['Prune(Top-10)'])
-##    mean_list[1].append(val['Prune(Top-3)'])
-##    mean_list[2].append(val['No Prune'])
-##cnt = 0
-##for idx, val in min_data.iterrows():  # Iterate over bar groups (represented as columns)
-##    # print(idx, val['Prune'])
-##    # err[int(idx)-2].append([])
-##    err[1][0].append(mean_list[0][cnt] - val['Prune(Top-10)'])
-##    err[2][0].append(mean_list[1][cnt] - val['Prune(Top-3)'])
-##    err[0][0].append(mean_list[2][cnt] - val['No Prune'])
-##    cnt += 1
-##cnt = 0
-##for idx, val in max_data.iterrows():  # Iterate over bar groups (represented as columns)
-##    # print(idx, val['Prune'])
-##    err[1][1].append(val['Prune(Top-10)'] - mean_list[0][cnt])
-##    err[2][1].append(val['Prune(Top-3)'] - mean_list[1][cnt])
-##    err[0][1].append(val['No Prune'] - mean_list[2][cnt])
-##    cnt += 1
-##
-
-
-# PLOTTING
-
-##fig, ax = plt.subplots()
-### means.plot.bar(yerr=errors, ax=ax, capsize=4.5)
-##means.plot.bar(yerr=err, ax=ax, capsize=4.5)
-### ax.set_title('a')
-##fig.subplots_adjust(bottom=0.15)
-###fig.suptitle('#Patterns vs. Time', fontsize=14, fontweight='bold')
 
 # plot settings
 mymarker=['s','o','v','x']

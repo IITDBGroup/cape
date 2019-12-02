@@ -41,13 +41,9 @@ class ExplConfig(DictLike):
     DEFAULT_LAMBDA = 0.1
     DEFAULT_TOP_K = 10
 
-    # global MATERIALIZED_CNT
     MATERIALIZED_CNT = 0
-    # global MATERIALIZED_DICT
     MATERIALIZED_DICT = dict()
-    # global VISITED_DICT
     VISITED_DICT = dict()
-    prune_cnt = 0
 
     REGRESSION_PACKAGES = ['scikit-learn', 'statsmodels']
 
@@ -147,10 +143,8 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
         the Gower similarity between t1 and t2
     """
     dis = 0.0
-    cnt = 0
     if var_attr is None:
         var_attr = t1.keys()
-    max_dis = 0.0
 
     for v_col in var_attr:
         col = v_col.replace(' ', '')
@@ -160,26 +154,22 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
             #     dis += 10000
             # else:
             #     dis += 100
-            # cnt += 1
             continue
         if col not in t1 or col not in t2:
             # if col == 'name':
             #     dis += 10000
             # else:
             #     dis += 100
-            # cnt += 1
             continue
 
         if col == 'name':
             if t1[col] != t2[col]:
                 dis += 10000
-            cnt += 1
             continue
 
         if col == 'venue' or col == 'pubkey':
             if t1[col] != t2[col]:
                 dis += 0.25
-            cnt += 1
             continue
 
         if cat_sim.is_categorical(col):
@@ -198,10 +188,6 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
             else:
                 dis += (((1.0 / s)) * ((1.0 / s))) / 100
                 # dis += (1-s) * (1-s)
-                if math.sqrt((((1.0 / s)) * ((1.0 / s)) - 1) / 100) > max_dis:
-                    max_dis = math.sqrt((((1.0 / s)) * ((1.0 / s)) - 1) / 100)
-
-            cnt += 1
         else:
             if col not in num_dis_norm or num_dis_norm[col]['range'] is None:
                 if t1[col] == t2[col]:
@@ -218,10 +204,7 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
                         temp = abs(float(t1[col]) - float(t2[col]))
 
                     dis += 0.5 * math.pow(temp, 8)
-                    if temp > max_dis:
-                        max_dis = temp
-                cnt += 1
-
+                    
     return math.pow(dis, 0.5)
 
 
@@ -313,9 +296,6 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
     if len(gp2_list) == 0:
         return []
     for gp2 in gp2_list:
-        # if str(gp2[0]).find('primary_type') == -1 or str(gp2[0]).find('community_area') == -1 or str(gp2[1]).find('year') == -1:
-        #     continue
-
         if dir == 1:
             dev_ub = abs(gp2[7])
         else:
@@ -324,8 +304,6 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
         # print(888, dev_ub, k_score, 100 * float(dev_ub) / (dist_lb * float(norm_lb)))
         if ecf.pruning and tkheap.HeapSize() == ecf.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
             # prune
-            print('326 Prune')
-            ExplConfig.prune_cnt += 1
             continue
 
         lp2_list = get_local_patterns(gp2[0], None, gp2[1], gp2[2], gp2[3], t_prime, ecf.conn, ecf.cur, 
@@ -334,8 +312,6 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
             continue
         lp2 = lp2_list[0]
 
-        # if len(lp2[0]) == 2 and len(lp2[2]) == 1:
-        #     logger.debug(lp2)
         f_value = get_F_value(local_pattern[0], t_prime)
 
         tuples_same_F, agg_range, tuples_same_F_dict = get_tuples_by_F_V(local_pattern, lp2, f_value,
@@ -355,8 +331,6 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
 
             if ecf.pruning and tkheap.HeapSize() == ecf.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
                 # prune
-                print('355 Prune')
-                ExplConfig.prune_cnt += 1
                 continue
             f_key = str(lp3[1]).replace('\'', '')[1:-1]
             f_key = f_key.replace('.0', '')
@@ -377,33 +351,6 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
                         reslist.append(
                             Explanation(1, s[0], s[1], s[2], s[3], dir, dict(row), ecf.expl_topk, local_pattern,
                                         lp3))
-
-            # for f_key in tuples_same_F_dict:
-            # # commented finer pattern holds only
-            # if gp2 does not hold on (t[F], u):
-            #     continue
-            # e.g.{Author, venue} {Year} holds on (JH, ICDE)
-            # lp3 = (F', (t[F], u), V, agg, a, m3)
-            # s = score_of_explanation((t[F],u,t[V]), t, lp3, lp2)
-            # f_prime_value = f_key.split(', ')
-            # v_prime_value = get_V_value(lp2[0], row)
-            # if v_prime_value[0]
-            # f_prime_value = get_F_value(lp2[0], row)
-            # lp3 = get_local_patterns(lp2[0], f_prime_value, lp2[2], lp2[3], lp2[4], row, conn, cur, pat_table_name, res_table_name)
-            # lp3 = get_local_patterns(lp2[0], f_prime_value, lp2[2], lp2[3], lp2[4], tuples_same_F_dict[f_key][0], conn, cur, pat_table_name, res_table_name)
-
-            # if len(lp3) == 0:
-            #     continue
-            # for row in tuples_same_F_dict[f_key]:
-            #     s = score_of_explanation(row, target_tuple, cat_sim, num_dis_norm, dir, float(t_coarser[agg_col]), lp3[0], lp2)
-
-            #     # e.g. U = {Venue}, u = {ICDE}, do not need to check whether {Author, Venue} {Year} holds on (JH, ICDE)
-            #     # expected values are replaced with the average across year for all (JH, ICDE, year) tuples
-            #     #s = score_of_explanation(row, t_prime, cat_sim)
-            #     if not equal_tuple(row, target_tuple):
-            #         # print(551, row, target_tuple, s)
-            #         reslist.append([s[0], s[1:], dict(row), local_pattern, lp3[0], 1])
-
     return reslist
 
 
@@ -505,11 +452,9 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                         topK_heap.Push(expl_temp)
                         top_k_lists[i][-1].append(expl_temp)
                         # print(t_t, t, compare_tuple(t_t, t))
-                    # if s[-1] < dist_lb:
-                    #     dist_lb = s[-1]
+                    
                     if s[1] < dist_lb:
                         dist_lb = s[1]
-                        # use raw distance (without penalty on missing attributes) as the lower bound
                     if abs(s[2]) > dev_ub:
                         dev_ub = abs(s[2])
             if dist_lb < 1e-10:
@@ -526,11 +471,10 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             norm_lb = min(list(map(lambda x: x[agg_col], t_coarser_copy)))
 
             k_score = topK_heap.MinValue()
-            # print(993， k_score, 100 * float(dev_ub) / (dist_lb * float(norm_lb)))
-            # prune
+            
             if ecf.pruning and topK_heap.HeapSize() == ecf.expl_topk and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
-                print('526 Prune')
-                ExplConfig.prune_cnt += 1
+                # logger.debug(k_score, 100 * float(dev_ub) / (dist_lb * float(norm_lb)))
+                # prune
                 continue
             top_k_lists[i][-1] += DrillDown(global_patterns_dict, local_patterns[i],
                                             F_set, T_set.difference(F_set.union(V_set)), V_set, t_coarser_copy,
@@ -818,7 +762,6 @@ class ExplanationGenerator:
         ecf.MATERIALIZED_DICT = dict()
         ecf.MATERIALIZED_CNT = 0
 
-        logger.debug(ExplConfig.prune_cnt)
         ofile = sys.stdout
         if ecf.outfile != '':
             ofile = open(ecf.outfile, 'w')

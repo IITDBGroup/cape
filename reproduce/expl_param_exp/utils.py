@@ -5,10 +5,6 @@ from math import factorial
 from tqdm import tqdm
 from heapq import *
 
-
-MATERIALIZED_DICT = dict()
-MATERIALIZED_CNT = 0
-VISITED_DICT = dict()
  
 class TopkHeap(object):
     def __init__(self, k):

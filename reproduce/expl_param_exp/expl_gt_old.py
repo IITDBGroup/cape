@@ -969,19 +969,9 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                 global_patterns_dict, uq['target_tuple'], conn, cur, res_table_name, pat_table_name, cat_sim)
         score_computing_time_start = time.time()
         start = time.time()
-        # local_patterns = get_local_patterns(
-        #     # list(map(lambda x:global_patterns[x], uq['global_patterns'])), 
-        #     uq['global_patterns'],
-        #     t, conn, cur, pat_table_name, res_table_name
-        # )
+        
         local_patterns = []
-        # print(uq['global_patterns'])
-        # print(709, uq['global_patterns'])
-        # print(710, uq['local_patterns'])
-        # for l_pat in uq['local_patterns']:
-        #     if len(l_pat) > 1:
-        #         local_patterns.append(l_pat)
-
+        
         
         end = time.time()
         local_pattern_loading_time += end - start

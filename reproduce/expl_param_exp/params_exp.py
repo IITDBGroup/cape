@@ -31,17 +31,6 @@ from explain.pattern_retrieval import find_patterns_relevant, find_patterns_refi
 from explain.tuple_retrieval import get_tuples_by_F_V
 
 
-
-
-# DEFAULT_QUERY_RESULT_TABLE = 'crime_subset'
-# DEFAULT_PATTERN_TABLE = 'crime.crime_subset'
-# DEFAULT_QUERY_RESULT_TABLE = 'crime_clean_100000_2'
-# DEFAULT_PATTERN_TABLE = 'dev.crime_clean_100000'
-
-# DEFAULT_QUERY_RESULT_TABLE = 'crime_partial'
-# DEFAULT_PATTERN_TABLE = 'dev.crime_partial'
-# DEFAULT_PATTERN_TABLE = 'crime_2017_2'
-
 TEST_ID = '_7'
 DEFAULT_QUESTION_PATH = './exp_parameter/user_question_expl_gt_7.txt'
 
@@ -53,34 +42,31 @@ DEFAULT_PATTERN_TABLE = 'dev.crime_exp'+ TEST_ID
 # # DEFAULT_PATTERN_TABLE = 'crime_2017_2'
 # DEFAULT_QUESTION_PATH = '../input/user_question_crime_partial_1.csv'
 DEFAULT_LOCAL_SUPPORT = 5
-DEFAULT_EPSILON = 0.1
 EXAMPLE_NETWORK_EMBEDDING_PATH = '../input/NETWORK_EMBEDDING'
 EXAMPLE_SIMILARITY_MATRIX_PATH = '../input/SIMILARITY_DEFINITION'
 DEFAULT_AGGREGATE_COLUMN = '*'
+DEFAULT_PORT = 5436
 TOP_K = 10
+
+class global_vars:
+
+    MATERIALIZED_DICT = dict()
+    MATERIALIZED_CNT = 0
+    VISITED_DICT = dict()
+
 
 
 def predict(local_pattern, t):
     # print('In predict ', local_pattern)
     if local_pattern[4] == 'const':
-        # predictY = float(local_pattern[-1][1:-1])
-        # predictY = float(local_pattern[-2][1:-1].split(',')[0])
         predictY = float(local_pattern[-4][1:-1].split(',')[0])
     elif local_pattern[4] == 'linear':
         # print(local_pattern, t)
         v = get_V_value(local_pattern[2], t)
-        # params = list(map(float, local_pattern[-1][1:-1].split(',')))
-        # print(local_pattern[-1])
-        # if isinstance(local_pattern[-1], str):
-            # params_str = local_pattern[-1].split('\n')
         if isinstance(local_pattern[-3], str):
             params_str = local_pattern[-3].split('\n')
-            # params = list(map(float, ))
-            # print(params_str, v)
             params_dict = {}
             for i in range(0, len(params_str)-1):
-                # print(params_str[i])
-                # p_cate = re.compile(r'(.*)\[T\.\s+(.*)\]\s+(-?\d+\.\d+)')
                 p_cate = re.compile(r'(.*)\[T\.\s*(.*)\]\s+(-?\d+\.\d+)')
                 cate_res = p_cate.findall(params_str[i])
                 if len(cate_res) != 0:
@@ -101,11 +87,9 @@ def predict(local_pattern, t):
                     param = float(nume_res[1])
                     params_dict[v_attr] = param
         else:
-            # params_dict = local_pattern[-1]
             params_dict = local_pattern[-3]
 
         predictY = params_dict['Intercept']
-        # print(t, params_dict)
         for v_attr in t:
             v_key = '{}[T.{}]'.format(v_attr, t[v_attr])
             if v_key in params_dict:
@@ -113,116 +97,8 @@ def predict(local_pattern, t):
             else:
                 if v_attr in params_dict:
                     predictY += params_dict[v_attr] * float(t[v_attr])
-            
-        # for v_attr, v_dict in params_dict.items():
-        #     print(v_attr, v_dict, t)
-        #     if v_attr == 'Intercept':
-        #         predictY += v_dict
-        #     else:
-        #         if isinstance(v_dict, dict):
-        #             v_key = t[v_attr].replace('\'', '').replace(' ', '')
-        #             # print(v_attr, v_key)
-        #             # print(v_dict.keys())
-        #             if v_key in v_dict:
-        #                 predictY += v_dict[v_key]
-        #         else:
-        #             print(v_attr)
-        #             if v_attr in t:
-        #                 predictY += v_dict * t[v_attr]
-
-        # predictY = sum(map(lambda x: x[0]*x[1], zip(params[:-1], v))) + params[-1]
 
     return predictY
-
-# def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
-#     """Compute the similarity between two tuples t1 and t2 on their attributes var_attr
-
-#     Args:
-#         t1, t2: two tuples
-#         var_attr: variable attributes
-#         cat_sim: the similarity measure for categorical attributes
-#         num_dis_norm: normalization terms for numerical attributes
-#         agg_col: the column of aggregated value
-#     Returns:
-#         the Gower similarity between t1 and t2
-#     """
-#     dis = 0.0
-#     cnt = 0
-#     if var_attr is None:
-#         var_attr = t1.keys()
-#     max_dis = 0.0
-
-#     for v_col in var_attr:
-#         col = v_col.replace(' ', '')
-
-#         if col not in t1 and col not in t2:
-#             # if col == 'name':
-#             #     dis += 10000
-#             # else:
-#             #     dis += 100
-#             # cnt += 1
-#             continue
-#         if col not in t1 or col not in t2:
-#             # if col == 'name':
-#             #     dis += 10000
-#             # else:
-#             #     dis += 100
-#             # cnt += 1
-#             continue
-
-#         if col == 'name':
-#             if t1[col] != t2[col]:
-#                 dis += 10000
-#             cnt += 1
-#             continue
-
-#         if col == 'venue' or col == 'pubkey':
-#             if t1[col] != t2[col]:
-#                 dis += 0.25
-#             cnt += 1
-#             continue
-
-#         if cat_sim.is_categorical(col):
-
-#             t1_key = str(t1[col]).replace("'", '').replace(' ', '')
-#             t2_key = str(t2[col]).replace("'", '').replace(' ', '')
-#             s = 0
-#             if t1[col] == t2[col]:
-#                 s = 1
-#             else:
-#                 s = cat_sim.compute_similarity(col, t1_key, t2_key, agg_col)
-
-#             if s == 0:
-#                 dis += 1
-#                 max_dis = 1
-#             else:
-#                 dis += (((1.0 / s)) * ((1.0 / s))) / 100
-#                 # dis += (1-s) * (1-s)
-#                 if math.sqrt((((1.0 / s)) * ((1.0 / s)) - 1) / 100) > max_dis:
-#                     max_dis = math.sqrt((((1.0 / s)) * ((1.0 / s)) - 1) / 100)
-
-#             cnt += 1
-#         else:
-#             if col != 'year' and (col not in num_dis_norm or num_dis_norm[col]['range'] is None):
-#                 if t1[col] == t2[col]:
-#                     dis += 0
-#                 else:
-#                     dis += 1
-#             else:
-#                 if col != agg_col and col != 'index':
-#                     if isinstance(t1[col], datetime.date):
-#                         diff = datetime.datetime(t1[col].year, t1[col].month, t1[col].day) - datetime.datetime.strptime(
-#                             t2[col], "%Y-%m-%d")
-#                         temp = diff.days
-#                     else:
-#                         temp = abs(float(t1[col]) - float(t2[col]))
-
-#                     dis += 0.5 * math.pow(temp, temp+5)
-#                     if temp > max_dis:
-#                         max_dis = temp
-#                 cnt += 1
-
-#     return math.pow(dis, 0.5)
 
 def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
     """Compute the similarity between two tuples t1 and t2 on their attributes var_attr
@@ -265,28 +141,13 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
                 s = 1
             else:
                 s = cat_sim.compute_similarity(col, t1_key, t2_key, agg_col)
-            # print(359, col, t1, t2, s)
-            # if col == 'community_area':
-            #     s = 
             if s == 0:
                 dis += 1
-                max_dis = 1
             else:
                 dis += (((1.0/s)) * ((1.0/s))) / 100
-                # dis += (1-s) * (1-s)
-                if math.sqrt((((1.0/s)) * ((1.0/s)) - 1) / 100) > max_dis:
-                    max_dis = math.sqrt((((1.0/s)) * ((1.0/s)) - 1) / 100)
-            # if s == 0:
-            #     dis += 1
-            #     max_dis = 1
-            # else:
-            #     dis += (((1.0/s)) * ((1.0/s))) / 100
-            #     # dis += (1-s) * (1-s)
-            #     if math.sqrt((((1.0/s)) * ((1.0/s)) - 1) / 100) > max_dis:
-            #         max_dis = math.sqrt((((1.0/s)) * ((1.0/s)) - 1) / 100)
+                
             cnt += 1
         else:
-            # print(387, col)
             if col != 'year' and (col not in num_dis_norm or num_dis_norm[col]['range'] is None):
                 if t1[col] == t2[col]:
                     dis += 0
@@ -294,29 +155,15 @@ def tuple_distance(t1, t2, var_attr, cat_sim, num_dis_norm, agg_col):
                     dis += 1
             else:
                 if col != agg_col and col != 'index':
-                    # temp = (t1[col] - t2[col]) * (t1[col] - t2[col]) / (num_dis_norm[col]['range'] * num_dis_norm[col]['range'])
-                    # temp = abs(t1[col] - t2[col]) / (num_dis_norm[col]['range'])
                     if isinstance(t1[col], datetime.date):
-                        # print(398, t1, t2)
-                        # print(col, t1[col], t2[col])
                         diff = datetime.datetime(t1[col].year, t1[col].month, t1[col].day) - datetime.datetime.strptime(t2[col], "%Y-%m-%d")
                         temp = diff.days
                     else:
-                        # print(398, t1, t2)
-                        # print(col, t1[col], t2[col])
                         temp = abs(float(t1[col]) - float(t2[col]))
-                    # if temp != 0:
-                    #     temp = 1/(1+(math.exp(-temp+2)))
-                    # print(408, temp)
+                    
                     dis += 0.5 * math.pow(temp, temp+5)
-                    # dis += 0.5 * math.pow(temp, temp+3)
-                    if temp > max_dis:
-                        max_dis = temp
                 cnt += 1
-                    # sim += x * x * x * x
-            # print(2, col, sim, t1[col], t2[col])
         
-    # print(t1, t2, var_attr)
     return math.pow(dis, 0.5)
 
 
@@ -367,19 +214,10 @@ def get_local_patterns(F, Fv, V, agg_col, model_type, t, conn, cur, pat_table_na
                 str(V).replace("\'", '').replace('[', '').replace(']', ''), 
                 agg_col, mt_predicate, str(theta_lb)
             )
-        # print(406, Fv, local_pattern_query)
     else:
         if DEFAULT_LOCAL_SUPPORT != 5:
             if not validate_local_support(F, V, list(map(str, tF)), cur, res_table_name, cat_sim):
                 return []
-    #     local_pattern_query = '''SELECT * FROM {} WHERE array_to_string(fixed, ', ')='{}' AND 
-    #         REPLACE(array_to_string(fixed_value, ', '), '"', '') = REPLACE('{}', '"', '') AND array_to_string(variable, ', ')='{}' AND
-    #         agg='{}'{};'''.format(
-    #             pat_table_name + '_local'+TEST_ID, str(F).replace("\'", '').replace('[', '').replace(']', ''), 
-    #             str(tF).replace("\'", '"').replace('[', '').replace(']', ''),
-    #             str(V).replace("\'", '').replace('[', '').replace(']', ''), 
-    #             agg_col, mt_predicate
-    #         )
         local_pattern_query = '''SELECT * FROM {} WHERE array_to_string(fixed, ', ')='{}' AND 
             REPLACE(array_to_string(fixed_value, ', '), '"', '') LIKE '%{}%' AND array_to_string(variable, ', ')='{}' AND
             agg='{}'{};'''.format(
@@ -388,38 +226,25 @@ def get_local_patterns(F, Fv, V, agg_col, model_type, t, conn, cur, pat_table_na
                 str(V).replace("\'", '').replace('[', '').replace(']', ''), 
                 agg_col, mt_predicate
             )
-        # print(local_pattern_query)
+    # print(local_pattern_query)
         
     cur.execute(local_pattern_query)
     local_patterns = cur.fetchall()
         
     return local_patterns
 
-
 def score_of_explanation(t1, t2, cat_sim, num_dis_norm, dir, denominator=1, lp1=None, lp2=None):
     if lp1 is None:
         return 1.0
     else:
-        #print(lp1, lp2, t1, t2)
         agg_col = lp1[3]
-
-        # t1fv = dict(zip(lp1[0] + lp1[2], map(lambda x:x, get_F_value(lp1[0] + lp1[2], t1))))
-        # t2fv = dict(zip(lp2[0] + lp2[2], map(lambda x:x, get_F_value(lp2[0] + lp2[2], t2))))
         t1fv = dict()
         t2fv = dict()
         for a in lp2[0] + lp2[2]:
             t1fv[a] = t1[a]
             if a in t2:
                 t2fv[a] = t2[a]
-        # if lp1 == lp2:
-        #     t_sim = tuple_similarity(t1fv, t2fv, lp1[2], cat_sim, num_dis_norm, agg_col)
-        # else:
-        #     t_sim = tuple_similarity(t1fv, t2fv, None, cat_sim, num_dis_norm, agg_col)
-        # t_sim = tuple_similarity(t1fv, t2fv, None, cat_sim, num_dis_norm, agg_col)
-        # print(745, t1, t1fv)
-        # print(746, t2, t2fv)
-        # print(lp1[0], lp1[2])
-        # print(lp2[0], lp2[2])
+        
         t_dis_raw = tuple_distance(t1fv, t2fv, None, cat_sim, num_dis_norm, agg_col)
         cnt1 = 0
         cnt2 = 0
@@ -432,12 +257,7 @@ def score_of_explanation(t1, t2, cat_sim, num_dis_norm, dir, denominator=1, lp1=
         
         diff = 0
         if len(t1.keys()) + 1 != len(t2.keys()):
-            # diff = len(t2.keys()) - len(t1.keys()) - 1
-            # if 'lambda' not in t2:
-            #     diff += 1
-            # w = 1
-            # if 'name' in t2 and 'name' not in t1:
-            #     w = 10000
+            
             for col in t1:
                 if col not in t2:
                     diff += 1
@@ -454,70 +274,26 @@ def score_of_explanation(t1, t2, cat_sim, num_dis_norm, dir, denominator=1, lp1=
                     diff += 1
         w = 1
         t_dis = math.sqrt(t_dis_raw * t_dis_raw + w * diff * diff)
-            # print(488, t1, t2)
-        # print local_cons[i].var_attr, row
+            
         t1v = dict(zip(lp1[2], map(lambda x:x, get_V_value(lp1[2], t1))))        
         predicted_agg1 = predict(lp1, t1v)
         t2v = dict(zip(lp2[2], map(lambda x:x, get_V_value(lp2[2], t2))))        
         predicted_agg2 = predict(lp2, t2v)
         # deviation - counterbalance_needed 
         deviation = float(t1[agg_col]) - predicted_agg1
-        # counterbalance = float(t2[agg_col]) - predicted_agg2
-        # deviation_normalized = (t1[agg_col] - predicted_agg1) / predicted_agg1
-        # influence = -deviation / counterbalance
-        #score = (deviation + counterbalance) * t_sim
-        #score = deviation * (math.exp(t_sim) - 1)
         
-
-        # if t_sim == 1:
-        #     score = deviation * -dir
-        # else:
-        #     score = deviation * math.exp(t_sim) * -dir
         if t_dis == 0:
             score = deviation * -dir
         else:
             score = deviation / t_dis * -dir
         
-        # score = deviation * t_sim * -dir * 1 / (1 + math.exp(-(influence - 0.5)))
-        # score *= math.log(deviation_normalized + 3)
-        # score /= counterbalance
-        # print(414, t1fv, t2fv)
-        # print(t_dis, deviation, score)
-        # return score / float(denominator) * cnt1 / cnt2
         return [100 * score / float(denominator), t_dis, deviation, float(denominator), t_dis_raw]
-
-# def compare_tuple(t1, t2):
-#     flag1 = True
-#     for a in t1:
-#         # if (a != 'lambda' and a.find('_') == -1):
-#         if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
-#             if a not in t2:
-#                 flag1 = False
-#             elif t1[a] != t2[a]:
-#                 return 0
-#     flag2 = True
-#     for a in t2:
-#         # if (a != 'lambda' and a.find('_') == -1):
-#         if a != 'lambda' and not a.startswith('count_') and not a.startswith('sum_'):
-#             if a not in t1:
-#                 flag2 = False
-#             elif t1[a] != t2[a]:
-#                 return 0
-
-#     if flag1 and flag2:
-#         return -1
-#     elif flag1:
-#         return -1
-#     else:
-#         return 0
 
 def compare_tuple(t1, t2):
     flag1 = True
-    # if 'year' in t1 and t1['year'] == '2014' and 'primary_type' in t1 and t1['primary_type'] == 'CRIMINAL DAMAGE':
-    #     print(788, t1, t2)
     for a in t1:
         # if (a != 'lambda' and a.find('_') == -1):
-        if (a != 'lambda' and a != 'count'):
+        if a != 'lambda' and not a.startswith('count') and not a.startswith('sum'):
             if a not in t2:
                 flag1 = False
             elif t1[a] != t2[a]:
@@ -525,12 +301,12 @@ def compare_tuple(t1, t2):
     flag2 = True
     for a in t2:
         # if (a != 'lambda' and a.find('_') == -1):
-        if (a != 'lambda' and a != 'count'):
+        if a != 'lambda' and not a.startswith('count') and not a.startswith('sum'):
             if a not in t1:
                 flag2 = False
             elif t1[a] != t2[a]:
                 return 0
-    # print(t1, t2, flag1, flag2)
+
     if flag1 and flag2:
         return -1
     elif flag1:
@@ -538,21 +314,43 @@ def compare_tuple(t1, t2):
     else:
         return 0
 
+# def compare_tuple(t1, t2):
+#     flag1 = True
+#     for a in t1:
+#         # if (a != 'lambda' and a.find('_') == -1):
+#         if (a != 'lambda' and a != 'count'):
+#             if a not in t2:
+#                 flag1 = False
+#             elif t1[a] != t2[a]:
+#                 return 0
+#     flag2 = True
+#     for a in t2:
+#         # if (a != 'lambda' and a.find('_') == -1):
+#         if (a != 'lambda' and a != 'count'):
+#             if a not in t1:
+#                 flag2 = False
+#             elif t1[a] != t2[a]:
+#                 return 0
+#     # print(t1, t2, flag1, flag2)
+#     if flag1 and flag2:
+#         return -1
+#     elif flag1:
+#         return -1
+#     else:
+#         return 0
+
 def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_coarser, t_coarser, t_prime, target_tuple,
         conn, cur, pat_table_name, res_table_name, cat_sim, num_dis_norm, 
         epsilon, dir, query_result, theta_lb=0.1):
     reslist = []
     F_prime_set = F_set.union(U_set)
     agg_col = local_pattern[3]
-    # gp2_list = find_global_patterns_exact_match(global_patterns_dict, F_prime_set, V_set, local_pattern[3], local_pattern[4])
-    # gp2_list = find_patterns_refinement(global_patterns_dict, F_prime_set, V_set, local_pattern[3], local_pattern[4])
     gp2_list = find_patterns_refinement(global_patterns_dict, F_set, V_set, local_pattern[3], local_pattern[4])
-    # print(792, gp2_list)
+    
     if len(gp2_list) == 0:
         return []
     for gp2 in gp2_list:
 
-    
         # lp2_list = get_local_patterns(gp2[0], None, gp2[1], gp2[2], None, t_prime, conn, cur, pat_table_name, res_table_name)
         lp2_list = get_local_patterns(gp2[0], None, gp2[1], gp2[2], gp2[3], t_prime, conn, cur, pat_table_name, res_table_name, cat_sim, theta_lb)
         
@@ -560,23 +358,13 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
             continue
         lp2 = lp2_list[0]
         
-        # if 'community_area' not in gp2[0] or len(gp2[0]) != 2:
-        #     continue
-        # print(lp2[0])
-        # print(800, gp2, lp2_list)
+        
         f_value = get_F_value(local_pattern[0], t_prime)
         tuples_same_F, agg_range, tuples_same_F_dict = get_tuples_by_F_V(local_pattern, lp2, f_value, 
-            # [get_V_value(local_pattern[2], t_prime), [[-3, 3]]],
             None,
             conn, cur, res_table_name, cat_sim)
         lp3_list = get_local_patterns(lp2[0], f_value, lp2[2], lp2[3], lp2[4], t_prime, conn, cur, pat_table_name, res_table_name, cat_sim, theta_lb)
-        # tuples_same_F, agg_range = get_tuples_by_F(local_pattern, lp2, f_value, 
-        #     conn, cur, res_table_name, cat_sim)
-        # tuples_same_F, agg_range, tuples_same_F_dict = get_tuples_by_F_V(local_pattern, lp2, f_value, None,
-        #     conn, cur, res_table_name, cat_sim)
-        # print(725, local_pattern[0], local_pattern[1], local_pattern[2], lp2[0], lp2[1], lp2[2])
-        # print(725, len(tuples_same_F), len(lp3_list))
-        # print(tuples_same_F_dict.keys())
+        
         for lp3 in lp3_list:
             f_key = str(lp3[1]).replace('\'', '')[1:-1]
             # print(836, f_key)
@@ -598,35 +386,6 @@ def DrillDown(global_patterns_dict, local_pattern, F_set, U_set, V_set, t_prime_
                         # reslist.append([s[0], s[1:], dict(row), local_pattern, lp3, 1])  
                         reslist.append(
                             Explanation(1, s[0], s[1], s[2], s[3], dir, dict(row), TOP_K, local_pattern, lp3))
-
-                    # else:
-                    #     reslist.append([s[0], s[1:], dict(row), local_pattern, lp3, 1])  
-            # for f_key in tuples_same_F_dict:
-            # # commented finer pattern holds only
-            # if gp2 does not hold on (t[F], u):
-            #     continue
-            # e.g.{Author, venue} {Year} holds on (JH, ICDE)
-            # lp3 = (F', (t[F], u), V, agg, a, m3)
-            # s = score_of_explanation((t[F],u,t[V]), t, lp3, lp2)
-            # f_prime_value = f_key.split(', ')
-            # v_prime_value = get_V_value(lp2[0], row)
-            # if v_prime_value[0]
-            # f_prime_value = get_F_value(lp2[0], row)
-            # lp3 = get_local_patterns(lp2[0], f_prime_value, lp2[2], lp2[3], lp2[4], row, conn, cur, pat_table_name, res_table_name)
-            # lp3 = get_local_patterns(lp2[0], f_prime_value, lp2[2], lp2[3], lp2[4], tuples_same_F_dict[f_key][0], conn, cur, pat_table_name, res_table_name)
-
-            # print(791, f_key, f_prime_value, len(lp3))
-            # if len(lp3) == 0:
-            #     continue
-            # for row in tuples_same_F_dict[f_key]:
-            #     s = score_of_explanation(row, target_tuple, cat_sim, num_dis_norm, dir, float(t_coarser[agg_col]), lp3[0], lp2)
-            
-            #     # e.g. U = {Venue}, u = {ICDE}, do not need to check whether {Author, Venue} {Year} holds on (JH, ICDE)
-            #     # expected values are replaced with the average across year for all (JH, ICDE, year) tuples
-            #     #s = score_of_explanation(row, t_prime, cat_sim)
-            #     if not equal_tuple(row, target_tuple):
-            #         # print(551, row, target_tuple, s)
-            #         reslist.append([s[0], s[1:], dict(row), local_pattern, lp3[0], 1])
 
     
     return reslist
@@ -670,19 +429,9 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
                 global_patterns_dict, uq['target_tuple'], conn, cur, res_table_name, cat_sim)
         score_computing_time_start = time.time()
         start = time.time()
-        # local_patterns = get_local_patterns(
-        #     # list(map(lambda x:global_patterns[x], uq['global_patterns'])), 
-        #     uq['global_patterns'],
-        #     t, conn, cur, pat_table_name, res_table_name
-        # )
+        
         local_patterns = []
-        # print(uq['global_patterns'])
-        # print(709, uq['global_patterns'])
-        # print(710, uq['local_patterns'])
-        # for l_pat in uq['local_patterns']:
-        #     if len(l_pat) > 1:
-        #         local_patterns.append(l_pat)
-
+        
         
         end = time.time()
         local_pattern_loading_time += end - start
@@ -695,7 +444,7 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
         
         psi = []
         
-        utils.VISITED_DICT = dict()
+        global_vars.VISITED_DICT = dict()
         score_computing_time_cur_uq = 0
         score_computing_start = time.time()
         explanation_type = 0
@@ -704,14 +453,11 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             local_patterns.append(None)
             F_key = str(sorted(uq['global_patterns'][i][0]))
             V_key = str(sorted(uq['global_patterns'][i][1]))
-            # print(980, F_key, V_key)
             pat_key = F_key + '|,|' + V_key + '|,|' + uq['global_patterns'][i][2] + '|,|' + uq['global_patterns'][i][3]
-            # if F_key.find('community_area') == -1:
-            #     continue
-            # print(955, uq['global_patterns'][i])
-            if pat_key in utils.VISITED_DICT:
+            
+            if pat_key in global_vars.VISITED_DICT:
                 continue
-            utils.VISITED_DICT[pat_key] = True
+            global_vars.VISITED_DICT[pat_key] = True
 
             local_pattern_query_count = '''SELECT count(*) FROM {} 
                     WHERE array_to_string(fixed, ', ')='{}' AND 
@@ -726,10 +472,9 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             )
             cur.execute(local_pattern_query_count)
             res_count = cur.fetchall()
-            print(1070, res_count[0][0])
+            # print(476, res_count[0][0])
             if res_count[0][0] < lam * local_patterns_count[i] or res_count[0][0] < gs:
                 continue
-            
             
             tF = get_F_value(uq['global_patterns'][i][0], t)
             local_pattern_query_fixed = '''SELECT * FROM {} 
@@ -748,7 +493,6 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             )
             cur.execute(local_pattern_query_fixed)
             res_fixed = cur.fetchall()
-            print(1087, res_fixed)
             if len(res_fixed) == 0:
                 continue
             local_patterns[i] = res_fixed[0]
@@ -758,16 +502,12 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             psi.append(0)
             agg_col = local_patterns[i][3]
             start = time.time()
-            # print('PAT', i, local_patterns[i])
-            # t_coarser_list, agg_range, t_coarser_dict = get_tuples_by_F_V(local_patterns[i], local_patterns[i], 
-            #     get_F_value(local_patterns[i][0], t), [get_V_value(local_patterns[i][2], t), [[0, 0]]],
-            #     conn, cur, res_table_name, cat_sim)
+            
             t_t_list, agg_range, t_t_dict = get_tuples_by_F_V(local_patterns[i], local_patterns[i], 
                 get_F_value(local_patterns[i][0], t), 
                 #[get_V_value(local_patterns[i][2], t), [[-3, 3]]],
                 None,
                 conn, cur, res_table_name, cat_sim)
-            # print(t_t_list)
             dist_lb = 1e10
             dev_ub = 0
             for t_t in t_t_list:
@@ -798,34 +538,19 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             F_set = set(local_patterns[i][0])
             V_set = set(local_patterns[i][2])
             
-            # if 'venue' in local_patterns[i][0] and 'name' not in local_patterns[i][0]:
-            #     continue
-            # if 'pubkey' in local_patterns[i][0] and 'name' not in local_patterns[i][0]:
-            #     continue
             # F union V \subsetneq G
             
             start = time.time()
             
-            
             # print(t_coarser)
             t_coarser_copy = list(t_t_list)
-            # t_coarser_copy[agg_col] = 1
-            # if len(local_patterns[i][0]) + len(local_patterns[i][2]) < len(t.keys()) -2:
-                # if 'pubkey' in local_patterns[i][0] and 'name' not in local_patterns[i][0]:
-                #     continue
-            # if 'venue' in local_patterns[i][0] and 'name' not in local_patterns[i][0]:
-            #     continue
-
-            # dev_ub_list = get_dev_upper_bound(local_patterns[i])
-            # dev_ub = agg_range[1] - agg_range[0]
+            
             norm_lb = min(list(map(lambda x: x[agg_col], t_coarser_copy)))
-            # cur_top_k_res = topK_heap.TopK()
-            # k_score = min(map(lambda x:x[0], cur_top_k_res))
+            
             k_score = topK_heap.MinValue()
-            # k_score = topK_heap.MaxValue()
-            print(993, k_score, 100 * float(dev_ub) / (dist_lb * float(norm_lb)))
+            
+        
             if topK_heap.HeapSize() == TOP_K and 100 * float(dev_ub) / (dist_lb * float(norm_lb)) <= k_score:
-                print(998, dev_ub, dist_lb, norm_lb, local_patterns[i][0], local_patterns[i][1])
                 continue
             top_k_lists[i][-1] += DrillDown(global_patterns_dict, local_patterns[i], 
                 F_set, T_set.difference(F_set.union(V_set)), V_set, t_coarser_copy, t_coarser_copy, t, t,
@@ -856,136 +581,15 @@ def find_explanation_regression_based(user_question_list, global_patterns, globa
             
                 
         score_computing_time_end = time.time()    
-        # uses heapq to manipulate merge of explanations from multiple constraints
         start = time.time()
-        # complementary_explanation_list = []
-        # heapify(complementary_explanation_list)
-        # refute_explanation_list = []
-        # for i in range(len(local_patterns)):
-        #     if len(top_k_lists[i]) > 3 and len(top_k_lists[i][3]) > 0:
-        #         for idx, tk in enumerate(top_k_lists[i][3]):
-        #             top_k_lists[i][3][idx][0] = -tk[0]
-        #             top_k_lists[i][3][idx][2] = list(map(lambda y: y[1], sorted(tk[2].items(), key=lambda x: x[0])))
-        #         print(top_k_lists[i])
-        #         heapify(top_k_lists[i][-1])
-        #         # print(top_k_lists[i])
-        #         poped_tuple = list(heappop(top_k_lists[i][-1]))
-        #         poped_tuple.append(i)
-        #         heappush(complementary_explanation_list, poped_tuple)
-        #     else:
-        #         refute_explanation_list.append(top_k_lists[i])
         answer[j] = [{} for i in range(TOP_K)]
-        # score_computing_time_list.append([t, score_computing_time_cur_uq])
         score_computing_time_list.append([t, score_computing_time_end - score_computing_time_start])
-        # cnt = 0
-        # while cnt < TOP_K and len(complementary_explanation_list) > 0:
-        #     poped_tuple = heappop(complementary_explanation_list)
-        #     if str(poped_tuple[2]) not in marked:
-        #         marked[str(poped_tuple[2])] = True
-        #         answer[j][cnt] = (poped_tuple[0], poped_tuple[1], poped_tuple[2], poped_tuple[3], poped_tuple[4], poped_tuple[5])
-        #         cnt += 1
-        #     if len(top_k_lists[poped_tuple[-1]][3]) == 0:
-        #         for i in range(len(local_patterns)):
-        #             if len(top_k_lists[i]) > 3 and len(top_k_lists[i][-1]) > 0:
-        #                 poped_tuple2 = list(heappop(top_k_lists[i][-1]))
-        #                 poped_tuple2.append(i)
-        #                 heappush(complementary_explanation_list, poped_tuple2)
-                        
-        #         heapify(complementary_explanation_list)
-        #     else:
-        #         # for tk in top_k_lists[poped_tuple[3]][3]:
-        #         #     print(tk)
-
-        #         poped_tuple2 = list(heappop(top_k_lists[poped_tuple[-1]][-1]))
-        #         poped_tuple2.append(poped_tuple[-1])
-        #         heappush(complementary_explanation_list, poped_tuple2)
+        
         answer[j] = topK_heap.TopK()
         end = time.time()
         result_merging_time += end - start
-        # print(749, answer[j])
-        # print(topK_heap)
-
-        # for i in range(len(local_patterns)):
-        #     # print("TOP K: ", top_k_lists[i])
-        #     if len(top_k_lists[i]) > 3:
-        #         print(top_k_lists[i])
-        #         answer[j].append(sorted(top_k_lists[i][-1], key=lambda x: x[1], reverse=True)[0:TOP_K])
-        #     else:
-        #         answer[j].append(top_k_lists[i])
-        #     # print(len(answer[j][-1]))
-
-
-
-    print('Local pattern loading time: ' + str(local_pattern_loading_time) + 'seconds')
-    print('Question validating time: ' + str(question_validating_time) + 'seconds')
-    print('Score computing time: ' + str(score_computing_time) + 'seconds')
-    print('Result merging time: ' + str(result_merging_time) + 'seconds')
+        
     return answer, local_patterns_list, score_computing_time_list
-
-
-
-def find_user_question(cur):
-    # find_query = '''
-    # SELECT A.primary_type,A.district,A.year,A.cnt_new,A.cnt_new-B.cnt_old FROM
-    # (SELECT primary_type,district,year,count(*) as cnt_new FROM synthetic.crime_exp_{} GROUP BY primary_type,district,year) A,
-    # (SELECT primary_type,district,year,count(*) as cnt_old FROM crime_exp GROUP BY primary_type,district,year) B
-    # WHERE A.primary_type=B.primary_type AND A.district = B.district AND A.year=B.year AND A.cnt_new <> B.cnt_old;
-    # '''
-    find_query = '''
-    SELECT A.primary_type,A.beat,A.year,A.cnt_new,A.cnt_new-B.cnt_old FROM
-    (SELECT primary_type,beat,year,count(*) as cnt_new FROM synthetic.crime_exp_{} GROUP BY primary_type,beat,year) A,
-    (SELECT primary_type,beat,year,count(*) as cnt_old FROM crime_exp GROUP BY primary_type,beat,year) B
-    WHERE A.primary_type=B.primary_type AND A.beat = B.beat AND A.year=B.year AND A.cnt_new <> B.cnt_old;
-    '''
-    uq_list = []
-    if TEST_ID == '_7':
-        cur.execute(find_query.format('7'))
-        res = cur.fetchall()
-        for row in res:
-            uq_list.append({'primary_type':row[0],'beat':row[1],
-                # 'year':row[2],'count_star':row[3],'direction':'high', 'lambda':0.0})
-                'year':row[2],'count':row[3],'direction':'high', 'lambda':0.0})
-            uq_list.append({'primary_type':row[0],'beat':row[1],
-                # 'year':row[2],'count_star':row[3],'direction':'low', 'lambda':0.0})
-                'year':row[2],'count':row[3],'direction':'low', 'lambda':0.0})
-    if TEST_ID == '_9':
-        cur.execute(find_query.format('9'))
-        res = cur.fetchall()
-        for row in res:
-            uq_list.append({'primary_type':row[0],'beat':row[1],
-                # 'year':row[2],'count_star':row[3],'direction':'high', 'lambda':0.0})
-                'year':row[2],'count':row[3],'direction':'high', 'lambda':0.0})
-            uq_list.append({'primary_type':row[0],'beat':row[1],
-                # 'year':row[2],'count_star':row[3],'direction':'low', 'lambda':0.0})
-                'year':row[2],'count':row[3],'direction':'low', 'lambda':0.0})
-    # find_query = '''
-    # SELECT A.primary_type,A.description,A.community_area,A.year,A.cnt_new,A.cnt_new-B.cnt_old FROM
-    # (SELECT primary_type,description,community_area,year,count(*) as cnt_new FROM synthetic.crime_exp_{} 
-    # GROUP BY primary_type,description,community_area,year) A,
-    # (SELECT primary_type,description,community_area,year,count(*) as cnt_old FROM crime_exp 
-    # GROUP BY primary_type,description,community_area,year) B
-    # WHERE A.primary_type=B.primary_type AND A.description = B.description AND 
-    # A.community_area = B.community_area AND A.year=B.year AND A.cnt_new <> B.cnt_new;
-    # '''
-    find_query = '''
-    SELECT A.primary_type,A.community_area,A.year,A.cnt_new,A.cnt_new-B.cnt_old FROM
-    (SELECT primary_type,community_area,year,count(*) as cnt_new FROM synthetic.crime_exp_{} 
-    GROUP BY primary_type,community_area,year) A,
-    (SELECT primary_type,community_area,year,count(*) as cnt_old FROM crime_exp 
-    GROUP BY primary_type,community_area,year) B
-    WHERE A.primary_type=B.primary_type AND A.community_area = B.community_area AND A.year=B.year AND A.cnt_new <> B.cnt_old;
-    '''
-    if 'TEST_ID' == '_10':
-        cur.execute(find_query.format('10'))
-        res = cur.fetchall()
-        for row in res:
-            uq_list.append({'primary_type':row[0],'community_area':row[1],
-                'year':row[2],'count_star':row[3],'direction':'high', 'lambda':0.0})
-            uq_list.append({'primary_type':row[0],'community_area':row[1],
-                'year':row[2],'count_star':row[3],'direction':'low', 'lambda':0.0})
-
-    return uq_list
-    # return random.sample(uq_list, 10)
 
 def load_user_question(global_patterns, global_patterns_dict, uq_path=DEFAULT_QUESTION_PATH, schema=None, cur=None, pattern_table='', query_result_table=''):
     '''
@@ -993,10 +597,7 @@ def load_user_question(global_patterns, global_patterns_dict, uq_path=DEFAULT_QU
     '''
     print(global_patterns_dict)
     uq = []
-    uq_cnt = 0
 
-    # uqs = [1,9,25,33,41,49,65,73,89,97,105,113,121,137,145,153,161,169,177,193]
-    uqs = [1,9,25,81,89,97,121,137,153,93]
     with open(uq_path, 'rt') as uqfile:
         reader = csv.DictReader(uqfile, quotechar='\'')
         headers = reader.fieldnames
@@ -1006,23 +607,10 @@ def load_user_question(global_patterns, global_patterns_dict, uq_path=DEFAULT_QU
             row_data = {}
             raw_row_data = {}
             agg_col = None
-            uq_cnt += 1
-            #  0, 1, 2, 3, 4,  5, 6,  7, 8, 9, 10, 11, 12, 13,14, 15, 16,17,18, 19,20,21,22, 23,24
-            # [9, 9, 3, 10, 8, 10, 4, 8, 9, 3, 8,  10, 9, 10, 10, 8,  1, 8,  9, 9, 10, 5, 7, 0, 10]
-            # if (uq_cnt % 8 != 1) or uq_cnt > 199:
-            #     continue
-            if uq_cnt not in uqs:
-                continue
-            # for k, v in enumerate(headers):
             for v in row:
                 # print(k, v)
                 if schema is None or v not in schema:
                     if v != 'direction':
-                        # if is_float(row[v]):
-                        #     row_data[v] = float(row[v])
-                        # elif is_integer(row[v]):
-                        #     row_data[v] = float(long(row[v]))
-                        # else:
                         row_data[v] = row[v]
                     if v not in schema and v != 'lambda' and v != 'direction':
                         agg_col = v
@@ -1039,12 +627,10 @@ def load_user_question(global_patterns, global_patterns_dict, uq_path=DEFAULT_QU
                         else:    
                             row_data[v] = row[v]
                             raw_row_data[v] = row[v]
-            # print(row, row_data)
             if row['direction'][0] == 'h':
                 dir = 1
             else:
                 dir = -1
-        # print(615, schema, raw_row_data, row_data)
             uq.append({'target_tuple': row_data, 'dir':dir})
 
             uq[-1]['query_result'] = []
@@ -1073,16 +659,9 @@ def load_patterns(cur, pat_table_name, query_table_name):
         if 'primary_type' in pat[1] or 'description' in pat[1] or 'location_description' in pat[1] or 'community_area' in pat[1] or 'beat' in pat[1]:
             continue
         patterns.append(list(pat))
-        # print(pat)
-        # print(patterns[-1])
-        # patterns[-1][0] = patterns[-1][0][1:-1].replace(' ', '').split(',')
-        # patterns[-1][1] = patterns[-1][1][1:-1].replace(' ', '').split(',')
         
         f_key = str(sorted(patterns[-1][0]))
-        # f_key = str(patterns[-1][0])
-        # print(694, f_key)
         v_key = str(sorted(patterns[-1][1]))
-        # v_key = str(patterns[-1][1])
         if v_key not in pattern_dict[0]:
             pattern_dict[0][v_key] = {}
         if f_key not in pattern_dict[0][v_key]:
@@ -1103,41 +682,9 @@ def load_patterns(cur, pat_table_name, query_table_name):
 
     return patterns, schema, pattern_dict
 
-
-
-
-def plot_heatmap(hm):
-    
-    cmap = cm.get_cmap('Spectral')  # Colour map (there are many others)
-
-
-    x = [i*0.05 for i in range(0, 21)]
-    y = [i*0.05 for i in range(0, 21)]
-    # setup the 2D grid with Numpy
-    x, y = np.meshgrid(x, y)
-
-    # convert intensity (list of lists) to a numpy array for plotting
-    intensity = np.array(hm)
-
-    # now just plug the data into pcolormesh, it's that easy!
-    plt.pcolormesh(x, y, intensity)
-    # plt.xticks(x, list(map(lambda t: str(t*0.05)[:4], x)))
-    # plt.yticks(y, list(map(lambda t: str(t*0.05)[:4], y)))
-    plt.colorbar()  # need a colorbar to show the intensity scale
-
-    # plt.show()  # boom
-    # plt.show()
-    # plt.savefig(df_key + '.png')
-    l1 = plt.legend(bbox_to_anchor=(1.04,1), borderaxespad=0, fontsize='x-small')
-
-    pp.savefig(bbox_inches='tight')
-    plt.close()
-
-
-def compute_expl_quality_gt(cur, expl_list):
-    if TEST_ID == '_7':
-        fixed_list = ['primary_type','beat','district']
-        var_list = ['year']
+def compute_expl_quality_gt(cur, expl_list):    
+    fixed_list = ['primary_type','beat','district']
+    var_list = ['year']
     gt_query = '''
     SELECT * FROM synthetic.crime_exp_changes 
     WHERE num={} AND {} AND {}
@@ -1173,29 +720,20 @@ def main(argv=[]):
     pattern_table = DEFAULT_PATTERN_TABLE
     user_question_file = DEFAULT_QUESTION_PATH
     outputfile = ''
-    epsilon = DEFAULT_EPSILON
+    resultfile = './output/expl_params_top_{}_delta_{}.txt'.format(str(TOP_K), str(DEFAULT_LOCAL_SUPPORT))
+    port = DEFAULT_PORT
     aggregate_column = DEFAULT_AGGREGATE_COLUMN
-    try:
-        conn = psycopg2.connect("host=localhost port=5436 dbname=antiprov user=antiprov")
-        cur = conn.cursor()
-    except psycopg2.OperationalError:
-        print('Connection to database failed！')
-
+    
     
     try:
-        opts, args = getopt.getopt(argv,"hq:p:u:o:e:a",["qtable=", "ptable=", "ufile=","ofile=","epsilon=","aggregate_column="])
+        opts, args = getopt.getopt(argv,"hq:p:u:o:P:a",["qtable=", "ptable=", "ufile=","ofile=","port=","aggregate_column="])
     except getopt.GetoptError:
-        print('explanation.py -q <query_result_table> -p <pattern_table> -u <user_question_file> -o <outputfile> -e <epsilon> -a <aggregate_column>')
+        print('explanation.py -q <query_result_table> -p <pattern_table> -u <user_question_file> -o <outputfile> -r <resultfile> -P <port> -a <aggregate_column>')
         sys.exit(2)
 
-    try:
-        opts, args = getopt.getopt(argv,"hq:p:u:o:e:a",["qtable=", "ptable=", "ufile=","ofile=","epsilon=","aggregate_column="])
-    except getopt.GetoptError:
-        print('explanation.py -q <query_result_table> -p <pattern_table> -u <user_question_file> -o <outputfile> -e <epsilon> -a <aggregate_column>')
-        sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('explanation.py -q <query_result_table> -p <pattern_table> -u <user_question_file> -o <outputfile> -e <epsilon> -a <aggregate_column>')
+            print('explanation.py -q <query_result_table> -p <pattern_table> -u <user_question_file> -o <outputfile> -r <resultfile> -P <port> -a <aggregate_column>')
             sys.exit(2)    
         elif opt in ("-q", "--qtable"):
             query_result_table = arg
@@ -1205,10 +743,19 @@ def main(argv=[]):
             user_question_file = arg
         elif opt in ("-o", "--ofile"):
             outputfile = arg
-        elif opt in ("-e", "--epsilon"):
-            epsilon = float(arg)
+        elif opt in ("-r", "--rtfile"):
+            resultfile = arg
+        elif opt in ("-P", "--port"):
+            port = float(arg)
         elif opt in ("-a", "--aggcolumn"):
             aggregate_column = arg
+
+    try:
+        conn = psycopg2.connect("host=localhost port={} dbname=antiprov user=antiprov".format(str(port)))
+        cur = conn.cursor()
+    except psycopg2.OperationalError:
+        print('Connection to database failed！')
+
 
     # standard_expl_dict = load_explanations(outputfile)
     # print(standard_expl_dict)
@@ -1296,23 +843,18 @@ def main(argv=[]):
             # break
     
     
-    for g_key in utils.MATERIALIZED_DICT:
-        for fv_key in utils.MATERIALIZED_DICT[g_key]:
-            dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(utils.MATERIALIZED_DICT[g_key][fv_key]))
+    for g_key in global_vars.MATERIALIZED_DICT:
+        for fv_key in global_vars.MATERIALIZED_DICT[g_key]:
+            dv_query = '''DROP VIEW IF EXISTS MV_{};'''.format(str(global_vars.MATERIALIZED_DICT[g_key][fv_key]))
             cur.execute(dv_query)
             conn.commit()
 
-    gt_ofile = open('./output/params_top_{}_delta_{}.txt'.format(str(TOP_K), str(DEFAULT_LOCAL_SUPPORT)), 'w')
+    gt_ofile = open(resultfile, 'w')
     for ek in quality_dict:
         gt_ofile.write(ek + '\n')
         gt_ofile.write(str(quality_dict[ek]) + '\n')
         gt_ofile.write(str(expl_time_dict[ek]) + '\n')
     gt_ofile.close()
-    # plot_heatmap(quality_lam_the)
-    # plot_heatmap(expl_time_lam_the)
-    # pp.close()
-
-
 
 
 if __name__ == "__main__":
