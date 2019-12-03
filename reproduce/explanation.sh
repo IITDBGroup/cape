@@ -26,8 +26,8 @@ echo 'Running experiments for Figure 6 (a)'
 pattern_size_dblp=('800k' '400k' '200k' '100k' '40k' '20k' '10k')
 
 mkdir -p ./experiments/expl_time_record
-
 mkdir -p ./expl_perf_exp/output
+
 for exp_id in 1 2 3 4 5 7
 # for exp_id in 7
 do
@@ -51,8 +51,6 @@ do
             --exp_id $exp_id --expl_topk=$topk --pruning --rtfile ./experiments/expl_time_record/dblp_pruning_top${topk}_exp_${exp_id}.csv
     done
 done
-
-# python3 expl_DBLP_numpat.py
 
 echo 'Running experiments for Figure 6 (b)(c)'
 
@@ -81,10 +79,6 @@ do
             --exp_id $exp_id --expl_topk=$topk --pruning --rtfile ./experiments/expl_time_record/crime_pruning_top${topk}_exp_${exp_id}.csv
     done
 done
-
-# python3 expl_crime_numpat.py
-# python3 expl_crime_numatt.py
-
 
 echo 'Running experiments for Figure 7'
 python3 ./expl_param_exp/params_exp.py -h ${pgip} -P ${port} --ufile ./expl_param_exp/input/user_question.csv --rtfile ./experiments/expl_params_top_10_delta_5.txt
