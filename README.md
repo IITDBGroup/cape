@@ -143,7 +143,7 @@ In our experiments we evaluated three things:
 - performance of the online explanation generation algorithm
 - quality of the generated explanations wrt. to a known ground truth
 
-All generated result files will be in the current folder on your local machine. See Section F for detail.
+All generated result files will be in `docker` folder within the cape repository on your local machine. See Section F for detail.
 
 # E) Suggestions and Instructions for Alternative Experiments
 
@@ -329,7 +329,7 @@ Then to reproduce all the experiment results you can simply run the script
 ./script.sh
 ~~~
 
-The result will be in `experiments` folder (If you are using docker for cape, this folder will get copied to the current folder on your local machine). In below subsections we will explain which file corresponds to which figure in the paper.
+The result will be in `experiments` folder (If you are using docker for cape, this folder will get copied to `docker` folder). In below subsections we will explain which file corresponds to which figure in the paper.
 
 Alternatively you can run each part of the experiment separately.
 
