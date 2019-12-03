@@ -1,5 +1,9 @@
 # SIGMOD Reproducibility for Paper
 
+If you are looking at the pdf version of this document, please look at the online markdown version instead which has better layout:
+
+[https://github.com/IITDBGroup/cape/tree/sigmod-reproducibility](https://github.com/IITDBGroup/cape/tree/sigmod-reproducibility)
+
 
 # A) Source code info
 
