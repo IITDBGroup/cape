@@ -1,6 +1,16 @@
 #!/bin/bash
 
+#parameters
+if [ -z ${port} ];
+then
+    port=5437;
+fi;
+
+if [ -z ${pgip} ];
+then
+    pgip='localhost';
+fi;
+
 echo 'Running experiments for Figure 7'
 
-python3 expl_gt.py --ufile ./input/user_question_expl_gt_7.txt
-python3 plot_params.py
+python3 params_exp.py -h ${pgip} -P ${port} --ufile ./expl_param_exp/input/user_question.txt --rtfile ./experiments/expl_params_top_10_delta_5.txt

@@ -82,8 +82,7 @@ this should produce an output like this:
 │   │   ├── input
 │   │   └── similarity
 │   ├── expl_perf_exp
-│   │   ├── input
-│   │   └── similarity
+│   │   └── input
 │   └── expl_qual_exp
 │       └── input
 └── testdb
@@ -332,31 +331,53 @@ cd reproduce
 
 ### Explanation generation
 
-To test if the experiment environment has been setup correctly, run
+To test if the experiment environment has been setup correctly, we provide a script to run the performance evaluation experiment with few user questions. In `reproduce/expl_perf_exp` forlder, run
 
 ~~~shell
 bash perf_exp_crime_small.sh
 ~~~
-to see if the code runs and plots `expl_crime_numpat.pdf` and `expl_crime_numatt.pdf` generated.
+to see if the code runs and plots `reproduce/expl_perf_exp/expl_crime_numpat.pdf` and `reproduce/expl_perf_exp/expl_crime_numatt.pdf` generated.
 
-To reproduce the result:
+To reproduce the result, in `reproduce` folder:
+~~~shell
+bash explanation.sh
+~~~
+
+The script `explanation.sh` will run all experiments for explanation generation; you can also run each experiment separately.
+
+#### Performance
+To run performance evaluation experiments separately, in `reproduce/expl_perf_exp`, run:
 ~~~shell
 bash perf_exp_crime.sh
 bash perf_exp_dblp.sh
 ~~~
 
-The result of Figure 6 (a) is in `expl_DBLP_numpat.pdf`; Figure 6 (b) is in `expl_crime_numpat.pdf`; Figure 6 (c) is in `expl_crime_numatt.pdf`.
-
-### Explanation Quality
-
-To reproduce the result:
-
+#### Explanation Quality
+To run quality evaluation experiments separately, in `reproduce/expl_qual_exp`, run:
 ~~~shell
 bash qual_exp_crime.sh
 bash qual_exp_dblp.sh
 ~~~
 
-The results for Table 3 and Table 4 are in `output_dblp.txt`, and the results for Table 5 are in `output_crime.txt`.
+The results for Table 3 and Table 4 are in `reproduce/expl_qual_exp/output_dblp.txt`, and the results for Table 5 are in `reproduce/expl_qual_exp/output_crime.txt`.
+
+#### Parameter Sensitivity:
+To run parameter sensitivity evaluation experiments separately, in `reproduce/expl_param_exp`, run:
+~~~shell
+bash params_exp.sh
+~~~
+
+## Plot results
+
+All results for plotting figures are stored in `reproduce/experiments`. After experiments are finished, enter this folder, run
+
+~~~shell
+make
+~~~
+
+The result of Figure 6 (a) is in `expl_DBLP_numpat.pdf`; Figure 6 (b) is in `expl_crime_numpat.pdf`; Figure 6 (c) is in `expl_crime_numatt.pdf`. Figure 7 is in `params_gs.pdf`.
+
+
 
 # G) Links and Contact Information #
 
