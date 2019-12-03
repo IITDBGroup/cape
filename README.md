@@ -1,23 +1,25 @@
 # SIGMOD Reproducibility for Paper
 
 
-## A) Source code info
+# A) Source code info
 
-The **Cape** system is written in `Python` and uses [PostgreSQL](https://www.postgresql.org/) as a backend for storage. Cape is made available on [pypi](https://pypi.org/). The **Cape** package installs a library as well as a commandline tool `capexplain`. This tool can be used to mine patterns, create explanations, and to start a GUI for interactively running queries, specifying questions, and browsing patterns and explanation
+The **Cape** system is written in `Python` and uses [PostgreSQL](https://www.postgresql.org/) as a backend for storage. Cape is made available on [pypi](https://pypi.org/). The **Cape** package installs a library as well as a commandline tool `capexplain`. This tool can be used to mine patterns, create explanations, and to start a GUI for interactively running queries, specifying questions, and browsing patterns and explanation. For convenience we provide a docker container.
 
-- Repository: https://github.com/IITDBGroup/cape
+- Repository: https://github.com/IITDBGroup/cape (branch `SIGMOD-reproducibility`)
 - Programming Language: Python
 - Additional Programming Language info: we are requiring Python3. Tested versions are Python 3.6 and Python 3.8.
-- Required libraries/packages: `tkinter` which requires a system package to be installed (see below)
+- OS for Experiments: Linux (required for docker)
+- Required libraries/packages:
+    - `tkinter` which requires a system package to be installed (see below)
+    - `postgresql` as a database backend
 
-
-## B)  Datasets info
+# B) Datasets info
 
 We used two real world datasets in the experiments:
 - Publication dataset extracted from DBLP: [https://dblp.uni-trier.de/](https://dblp.uni-trier.de/)
 - Crime dataset from the Chicago open data portal: [https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2](https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/ijzp-q8t2)
 
-## C) Hardware Info
+# C) Hardware Info
 
 All runtime experiments were executed on a server with the following specs:
 
@@ -31,13 +33,189 @@ All runtime experiments were executed on a server with the following specs:
 | Disks            | 4 x 1TB 7.2K RPM Near-Line SAS 6Gbps (DELL CONSTELLATION ES.3)                |
 
 
-## D) Installation and Setup
+# D) Installation, Setup, and Running Experiments
 
-### Install Cape
+Please follow these instructions to install the system and datasets for reproducibility. Please see below for an standard installation with pip. We use two docker images for  reproducibility: 1) a container running cape and 2) a container running postgres (including the datasets for the experiments).
 
-Please follow these instructions to install the system and datasets for reproducibility. Please see below for an standard installation with pip.
+## Prerequisites ##
 
-#### Prerequisites ####
+- You need to have [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/install/) installed on your system (please use linux so docker can use sufficient memory resources  and does not have to run in a VM).
+
+## Clone git repository
+
+Please clone the Cape git repository and check out the `sigmod-reproducibility` branch. This branch contains Cape as well as scripts for running experiments and plotting results.
+
+~~~shell
+git clone --single-branch --branch sigmod-reproducibility https://github.com/IITDBGroup/cape.git
+~~~
+
+To check whether it was cloned correctly run:
+
+~~~shell
+cd cape
+tree -d
+~~~
+
+this should produce an output like this:
+
+~~~shell
+.
+├── capexplain
+│   ├── cl
+│   ├── database
+│   ├── dev
+│   ├── explain
+│   ├── explanation_model
+│   ├── fd
+│   ├── gui
+│   ├── pattern_miner
+│   ├── pattern_model
+│   └── similarity
+├── docker
+│   ├── cape
+│   └── postgres
+├── images
+├── reproduce
+│   ├── experiments
+│   ├── expl_param_exp
+│   │   ├── explanation_model
+│   │   ├── input
+│   │   └── similarity
+│   ├── expl_perf_exp
+│   │   ├── input
+│   │   └── similarity
+│   └── expl_qual_exp
+│       └── input
+└── testdb
+~~~
+
+## Start-up docker cluster
+
+We are using `docker-compose` for this. Switch to the `docker` directory inside the git repository you have cloned.
+
+~~~shell
+cd docker
+~~~
+
+Now run docker-compose which will create a `cape-system` and a `postgres-cape` container:
+
+~~~shell
+docker-compose up -d
+~~~
+
+To test whether the containers are running do:
+
+~~~shell
+docker ps
+~~~
+
+You should see these two containers (the IDs would be different of course):
+
+~~~shell
+CONTAINER ID        IMAGE                                                         COMMAND                  CREATED             STATUS              PORTS                              NAMES
+14cd28b898c0        289a14cb79dc                                                  "/mesleeps.sh"           About an hour ago   Up About an hour                                       cape-system
+d603c8e78410        iitdbgroup/2019-sigmod-reproducibility-cape-postgres:latest   "docker-entrypoint.s…"   About an hour ago   Up About an hour    5432/tcp, 0.0.0.0:5436->5436/tcp   postgres-cape
+~~~
+
+## Run Experiments
+
+There is a main script for driving the experiments that is run from within the `cape-system` container. This script copies results to the directory from which you ran `docker-compose`. Partial experiments can be restarted and existing results (CSV and PDF files) will not be overwritten. This is because the whole experiments will run for a few days. Note that the script only runs the each experiment once (instead of 3 times as we did for the paper) to keep the runtime feasible. You can overwrite this behaviour by setting an environment variable when running the script.
+
+To start the experiments:
+
+~~~shell
+docker exec -ti -w /usr/local/cape/reproduce/ cape-system /usr/local/cape/reproduce/script.sh
+~~~
+
+Over time you should see CSV and PDF files pop up in the `docker` folder in the cloned git repository.
+If you want to run additional repetitions for the long-running mining experiments, then you can set the number of repetitions like this, e.g., setting it to 3 repetitions:
+
+~~~shell
+docker exec -ti -w /usr/local/cape/reproduce/ -e rep=3 cape-system /usr/local/cape/reproduce/script.sh
+~~~
+
+In our experiments we evaluated three things:
+
+- performance of the offline pattern mining algorithm
+- performance of the online explanation generation algorithm
+- quality of the generated explanations wrt. to a known ground truth
+
+# E) Suggestions and Instructions for Alternative Experiments
+
+For convenience, we provide the single script that runs all experiments. Creating explanations for outliers in cape consists of two steps. There is an offline mining phase that detects patterns in a dataset and an online explanation generation phase that uses the patterns to create an explanation for a user questions. To run different parameter settings, you can use the commandline client to run these phases (`capexplain COMMAND -help` lists all options that are available for a particular command, e.g., `mine`). Furthermore, we provide a GUI for exploring explanations. Feel free to use it for generating explanations for additional queries / user questions not covered in the experiments.
+
+
+## Pattern mining
+
+The pattern mining algorithm takes multiple configuration parameters. You can run the algorithm with different parameter settings. Here are a few suggestions. We describe the parameters in more details below.
+
+- this command repeats a short experiment over the publication table, but output details of what the miner is doing (using `-l DEBUG` parameter that show a lot of debug outputs. At the end cape will show statistics about runtime and the detected patterns.
+
+~~~shell
+docker exec -ti cape-system /usr/local/bin/capexplain mine -h postgres-cape -u antiprov -p antiprov -d antiprov -P 5436 -t pub_10000 --algorithm cube --local-support 15 --global-support 15 --show-progress False -l DEBUG
+~~~
+
+- run the algorithm for one subset of the crime table. Run the command multiple times changing the *local support threshold* to 5, 10, and 15 and observe how the number of detected local and global patterns change. See our paper to understand the meaning of the local support threshold.
+
+~~~shell
+docker exec -ti cape-system /usr/local/bin/capexplain mine -h postgres-cape -u antiprov -p antiprov -d antiprov -P 5436 -t crime_exp_5 --algorithm optimized --local-support 55 --global-support 10 --show-progress True
+~~~
+
+- we included additional dataset in the postgres container that was not used in the experiments. The `potholes` dataset records when potholes were at what location in Chicago. The `cta` dataset records traffic at Chicago public transportation stations. For instance, you could try:
+
+~~~shell
+docker exec -ti cape-system /usr/local/bin/capexplain mine -h postgres-cape -u antiprov -p antiprov -d antiprov -P 5436 -t pot_10000 --algorithm optimized --local-support 15 --global-support 20 --show-progress True
+~~~
+
+and
+
+~~~shell
+docker exec -ti cape-system /usr/local/bin/capexplain mine -h postgres-cape -u antiprov -p antiprov -d antiprov -P 5436 -t cta_100000 --algorithm optimized --local-support 15 --global-support 20 --show-progress True
+~~~
+
+### Mining Pattern Command
+
+Use `capexplain mine [OPTIONS]` to mine patterns. Cape will store the discovered patterns in the database. The "mined" patterns will be stored in a created schema called `pattern`, and the pattern tables generated after running `mine` command are `pattern.{target_table}_global` and `pattern.{target_table}_local`. At the minimum you have to tell Cape how to connect to the database you want to use and which table it should generate patterns for. Run `capexplain help mine` to get a list of all supported options for the mine command. The options needed to specify the target table and database connection are:
+
+~~~shell
+-h ,--host <arg>               - database connection host IP address (DEFAULT: 127.0.0.1)
+-u ,--user <arg>               - database connection user (DEFAULT: postgres)
+-p ,--password <arg>           - database connection password
+-d ,--db <arg>                 - database name (DEFAULT: postgres)
+-P ,--port <arg>               - database connection port (DEFAULT: 5432)
+-t ,--target-table <arg>       - mine patterns for this table
+~~~
+
+For instance, if you run a postgres server locally (default) with user `postgres` (default), password `test`, and want to mine patterns for a table `employees` in database `mydb`, then run:
+
+~~~shell
+capexplain mine -p test -d mydb -t employees
+~~~
+
+### Mining algorithm parameters ###
+
+Cape's mining algorithm takes the following arguments:
+
+~~~shell
+--gof-const <arg>              - goodness-of-fit threshold for constant regression (DEFAULT: 0.1)
+--gof-linear <arg>             - goodness-of-fit threshold for linear regression (DEFAULT: 0.1)
+--confidence <arg>             - global confidence threshold
+-r ,--regpackage <arg>         - regression analysis package to use {'statsmodels', 'sklearn'} (DEFAULT: statsmodels)
+--local-support <arg>          - local support threshold (DEFAULT: 10)
+--global-support <arg>         - global support thresh (DEFAULT: 100)
+-f ,--fd-optimizations <arg>   - activate functional dependency detection and optimizations (DEFAULT: False)
+-a ,--algorithm <arg>          - algorithm to use for pattern mining {'naive', 'cube', 'share_grp', 'optimized'} (DEFAULT: optimized)
+--show-progress <arg>          - show progress meters (DEFAULT: True)
+--manual-config                - manually configure numeric-like string fields (treat fields as string or numeric?) (DEFAULT: False)
+~~~
+
+## Explanation generation
+
+- TODO how to subsample the tables (create script), how to generate explanations, how to use the GUI
+
+# F) Install Cape without docker (just in case)
+
+**We just list this for completeness, you should not need to go though these steps!**.
 
 Cape requires python 3 and uses python's [tkinter](https://docs.python.org/3/library/tkinter.html) for its graphical UI. For example, on ubuntu you can install the prerequisites with:
 
@@ -45,17 +223,8 @@ Cape requires python 3 and uses python's [tkinter](https://docs.python.org/3/lib
 sudo apt-get install python3 python3-pip python3-tk
 ~~~
 
-#### Clone git repository
 
-Please clone the Cape git repository and check out the `sigmod-reproducibility` branch. This branch contains Cape as well as scripts for running experiments and plotting results.
-
-~~~shell
-git clone git@github.com:IITDBGroup/cape.git capexplain
-git checkout sigmod-reproducibility
-cd capexplain
-~~~
-
-#### Build and Install Cape
+## Build and Install Cape
 
 As mentioned before, Cape is written in Python. We recommend creating a python3 [virtual environment](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/). There are several ways to do that. Here we illustrate one. First enter the directory in which you cloned the capexplain git repository.
 
@@ -117,7 +286,7 @@ For convenience we also provide a docker image:
 
 - TODO
 
-### Install Postgres + load database ###
+## Install Postgres + load database ##
 
 We provide a docker image with a Postgres database that contains the datasets used in the experiments. If you do not have docker, please install it:
 
@@ -132,46 +301,39 @@ docker pull iitdbgroup/2019-sigmod-reproducibility-cape-postgres
 You can create a container from this image using
 
 ~~~sh
-docker run --name cape-postgres -d -p 5436:5436 iitdbgroup/2019-sigmod-reproducibility-cape-postgres
+docker run --rm --name cape-postgres -d -p 5436:5436 iitdbgroup/2019-sigmod-reproducibility-cape-postgres
 ~~~
 
 To test the container you can connect to the database and test it using:
 
 ~~~shell
-PGPASSWORD='antiprov' docker exec -ti cape-postgres psql -U antiprov -p 5436
+docker exec -ti cape-postgres psql -U antiprov -p 5436
 psql (10.10)
 Type "help" for help.
 
-antiprov=# 
+antiprov=#
 ~~~
 
-This will connect to the Postgres instance using Postgre's commandline client `psql`. You can quit the client using `\q`.
+This will connect to the Postgres instance using Postgres's commandline client `psql`. You can quit the client using `\q`.
 
-### Run Experiments
+## Run Experiments
 
-In our experiments we evaluated three things:
-
-- performance of the offline pattern mining algorithm
-- performance of the online explanation generation algorithm
-- quality of the generated explanations
-
-All experiment scripts are under reproduce folder. Firt enter with
+All experiment scripts are in the `reproduce` folder. First enter with
 
 ~~~shell
 cd reproduce
 ~~~
 
-#### Pattern mining
+### Pattern mining
 
 ~~~shell
 ./mining.sh
 ~~~
 
-#### Explanation generation
+### Explanation generation
 
-- TODO materialize the subset pattern tables
-- TODO setup the script
 To test if the experiment environment has been setup correctly, run
+
 ~~~shell
 bash perf_exp_crime_small.sh
 ~~~
@@ -185,11 +347,10 @@ bash perf_exp_dblp.sh
 
 The result of Figure 6 (a) is in `expl_DBLP_numpat.pdf`; Figure 6 (b) is in `expl_crime_numpat.pdf`; Figure 6 (c) is in `expl_crime_numatt.pdf`.
 
-#### Explanation Quality
-
-- TODO materialize the subset pattern tables
+### Explanation Quality
 
 To reproduce the result:
+
 ~~~shell
 bash qual_exp_crime.sh
 bash qual_exp_dblp.sh
@@ -197,21 +358,17 @@ bash qual_exp_dblp.sh
 
 The results for Table 3 and Table 4 are in `output_dblp.txt`, and the results for Table 5 are in `output_crime.txt`.
 
-### Suggestions and Instructions for Alternative Experiments
+# G) Links and Contact Information #
 
-For convenience, we provide the single script that runs all experiments. Creating explanations for outliers in cape consists of two steps. There is an offline mining phase that detects patterns in a dataset and an online explanation generation phase that uses the patterns to create an explanation for a user questions. To run different parameter settings, you can use the commandline client to run these phases (`capexplain COMMAND -help` lists all options that are available for a particular commeand, e.g., `mine`). Furthermore, we provide a GUI for exploring explanations. Feel free to use it for generating explanations for additional queries / user questions not covered in the experiments.
+Cape is developed by researchers at Illinois Institute of Technology and Duke University. For more information and publications see the Cape project page [http://www.cs.iit.edu/~dbgroup/projects/cape.html](http://www.cs.iit.edu/~dbgroup/projects/cape.html).
+
+For questions about the experiments or `Cape` feel free to contact us:
+
+- **Qitian Zeng** [qzeng3@hawk.iit.edu](qzeng3@hawk.iit.edu)
+- **Zhengjie Miao** [zhengjie.miao@duke.edu](zhengjie.miao@duke.edu)
 
 
-#### Pattern mining
-
-- TODO explain how to run the algorithm with different parameters, giving some suggestions
-
-#### Explanation generation and Explanation Quality
-
-- TODO how to subsample the tables (create script), how to generate explanations, how to use the GUI
-
-# Appendix
-## Cape Usage ##
+# H) Appendix - Cape Usage
 
 Cape provides a single binary `capexplain` that support multiple subcommands. The general form is:
 
@@ -221,11 +378,11 @@ capexplain COMMAND [OPTIONS]
 
 Options are specific to each subcommand. Use `capexplain help` to see a list of supported commands and `capexplain help COMMAND` get more detailed help for a subcommand.
 
-### Overview ###
+## Overview ##
 
 Cape currently only supports PostgreSQL as a backend database (version 9 or higher). To use Cape to explain an aggregation outlier, you first have to let cape find patterns for the table over which you are aggregating. This an offline step that only has to be executed only once for each table (unless you want to re-run pattern mining with different parameter settings). Afterwards, you can either use the commandline or Cape's UI to request explanations for an outlier in an aggregation query result.
 
-### Mining Patterns ###
+## Mining Patterns ##
 
 Use `capexplain mine [OPTIONS]` to mine patterns. Cape will store the discovered patterns in the database. The "mined" patterns will be stored in a created schema called `pattern`, and the pattern tables generated after running `mine` command are `pattern.{target_table}_global` and `pattern.{target_table}_local`. At the minimum you have to tell Cape how to connect to the database you want to use and which table it should generate patterns for. Run `capexplain help mine` to get a list of all supported options for the mine command. The options needed to specify the target table and database connection are:
 
@@ -244,7 +401,7 @@ For instance, if you run a postgres server locally (default) with user `postgres
 capexplain mine -p test -d mydb -t employees
 ~~~
 
-#### Mining algorithm parameters ####
+### Mining algorithm parameters ###
 
 Cape's mining algorithm takes the following arguments:
 
@@ -259,10 +416,9 @@ Cape's mining algorithm takes the following arguments:
 -a ,--algorithm <arg>          - algorithm to use for pattern mining {'naive', 'cube', 'share_grp', 'optimized'} (DEFAULT: optimized)
 --show-progress <arg>          - show progress meters (DEFAULT: True)
 --manual-config                - manually configure numeric-like string fields (treat fields as string or numeric?) (DEFAULT: False)
-
 ~~~
 
-#### Running our "crime" data example ####
+### Running our "crime" data example ###
 
 We included a subset of the "Chicago Crime" dataset (https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/)
 in our repository for user to play with. To import this dataset in your postgres databse, under `/testdb` directory, run the following command template:
@@ -272,7 +428,7 @@ psql -h <host> -U <user name> -d <local database name where you want to store ou
 ~~~
 then run the `capexplain` commands accordingly to explore this example.
 
-### Explaining Outliers ###
+## Explaining Outliers ###
 
 To explain an aggregation outlier use `capexplain explain [OPTIONS]`.
 
@@ -299,7 +455,7 @@ value1,value2,value3...., high/low
 please refer to `input.txt` to look at an example.
 
 
-### Starting the Explanation Explorer GUI ###
+## Starting the Explanation Explorer GUI ###
 
 Cape comes with a graphical UI for running queries, selecting outliers of interest, and exploring patterns that are relevant for an outlier and browsing explanations generated by the system. You need to specify the Postgres server to connect to. The explorer can only generate explanations for queries over tables for which patterns have mined beforehand using `capexplain mine`.
 Here is our demo video : (https://www.youtube.com/watch?v=gWqhIUrcwz8)
@@ -324,7 +480,3 @@ For instance, if you run a postgres server locally (default) with user `postgres
 ~~~shell
 capexplain gui -p test -d mydb
 ~~~
-
-## Links ##
-
-Cape is developed by researchers at Illinois Institute of Technology and Duke University. For more information and publications see the Cape project page [http://www.cs.iit.edu/~dbgroup/projects/cape.html](http://www.cs.iit.edu/~dbgroup/projects/cape.html).

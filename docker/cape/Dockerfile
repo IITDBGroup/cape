@@ -21,8 +21,10 @@ RUN cd /usr/local/cape && \
 ########################################
 # set environment variables for experiments
 ########################################
-ENV port 5436  # postgres port for experiments
-ENV pgip 17.17.0.3 # postgres host IP address
+# postgres port for experiments
+ENV port 5436
+# postgres host IP address
+ENV pgip 17.17.0.3
 ########################################
 # Start a sleeper script as entrypoint to keep container running
 ########################################
