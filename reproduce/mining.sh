@@ -40,7 +40,7 @@ cape_mine() {
         echo "mining $2 with $algo";
         capexplain mine -u antiprov -d antiprov -p antiprov -P ${port} -t $2 --algorithm $algo --local-support $lsup --global-support $gsup --show-progress False --experiment $1 --rep $rep --csv $3;
     fi;
-    cp -nR experiments/ $OUTPUTDIR;
+    cp -nR experiments/. $OUTPUTDIR;
 }
 
 
