@@ -239,8 +239,6 @@ class PatternFinder:
         if self.config.num is not None:
             self.num = self.config.num.split(',') if self.num else []
             self.summable = self.config.summable.split(',') if self.summable else []
-            print(self.num)
-            print(self.summable)
             log.debug("input given numerical attributes %s and summable attributes %s",
                     self.num, self.summable)
             return

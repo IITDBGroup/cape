@@ -6,8 +6,8 @@ mkdir -p $OUTPUTDIR
 
 cp -nR $OUTPUTDIR/. experiments
 
-OUTPUTDIR=$OUTPUTDIR ./mining.sh
-#./script_explaining.sh
+source mining.sh
+source explanation.sh
 
 make -C experiments
 
