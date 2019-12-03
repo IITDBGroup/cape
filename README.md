@@ -1,11 +1,11 @@
-# SIGMOD Reproducibility for Paper
+# SIGMOD Reproducibility for Paper "Going Beyond Provenance: Explaining Query Answers with Pattern-based Counterbalances"
 
 If you are looking at the pdf version of this document, please look at the online markdown version instead which has better layout:
 
 [https://github.com/IITDBGroup/cape/tree/sigmod-reproducibility](https://github.com/IITDBGroup/cape/tree/sigmod-reproducibility)
 
 
-# A) Source code info
+# A) Source Code Info
 
 The **Cape** system is written in `Python` and uses [PostgreSQL](https://www.postgresql.org/) as a backend for storage. Cape is made available on [pypi](https://pypi.org/). The **Cape** package installs a library as well as a commandline tool `capexplain`. This tool can be used to mine patterns, create explanations, and to start a GUI for interactively running queries, specifying questions, and browsing patterns and explanation. For convenience we provide a docker container.
 
@@ -17,7 +17,7 @@ The **Cape** system is written in `Python` and uses [PostgreSQL](https://www.pos
     - `tkinter` which requires a system package to be installed (see below)
     - `postgresql` as a database backend
 
-# B) Datasets info
+# B) Datasets Info
 
 We used two real world datasets in the experiments:
 - Publication dataset extracted from DBLP: [https://dblp.uni-trier.de/](https://dblp.uni-trier.de/)
@@ -45,7 +45,7 @@ Please follow these instructions to install the system and datasets for reproduc
 
 - You need to have [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/install/) installed on your system (please use linux so docker can use sufficient memory resources  and does not have to run in a VM).
 
-## Clone git repository
+## Clone git Repository
 
 Please clone the Cape git repository and check out the `sigmod-reproducibility` branch. This branch contains Cape as well as scripts for running experiments and plotting results.
 
@@ -93,7 +93,7 @@ this should produce an output like this:
 `-- testdb
 ~~~
 
-## Start-up docker cluster
+## Start-up Docker Cluster
 
 We are using `docker-compose` for this. Switch to the `docker` directory inside the git repository you have cloned.
 
@@ -149,7 +149,7 @@ In our experiments we evaluated three things:
 For convenience, we provide the single script that runs all experiments. Creating explanations for outliers in cape consists of two steps. There is an offline mining phase that detects patterns in a dataset and an online explanation generation phase that uses the patterns to create an explanation for a user questions. To run different parameter settings, you can use the commandline client to run these phases (`capexplain COMMAND -help` lists all options that are available for a particular command, e.g., `mine`). Furthermore, we provide a GUI for exploring explanations. Feel free to use it for generating explanations for additional queries / user questions not covered in the experiments.
 
 
-## Pattern mining
+## Pattern Mining
 
 The pattern mining algorithm takes multiple configuration parameters. You can run the algorithm with different parameter settings. Here are a few suggestions. We describe the parameters in more details below.
 
@@ -196,7 +196,7 @@ For instance, if you run a postgres server locally (default) with user `postgres
 capexplain mine -p test -d mydb -t employees
 ~~~
 
-### Mining algorithm parameters ###
+### Mining Algorithm Parameters ###
 
 Cape's mining algorithm takes the following arguments:
 
@@ -213,11 +213,11 @@ Cape's mining algorithm takes the following arguments:
 --manual-config                - manually configure numeric-like string fields (treat fields as string or numeric?) (DEFAULT: False)
 ~~~
 
-## Explanation generation
+## Explanation Generation
 
 - TODO how to subsample the tables (create script), how to generate explanations, how to use the GUI
 
-# F) Install Cape without docker (just in case)
+# F) Install Cape Without Docker (just in case)
 
 **We just list this for completeness, you should not need to go though these steps!**.
 
@@ -260,7 +260,7 @@ Install Cape:
 python3 setup.py install
 ~~~
 
-##### Test the installation
+### Test the Installation
 
 You can run
 
@@ -284,13 +284,7 @@ help                          - Show general or command specific help.
 gui                           - Open the Cape graphical explanation explorer.
 ~~~
 
-##### Use Docker (Alternative)
-
-For convenience we also provide a docker image:
-
-- TODO
-
-## Install Postgres + load database ##
+## Install Postgres + Load Database ##
 
 We provide a docker image with a Postgres database that contains the datasets used in the experiments. If you do not have docker, please install it:
 
@@ -328,13 +322,13 @@ All experiment scripts are in the `reproduce` folder. First enter with
 cd reproduce
 ~~~
 
-### Pattern mining
+### Pattern Mining
 
 ~~~shell
 ./mining.sh
 ~~~
 
-### Explanation generation
+### Explanation Generation
 
 To test if the experiment environment has been setup correctly, run
 
@@ -405,7 +399,7 @@ For instance, if you run a postgres server locally (default) with user `postgres
 capexplain mine -p test -d mydb -t employees
 ~~~
 
-### Mining algorithm parameters ###
+### Mining Algorithm Parameters ###
 
 Cape's mining algorithm takes the following arguments:
 
@@ -422,7 +416,7 @@ Cape's mining algorithm takes the following arguments:
 --manual-config                - manually configure numeric-like string fields (treat fields as string or numeric?) (DEFAULT: False)
 ~~~
 
-### Running our "crime" data example ###
+### Running Our "crime" Data Example ###
 
 We included a subset of the "Chicago Crime" dataset (https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-present/)
 in our repository for user to play with. To import this dataset in your postgres databse, under `/testdb` directory, run the following command template:
