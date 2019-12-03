@@ -26,7 +26,8 @@ echo 'Running experiments for Figure 6 (a)'
 pattern_size_dblp=('800k' '400k' '200k' '100k' '40k' '20k' '10k')
 
 mkdir -p ./experiments/expl_time_record
-for exp_id in 1 2 3 4 5 7
+# for exp_id in 1 2 3 4 5 7
+for exp_id in 7
 do
     for topk in 3 10
     do
@@ -37,7 +38,8 @@ do
     done
 done
 
-for exp_id in 1 2 3 4 5 7
+# for exp_id in 1 2 3 4 5 7
+for exp_id in 7
 do
     for topk in 3 10
     do
@@ -54,8 +56,8 @@ echo 'Running experiments for Figure 6 (b)(c)'
 
 pattern_size_crime=('800k' '400k' '200k' '100k' '50k' '25k')
 
-mkdir -p ./time_record
-for exp_id in 1 2 3 4 5 6
+# for exp_id in 1 2 3 4 5 6
+for exp_id in 6
 do
     for topk in 3
     do
@@ -66,7 +68,8 @@ do
     done
 done
 
-for exp_id in 1 2 3 4 5 6
+# for exp_id in 1 2 3 4 5 6
+for exp_id in 6
 do
     for topk in 3
     do
@@ -82,4 +85,4 @@ done
 
 
 echo 'Running experiments for Figure 7'
-python3 params_exp.py -P ${port} --ufile ./expl_param_exp/input/user_question.txt --rtfile ./experiments/expl_params_top_10_delta_5.txt
+python3 ./expl_param_exp/params_exp.py -P ${port} --ufile ./expl_param_exp/input/user_question.txt --rtfile ./experiments/expl_params_top_10_delta_5.txt

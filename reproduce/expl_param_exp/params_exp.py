@@ -342,10 +342,10 @@ def load_patterns(cur, pat_table_name, query_table_name, theta_thres=0.1, lambda
             continue
         if 'id' in pat[0] or 'id' in pat[1]:
             continue
-        # if 'year' in pat[0]:
-        #     continue
-        # if 'name' in pat[1] or 'venue' in pat[1]:
-        #     continue
+        if 'year' in pat[0]:
+            continue
+        if 'name' in pat[1] or 'venue' in pat[1]:
+            continue
         if 'primary_type' in pat[1] or 'description' in pat[1] or 'location_description' in pat[1] or 'community_area' in pat[1] or 'beat' in pat[1]:
             continue
 
@@ -1043,7 +1043,7 @@ def main(argv=[]):
     
     
     try:
-        opts, args = getopt.getopt(argv,"hq:p:u:o:P:a",["qtable=", "ptable=", "ufile=","ofile=","port=","aggregate_column="])
+        opts, args = getopt.getopt(argv,"hq:p:u:o:r:P:a",["qtable=", "ptable=", "ufile=","ofile=", "rtfile=", "port=", "aggregate_column="])
     except getopt.GetoptError:
         print('explanation.py -q <query_result_table> -p <pattern_table> -u <user_question_file> -o <outputfile> -r <resultfile> -P <port> -a <aggregate_column>')
         sys.exit(2)
