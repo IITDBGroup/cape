@@ -3,7 +3,7 @@
 #parameters
 if [ -z ${port} ];
 then
-    port=5440;
+    port=5437;
 fi;
 
 if [ -z ${pgip} ];
@@ -15,7 +15,7 @@ fi;
 echo "parameters: port=${port}";
 
 echo 'Running experiments for Table 3 and Table 4'
-capexplain explain -h ${pgip} -u antiprov -d antiprov -p antiprov -P 5436 --ptable dev.pub_large_no_domain --qtable pub_large_no_domain --ufile ./expl_qual_exp/dblp.txt --ofile ./expl_qual_exp/output_dblp.txt
+capexplain explain -h ${pgip} -u antiprov -d antiprov -p antiprov -P 5436 --ptable dev.pub_large_no_domain --qtable pub_large_no_domain --ufile ./expl_qual_exp/input/dblp.txt --ofile ./expl_qual_exp/output_dblp.txt
 
 echo 'Running experiments for Table 5'
 capexplain explain -h ${pgip} -u antiprov -d antiprov -p antiprov -P 5436 --ufile ./expl_qual_exp/input/crime.txt --ofile ./expl_qual_exp/output_crime.txt
