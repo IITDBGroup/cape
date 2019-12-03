@@ -1,2 +1,12 @@
 #!/bin/bash
-capexplain explain -u antiprov -d antiprov -p antiprov -P 5436 --ufile ./input/crime.txt --ofile output_crime.txt
+if [ -z ${port} ];
+then
+    port=5437;
+fi;
+
+if [ -z ${pgip} ];
+then
+    pgip='localhost';
+fi;
+
+capexplain explain -h ${pgip} -P ${port} -u antiprov -d antiprov -p antiprov --ufile ./input/crime.txt --ofile output_crime.txt

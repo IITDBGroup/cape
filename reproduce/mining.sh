@@ -6,7 +6,6 @@ then
     port=5437;
 fi;
 
-
 if [ -z ${lsup} ];
 then
     lsup=15;
@@ -28,7 +27,7 @@ then
 fi;
 
 
-echo "parameters: port=${port}, lsup=${lsup}, gsup=${gsup}, rep=${rep}";
+echo "parameters: host=${pgip}, port=${port}, lsup=${lsup}, gsup=${gsup}, rep=${rep}";
 
 #files
 FILE3A='experiments/crime_num_att.csv';
