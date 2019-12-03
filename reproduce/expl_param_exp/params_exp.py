@@ -1038,20 +1038,20 @@ def main(argv=[]):
     user_question_file = DEFAULT_QUESTION_PATH
     outputfile = ''
     resultfile = './output/expl_params_top_{}_delta_{}.txt'.format(str(TOP_K), str(DEFAULT_LOCAL_SUPPORT))
+    host = 'localhost'
     port = DEFAULT_PORT
     aggregate_column = DEFAULT_AGGREGATE_COLUMN
     
     
     try:
-        opts, args = getopt.getopt(argv,"hq:p:u:o:r:P:a",["qtable=", "ptable=", "ufile=","ofile=", "rtfile=", "port=", "aggregate_column="])
+        opts, args = getopt.getopt(argv,"h:q:p:u:o:r:P:a",["host=", "qtable=", "ptable=", "ufile=","ofile=", "rtfile=", "port=", "aggregate_column="])
     except getopt.GetoptError:
-        print('explanation.py -q <query_result_table> -p <pattern_table> -u <user_question_file> -o <outputfile> -r <resultfile> -P <port> -a <aggregate_column>')
+        print('params_exp.py -h <host> -q <query_result_table> -p <pattern_table> -u <user_question_file> -o <outputfile> -r <resultfile> -P <port> -a <aggregate_column>')
         sys.exit(2)
 
     for opt, arg in opts:
-        if opt == '-h':
-            print('explanation.py -q <query_result_table> -p <pattern_table> -u <user_question_file> -o <outputfile> -r <resultfile> -P <port> -a <aggregate_column>')
-            sys.exit(2)    
+        if opt in ("-h", "--host"):
+            host = arg
         elif opt in ("-q", "--qtable"):
             query_result_table = arg
         elif opt in ("-p", "--ptable"):
@@ -1068,7 +1068,7 @@ def main(argv=[]):
             aggregate_column = arg
 
     try:
-        conn = psycopg2.connect("host=localhost port={} dbname=antiprov user=antiprov".format(str(port)))
+        conn = psycopg2.connect("host={} port={} dbname=antiprov user=antiprov".format(host, str(port)))
         cur = conn.cursor()
     except psycopg2.OperationalError:
         print('Connection to database failed！')
