@@ -22,6 +22,12 @@ then
     rep=1;
 fi;
 
+if [ -z ${pgip} ];
+then
+    pgip='localhost';
+fi;
+
+
 echo "parameters: port=${port}, lsup=${lsup}, gsup=${gsup}, rep=${rep}";
 
 #files
@@ -38,7 +44,7 @@ cape_mine() {
         echo "result exists in output, skip experiment";
     else
         echo "mining $2 with $algo";
-        capexplain mine -u antiprov -d antiprov -p antiprov -P ${port} -t $2 --algorithm $algo --local-support $lsup --global-support $gsup --show-progress False --experiment $1 --rep $rep --csv $3;
+        capexplain mine -h $pgip -u antiprov -d antiprov -p antiprov -P ${port} -t $2 --algorithm $algo --local-support $lsup --global-support $gsup --show-progress False --experiment $1 --rep $rep --csv $3;
     fi;
     cp -nR experiments/ $OUTPUTDIR;
 }
