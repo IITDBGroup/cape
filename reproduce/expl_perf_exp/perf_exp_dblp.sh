@@ -38,5 +38,3 @@ do
             --exp_id $exp_id --expl_topk=$topk --pruning --rtfile ../experiments/expl_time_record/dblp_pruning_top${topk}_exp_${exp_id}.csv
     done
 done
-
-python3 expl_DBLP_numpat.py
