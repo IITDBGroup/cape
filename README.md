@@ -357,7 +357,7 @@ bash qual_exp_crime.sh
 bash qual_exp_dblp.sh
 ~~~
 
-The results for Table 3 and Table 4 are in `reproduce/expl_qual_exp/output_dblp.txt`, and the results for Table 5 are in `reproduce/expl_qual_exp/output_crime.txt`.
+The results for Table 3 and Table 4 are in `reproduce/experiments/expl_qual_dblp.txt`, and the results for Table 5 are in `reproduce/experiments/expl_qual_crime.txt`.
 
 #### Parameter Sensitivity:
 To run parameter sensitivity evaluation experiments separately, in `reproduce/expl_param_exp`, run:
