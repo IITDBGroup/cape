@@ -60,33 +60,33 @@ this should produce an output like this:
 
 ~~~shell
 .
-├── capexplain
-│   ├── cl
-│   ├── database
-│   ├── dev
-│   ├── explain
-│   ├── explanation_model
-│   ├── fd
-│   ├── gui
-│   ├── pattern_miner
-│   ├── pattern_model
-│   └── similarity
-├── docker
-│   ├── cape
-│   └── postgres
-├── images
-├── reproduce
-│   ├── experiments
-│   ├── expl_param_exp
-│   │   ├── explanation_model
-│   │   ├── input
-│   │   └── similarity
-│   ├── expl_perf_exp
-│   │   ├── input
-│   │   └── similarity
-│   └── expl_qual_exp
-│       └── input
-└── testdb
+|-- capexplain
+|   |-- cl
+|   |-- database
+|   |-- dev
+|   |-- explain
+|   |-- explanation_model
+|   |-- fd
+|   |-- gui
+|   |-- pattern_miner
+|   |-- pattern_model
+|   `-- similarity
+|-- docker
+|   |-- cape
+|   `-- postgres
+|-- images
+|-- reproduce
+|   |-- experiments
+|   |-- expl_param_exp
+|   |   |-- explanation_model
+|   |   |-- input
+|   |   `-- similarity
+|   |-- expl_perf_exp
+|   |   |-- input
+|   |   `-- similarity
+|   `-- expl_qual_exp
+|       `-- input
+`-- testdb
 ~~~
 
 ## Start-up docker cluster
