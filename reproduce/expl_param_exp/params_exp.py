@@ -1068,7 +1068,7 @@ def main(argv=[]):
             aggregate_column = arg
 
     try:
-        conn = psycopg2.connect("host={} port={} dbname=antiprov user=antiprov".format(host, str(port)))
+        conn = psycopg2.connect("host={} port={} dbname=antiprov user=antiprov password=antiprov".format(host, str(port)))
         cur = conn.cursor()
     except psycopg2.OperationalError:
         print('Connection to database failed！')
