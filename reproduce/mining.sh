@@ -66,7 +66,7 @@ do
     done
 done
 algo='naive';
-for num_attribute in {4..7}
+for num_attribute in {4..6}
 do
     cape_mine 'num_attribute' crime_exp_${num_attribute} ${FILE3A};
 done
