@@ -143,6 +143,8 @@ In our experiments we evaluated three things:
 - performance of the online explanation generation algorithm
 - quality of the generated explanations wrt. to a known ground truth
 
+All generated result files will be in the current folder on your local machine. See Section F for detail.
+
 # E) Suggestions and Instructions for Alternative Experiments
 
 For convenience, we provide the single script that runs all experiments. Creating explanations for outliers in cape consists of two steps. There is an offline mining phase that detects patterns in a dataset and an online explanation generation phase that uses the patterns to create an explanation for a user questions. To run different parameter settings, you can use the commandline client to run these phases (`capexplain COMMAND -help` lists all options that are available for a particular command, e.g., `mine`). Furthermore, we provide a GUI for exploring explanations. Feel free to use it for generating explanations for additional queries / user questions not covered in the experiments.
@@ -321,24 +323,38 @@ All experiment scripts are in the `reproduce` folder. First enter with
 cd reproduce
 ~~~
 
+Then to reproduce all the experiment results you can simply run the script
+
+~~~shell
+./script.sh
+~~~
+
+The result will be in `experiments` folder (If you are using docker for cape, this folder will get copied to the current folder on your local machine). In below subsections we will explain which file corresponds to which figure in the paper.
+
+Alternatively you can run each part of the experiment separately.
+
 ### Pattern Mining
+
+To run all the performance experiments of pattern mining,
 
 ~~~shell
 ./mining.sh
 ~~~
+
+This will generate the needed csv files for plot in `experiments` folder. The python3 script and the makefile to plot the result is already provided. You just need to finish other experiments and run make. check for Plot below for detail.
 
 ### Explanation Generation
 
 To test if the experiment environment has been setup correctly, we provide a script to run the performance evaluation experiment with few user questions. In `reproduce/expl_perf_exp` forlder, run
 
 ~~~shell
-bash perf_exp_crime_small.sh
+./perf_exp_crime_small.sh
 ~~~
 to see if the code runs and plots `reproduce/expl_perf_exp/expl_crime_numpat.pdf` and `reproduce/expl_perf_exp/expl_crime_numatt.pdf` generated.
 
 To reproduce the result, in `reproduce` folder:
 ~~~shell
-bash explanation.sh
+./explanation.sh
 ~~~
 
 The script `explanation.sh` will run all experiments for explanation generation; you can also run each experiment separately.
@@ -346,34 +362,36 @@ The script `explanation.sh` will run all experiments for explanation generation;
 #### Performance
 To run performance evaluation experiments separately, in `reproduce/expl_perf_exp`, run:
 ~~~shell
-bash perf_exp_crime.sh
-bash perf_exp_dblp.sh
+./perf_exp_crime.sh
+./perf_exp_dblp.sh
 ~~~
 
 #### Explanation Quality
 To run quality evaluation experiments separately, in `reproduce/expl_qual_exp`, run:
 ~~~shell
-bash qual_exp_crime.sh
-bash qual_exp_dblp.sh
+./qual_exp_crime.sh
+./qual_exp_dblp.sh
 ~~~
 
-The results for Table 3 and Table 4 are in `reproduce/expl_qual_exp/output_dblp.txt`, and the results for Table 5 are in `reproduce/expl_qual_exp/output_crime.txt`.
+The results for Table 3 and Table 4 are in `reproduce/experiments/expl_qual_dblp.txt`, and the results for Table 5 are in `reproduce/experiments/expl_qual_crime.txt`.
 
 #### Parameter Sensitivity:
 To run parameter sensitivity evaluation experiments separately, in `reproduce/expl_param_exp`, run:
 ~~~shell
-bash params_exp.sh
+./params_exp.sh
 ~~~
 
 ## Plot results
 
-All results for plotting figures are stored in `reproduce/experiments`. After experiments are finished, enter this folder, run
+If you ran all the experiments separately instead of using `script.sh`, then after all experiments are finished, enter `experiments` folder, run
 
 ~~~shell
 make
 ~~~
 
-The result of Figure 6 (a) is in `expl_DBLP_numpat.pdf`; Figure 6 (b) is in `expl_crime_numpat.pdf`; Figure 6 (c) is in `expl_crime_numatt.pdf`. Figure 7 is in `params_gs.pdf`.
+And this will generate all plots.
+
+Either way, the result of Figure 3 (a) is in `crime_num_att.pdf`; Figure 3 (b) is in `crime_size.pdf`;  Figure 3 (c) is in `dblp_size.pdf`; Figure 4 is in `crime_bar.pdf`; Figure 5 is in `crime_fd_on_off.pdf`; Figure 6 (a) is in `expl_DBLP_numpat.pdf`; Figure 6 (b) is in `expl_crime_numpat.pdf`; Figure 6 (c) is in `expl_crime_numatt.pdf`. Figure 7 is in `params_gs.pdf`.
 
 
 

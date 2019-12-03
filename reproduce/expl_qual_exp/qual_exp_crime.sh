@@ -9,4 +9,4 @@ then
     pgip='localhost';
 fi;
 
-capexplain explain -h ${pgip} -P ${port} -u antiprov -d antiprov -p antiprov --ufile ./input/crime.txt --ofile output_crime.txt
+capexplain explain -h ${pgip} -P ${port} -u antiprov -d antiprov -p antiprov --ufile ./input/crime.txt --ofile ../experiments/expl_qual_crime.txt
