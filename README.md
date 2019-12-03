@@ -373,7 +373,7 @@ To run quality evaluation experiments separately, in `reproduce/expl_qual_exp`, 
 ./qual_exp_dblp.sh
 ~~~
 
-The results for Table 3 and Table 4 are in `reproduce/expl_qual_exp/output_dblp.txt`, and the results for Table 5 are in `reproduce/expl_qual_exp/output_crime.txt`.
+The results for Table 3 and Table 4 are in `reproduce/experiments/expl_qual_dblp.txt`, and the results for Table 5 are in `reproduce/experiments/expl_qual_crime.txt`.
 
 #### Parameter Sensitivity:
 To run parameter sensitivity evaluation experiments separately, in `reproduce/expl_param_exp`, run:
@@ -389,9 +389,9 @@ If you ran all the experiments separately instead of using `script.sh`, then aft
 make
 ~~~
 
-And this will generate all plots
+And this will generate all plots.
 
-The result of Figure 3 (a) is in `crime_num_att.pdf`; Figure 3 (b) is in `crime_size.pdf`;  Figure 3 (c) is in `dblp_size.pdf`; Figure 4 is in `crime_bar.pdf`; Figure 5 is in `crime_fd_on_off.pdf`; Figure 6 (a) is in `expl_DBLP_numpat.pdf`; Figure 6 (b) is in `expl_crime_numpat.pdf`; Figure 6 (c) is in `expl_crime_numatt.pdf`. Figure 7 is in `params_gs.pdf`.
+Either way, the result of Figure 3 (a) is in `crime_num_att.pdf`; Figure 3 (b) is in `crime_size.pdf`;  Figure 3 (c) is in `dblp_size.pdf`; Figure 4 is in `crime_bar.pdf`; Figure 5 is in `crime_fd_on_off.pdf`; Figure 6 (a) is in `expl_DBLP_numpat.pdf`; Figure 6 (b) is in `expl_crime_numpat.pdf`; Figure 6 (c) is in `expl_crime_numatt.pdf`. Figure 7 is in `params_gs.pdf`.
 
 
 
