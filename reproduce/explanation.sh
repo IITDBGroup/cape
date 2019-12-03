@@ -12,7 +12,7 @@ then
 fi;
 
 
-echo "parameters: port=${port}";
+echo "parameters: host=${pgip}, port=${port}";
 
 echo 'Running experiments for Table 3 and Table 4'
 capexplain explain -h ${pgip} -u antiprov -d antiprov -p antiprov -P 5436 --ptable dev.pub_large_no_domain --qtable pub_large_no_domain --ufile ./expl_qual_exp/input/dblp.txt --ofile ./expl_qual_exp/output_dblp.txt
