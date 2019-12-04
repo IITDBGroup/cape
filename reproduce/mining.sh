@@ -38,16 +38,31 @@ FILE5='experiments/crime_fd_on_off.csv'
 
 #convenient function for mining
 cape_mine() {
-    if grep -Fq "${algo},${!1}" $3;
+    if [ $1 = 'fd' ];
     then
-        echo "result exists in output, skip experiment";
-    else
-        echo "mining $2 with $algo";
-        capexplain mine -h $pgip -u antiprov -d antiprov -p antiprov -P ${port} -t $2 --algorithm $algo --local-support $lsup --global-support $gsup --show-progress False --experiment $1 --rep $rep --csv $3;
-        if [ ! -z ${OUTPUTDIR} ];
+        if [ $(($((`wc -l<$3`)) % 2)) == 0 ];
         then
-            cp -R experiments/. $OUTPUTDIR;
+            sed -i '' -e '$ d' $3;
         fi;
+
+        if grep -Fq ",${size}," $3;
+        then
+            echo "result exists in output, skip experiment";
+            return;
+        fi;
+    else
+        if grep -Fq "${algo},${!1}" $3;
+        then
+            echo "result exists in output, skip experiment";
+            return;
+        fi;
+    fi;
+
+    echo "mining $2 with $algo";
+    capexplain mine -h $pgip -u antiprov -d antiprov -p antiprov -P ${port} -t $2 --algorithm $algo --local-support $lsup --global-support $gsup --show-progress False --experiment $1 --rep $rep --csv $3;
+    if [ ! -z ${OUTPUTDIR} ];
+    then
+        cp -R experiments/. $OUTPUTDIR;
     fi;
 }
 
