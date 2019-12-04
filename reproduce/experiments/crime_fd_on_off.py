@@ -7,8 +7,8 @@ from numpy import arange,power
 
 def main():
     df=pd.read_csv('crime_fd_on_off.csv',nrows=6)
-    off=list(df.query('fd_on==\'f\'')['total'])
-    on=list(df.query('fd_on==\'t\'')['total'])
+    off=list(df.query('fd==\'f\'')['total'])
+    on=list(df.query('fd==\'t\'')['total'])
     index=list(df['size'].unique())
     
     pl.ioff()

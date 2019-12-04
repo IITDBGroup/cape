@@ -13,8 +13,8 @@ def main():
 
     
     cube_bar=df_bar.query('algo==\'cube\'')[['query','regression','mining']]
-    _1q1g_bar=df_bar.query('algo==\'1Q1G\'')[['query','regression','mining']]
-    arp_bar=df_bar.query('algo==\'ARP-mine\'')[['query','regression','mining']]
+    _1q1g_bar=df_bar.query('algo==\'share_grp\'')[['query','regression','mining']]
+    arp_bar=df_bar.query('algo==\'optimized\'')[['query','regression','mining']]
 
     for index in cube_bar.index:
         norm=df_bar.query('algo==\'cube\'')['total'][index]

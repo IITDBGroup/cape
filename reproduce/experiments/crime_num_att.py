@@ -16,8 +16,8 @@ def main():
 
     # DFs
     cube=df.query('algo==\'cube\'')
-    _1q1g=df.query('algo==\'1Q1G\'')
-    arp=df.query('algo==\'ARP-mine\'')
+    _1q1g=df.query('algo==\'share_grp\'')
+    arp=df.query('algo==\'optimized\'')
     naive=df.query('algo==\'naive\' and total<7000')
 
     # non interactive
