@@ -44,11 +44,10 @@ cape_mine() {
     else
         echo "mining $2 with $algo";
         capexplain mine -h $pgip -u antiprov -d antiprov -p antiprov -P ${port} -t $2 --algorithm $algo --local-support $lsup --global-support $gsup --show-progress False --experiment $1 --rep $rep --csv $3;
-    fi;
-
-    if [ ! -z ${OUTPUTDIR} ];
-    then
-        cp -nR experiments/. $OUTPUTDIR;
+        if [ ! -z ${OUTPUTDIR} ];
+        then
+            cp -R experiments/. $OUTPUTDIR;
+        fi;
     fi;
 }
 
@@ -67,7 +66,7 @@ do
     done
 done
 algo='naive';
-for num_attribute in {4..7}
+for num_attribute in {4..6}
 do
     cape_mine 'num_attribute' crime_exp_${num_attribute} ${FILE3A};
 done

@@ -143,7 +143,7 @@ In our experiments we evaluated three things:
 - performance of the online explanation generation algorithm
 - quality of the generated explanations wrt. to a known ground truth
 
-All generated result files will be in the current folder on your local machine. See Section F for detail.
+All generated result files will be in `docker` folder within the cape repository on your local machine. See Section F for detail.
 
 # E) Suggestions and Instructions for Alternative Experiments
 
@@ -329,7 +329,7 @@ Then to reproduce all the experiment results you can simply run the script
 ./script.sh
 ~~~
 
-The result will be in `experiments` folder (If you are using docker for cape, this folder will get copied to the current folder on your local machine). In below subsections we will explain which file corresponds to which figure in the paper.
+The result will be in `experiments` folder (If you are using docker for cape, this folder will get copied to `docker` folder). In below subsections we will explain which file corresponds to which figure in the paper.
 
 Alternatively you can run each part of the experiment separately.
 
@@ -350,9 +350,11 @@ To test if the experiment environment has been setup correctly, we provide a scr
 ~~~shell
 ./perf_exp_crime_small.sh
 ~~~
+
 to see if the code runs and plots `reproduce/expl_perf_exp/expl_crime_numpat.pdf` and `reproduce/expl_perf_exp/expl_crime_numatt.pdf` generated.
 
 To reproduce the result, in `reproduce` folder:
+
 ~~~shell
 ./explanation.sh
 ~~~
@@ -361,6 +363,7 @@ The script `explanation.sh` will run all experiments for explanation generation;
 
 #### Performance
 To run performance evaluation experiments separately, in `reproduce/expl_perf_exp`, run:
+
 ~~~shell
 ./perf_exp_crime.sh
 ./perf_exp_dblp.sh
@@ -368,6 +371,7 @@ To run performance evaluation experiments separately, in `reproduce/expl_perf_ex
 
 #### Explanation Quality
 To run quality evaluation experiments separately, in `reproduce/expl_qual_exp`, run:
+
 ~~~shell
 ./qual_exp_crime.sh
 ./qual_exp_dblp.sh
@@ -377,6 +381,7 @@ The results for Table 3 and Table 4 are in `reproduce/experiments/expl_qual_dblp
 
 #### Parameter Sensitivity:
 To run parameter sensitivity evaluation experiments separately, in `reproduce/expl_param_exp`, run:
+
 ~~~shell
 ./params_exp.sh
 ~~~
@@ -463,6 +468,7 @@ in our repository for user to play with. To import this dataset in your postgres
 ~~~shell
 psql -h <host> -U <user name> -d <local database name where you want to store our example table> < ~/cape/testdb/crime_demonstration.sql
 ~~~
+
 then run the `capexplain` commands accordingly to explore this example.
 
 ## Explaining Outliers ###
@@ -483,6 +489,7 @@ To explain an aggregation outlier use `capexplain explain [OPTIONS]`.
 -o ,--ofile <arg>              - file to write output to
 -a ,--aggcolumn <arg>          - column that was input to the aggregation function
 ~~~
+
 for `explain` option, besides the common options, user should give `--ptable`,the `pattern.{target_table}` and `--qtable`, the `target_table`. Also, we currently only allow user pass question through a `.txt` file, user need to put the question in the following format:
 
 ~~~shell

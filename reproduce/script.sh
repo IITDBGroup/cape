@@ -11,4 +11,4 @@ source explanation.sh
 
 make -C experiments
 
-cp -nR experiments/. $OUTPUTDIR
+cp -R experiments/. $OUTPUTDIR
