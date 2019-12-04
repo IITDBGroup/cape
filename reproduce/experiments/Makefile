@@ -3,5 +3,5 @@ plots := crime_num_att.pdf crime_size.pdf crime_fd_on_off.pdf dblp_size.pdf \
 
 all: $(plots)
 
-%.pdf:%.py %.csv
+%.pdf:%.py
 	python3 $<
