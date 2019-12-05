@@ -67,6 +67,11 @@ cape_mine() {
 }
 
 
+#run a warm-up query first to make sure first few experiments aren't suffering for empty caches
+echo "warminig up"
+capexplain mine -h $pgip -u antiprov -d antiprov -p antiprov -P ${port} -t crime_exp_4 --algorithm cube --local-support $lsup --global-support $gsup --show-progress False;
+
+
 #start running
 algorithms='cube share_grp optimized';
 
