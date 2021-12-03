@@ -228,8 +228,8 @@ class PatternFinder:
         log.debug("input table has %d rows", self.num_rows)
 
         if self.config.num:
-            self.num = self.config.num
-            self.summable = self.config.summable
+            self.num = self.config.num.split(',')
+            self.summable = self.config.summable.split(',') if self.config.summable else []
             log.debug("input given numerical attributes %s and summable attributes %s",
                     self.num, self.summable)
         else:
