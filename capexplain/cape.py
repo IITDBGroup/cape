@@ -226,7 +226,7 @@ EXPLAIN_OPTIONS = COMMON_OPTIONS + DB_OPTIONS + [
     ConfigOpt(longopt='ufile', desc='file storing user question',
               hasarg=True, cfgFieldName='user_question_file'),
     ConfigOpt(longopt='ofile', desc='file to write output to',
-              hasarg=True, cfgFieldName='outfile'),
+              hasarg=True, cfgFieldName='outputfile'),
     ConfigOpt(longopt='aggcolumn', shortopt='a', desc='column that was input to the aggregation function',
               hasarg=True, cfgFieldName='aggregate_column'),
 ]
