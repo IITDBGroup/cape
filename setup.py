@@ -33,7 +33,7 @@ setup(
         'psycopg2-binary==2.7.6',
         'python-dateutil==2.7.3',
         'pytz==2018.5',
-        'requests==2.19.1',
+        'requests==2.20.0',
         'requests-toolbelt==0.8.0',
         'scikit-learn==0.19.2',
         'scipy==1.2.1',
