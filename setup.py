@@ -40,7 +40,7 @@ setup(
         'six>=1.11.0',
         'sklearn>=0.0',
         'SQLAlchemy==1.2.10',
-        'statsmodels>=0.9.0',
+        'statsmodels==0.9.0',
         'tqdm>=4.23.4',
         'urllib3>=1.23,<1.25',
         'pandastable==0.12.0'
