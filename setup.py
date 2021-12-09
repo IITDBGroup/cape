@@ -28,7 +28,7 @@ setup(
         'matplotlib==3.0.2',
         'numpy==1.19.5',
         'pandas==0.23.4',
-        'patsy==0.5.0',
+        'patsy==0.5.1',
         'pkginfo==1.4.2',
         'psycopg2-binary==2.7.6',
         'python-dateutil==2.7.3',
