@@ -26,7 +26,7 @@ setup(
         'geopy',
         'idna==2.7',
         'matplotlib==3.0.2',
-        'numpy==1.19.5',
+        'numpy==1.22.0',
         'pandas==0.23.4',
         'patsy==0.5.1',
         'pkginfo==1.4.2',
