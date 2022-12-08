@@ -20,7 +20,7 @@ setup(
     author_email='who@gmail.com',
     url='https://github.com/iitdbgroup/cape',
     install_requires=[
-        'certifi==2018.4.16',
+        'certifi==2022.12.7',
         'chardet==3.0.4',
         'colorful==0.4.1',
         'geopy',
